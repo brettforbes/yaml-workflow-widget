@@ -105,3 +105,69 @@ window.Widgets.Widget = {};
 
 ```
 
+### How to Raise Event from Widget
+
+To leverage the event system, you can use the `eventsNs` object that is available in the global scope and should be added to your namespace as window.Widgets.Events.
+
+
+
+To raise an event from the widget to the parent application, you can use the following code:
+
+```javascript
+    const eventName = "viz-open-form-" + formId;
+    const config = formId;
+    const action = "BUTTON_CLICK";
+
+    console.log("compileEventData", formData, eventName, action, formId, config);
+
+    const data = eventsNs.compileEventData(formData, eventName, action, formId, config);
+
+    console.log(`event raise ${eventName}`, data);
+    eventsNs.raiseEvent(eventName, data);
+    console.log(`event raised ${eventName}`);
+    console.groupEnd();
+```
+
+This will raise an event with the name `viz-open-form-<formId>` and the data will be the `formData` object.
+
+### How to Listen to Event from Widget
+
+To listen to an event from the widget in the parent application, you can use the following code:
+
+```javascript
+    ns.addEventListener = ($component, componentConfig) => {
+        console.group(`addEventListener on ${window.location}`);
+        const { events, id } = componentConfig;
+        const defaultTopic = id;
+  
+        console.log(["config", events, id, defaultTopic]);
+
+        console.log(["addEventListener windowListener"]);
+        eventsNs.windowListener((data) => {
+            console.group(`windowListener on ${window.location}`);
+            console.log(data);
+            const { type, payload, action, componentId, config } = data;
+            console.log(["type", type]);
+            console.log(["payload", payload]);
+            console.log(["action", action]);
+            console.log(["componentId", componentId]);
+            console.log(["config", config]);
+            // if (type === 'embed-viz-event-payload-data1') {
+            //     console.log(["action match, loading data."]);
+            //     ns.loadData(data);
+            // }
+            console.groupEnd();
+        });
+
+        console.log(["addEventListener windowListener done"]);
+        console.groupEnd();
+    }
+```
+
+You can see that the `windowListener` function is used to listen to events from the parent window with evebt payload that should be used to determine what widget should do.
+
+### How to send event from parent application to widget
+
+```javascript
+Typerefinery.Page.Events.emitEvent("notifydatarefresh", Typerefinery.Page.Events.compileEventData({}, "notifydatarefresh", "DATA_REFRESH", "notifydatarefresh", null));
+```

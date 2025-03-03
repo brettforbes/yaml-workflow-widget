@@ -6,21 +6,50 @@ const fs = require('fs');
 
 const paths = require('./webpack._paths')
 
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 const htmlBodyContent = fs.readFileSync(paths.src + '/html/content.html').toString();
 
+const htmlHeader = isDevelopment ? "<script src='http://localhost:35729/livereload.js'></script>" : "";
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 
+const WatchExternalFilesPlugin = require('webpack-watch-files-plugin').default;
+// const LiveReloadPlugin = require('webpack-livereload-plugin');
+const WebpackFileWatcherLiveReload = require('./webpack._livereload.js');
+
+const scssFiles = fs.readdirSync("./src").filter(function (file) {
+    return file.match(/.*\.scss$/);
+});
+const scssEntries = scssFiles.map((filename) => {
+    const filenameWithoutExtension = filename.replace(/\.[^/.]+$/, "");
+    const entryName = `style_` + filenameWithoutExtension;
+    return { [entryName]: "./src/" + filename };
+});
 
 //load package.json
 const config = require('./package');
 
 module.exports = {
   // Where webpack looks to start building the bundle
-  entry: [
-    paths.src + '/_index.js' 
- ],
+  entry: {
+    index: [
+        paths.src + '/_index.js',
+        // paths.src + '/sass/custom.scss',
+    ],
+    // ...Object.assign({}, ...scssEntries),
+    // indexCss: {
+    //     import: paths.src + '/sass/custom.scss',
+    //     filename: 'widget.css',
+    // },
+  },
+
+  watchOptions: {
+    poll: 1000,
+    aggregateTimeout: 200,
+    ignored: /node_modules/
+  },
 
   optimization: {
     runtimeChunk: false,
@@ -30,7 +59,7 @@ module.exports = {
   // Where webpack outputs the assets and bundles
   output: {
     path: paths.build,
-    filename: '[name].bundle.js',
+    filename: '[name].js',
     publicPath: paths.build,
   },
 
@@ -50,6 +79,31 @@ module.exports = {
           },
           noErrorOnMissing: true,
         },
+        {
+          from: 'node_modules/@fortawesome/fontawesome-free/webfonts',
+          to: paths.build + '/webfonts',
+          globOptions: {
+            ignore: ['*.DS_Store'],
+          },
+          noErrorOnMissing: true,
+        },
+        {
+          from: 'node_modules/@fontsource/wire-one/files',
+          to: paths.build + '/webfonts',
+          globOptions: {
+            ignore: ['*.DS_Store'],
+          },
+          noErrorOnMissing: true,
+        },
+        {
+          from: 'node_modules/@fontsource/alumni-sans-pinstripe/files',
+          to: paths.build + '/webfonts',
+          globOptions: {
+            ignore: ['*.DS_Store'],
+          },
+          noErrorOnMissing: true,
+        },
+        
       ],
     }),
 
@@ -61,6 +115,7 @@ module.exports = {
       template: paths.src + '/html/_index.html', // template file
       filename: 'index.html', // output file
       body: htmlBodyContent,
+      header: htmlHeader,
       inject: false, //dont inject anything
     }),
 
@@ -76,26 +131,57 @@ module.exports = {
             ],
             //create one file for all vendor css
             "vendor.css": [
-                //nothing here yet
+                'node_modules/bootstrap/dist/css/bootstrap.css',
+                'node_modules/@fortawesome/fontawesome-free/css/all.min.css'
             ],
             //create one file for all widget js
             "widget.js": [
                 paths.src + '/js/**/*.js',
+            ],
+            "widget.css": [
+                paths.src + '/css/**/*.css',
             ]
         }
     }),
 
-    // Extracts CSS into separate files
-    new MiniCssExtractPlugin({
-        filename: 'widget.css'
+    // // Extracts CSS into separate files
+    // new MiniCssExtractPlugin({
+    //     filename: 'widget2.css'
+    // }),
+
+    // Watch for changes in files and reload the page
+    isDevelopment && new WatchExternalFilesPlugin({
+        files: [
+          './src/**/*',
+          '!./src/*.test.js'
+        ]
     }),
+
+    // auto reload the page using http://localhost:35729/livereload.js
+    // new LiveReloadPlugin({}),
+    isDevelopment && new WebpackFileWatcherLiveReload({
+        watchFiles: [
+            './src/**/*',
+            '!./src/*.test.js'
+          ]
+      })
   ],
 
   // Determine how modules within the project are treated
   module: {
     rules: [
-      // JavaScript: Use Babel to transpile JavaScript files
-      { test: /\.js$/, use: ['babel-loader'] },
+      // JavaScript: Just load JavaScript files as is
+      //   { test: /\.js$/, use: ['babel-loader'] },
+      { test: /\.js$/, 
+        use: [
+            {
+                loader: 'raw-loader',
+                options: {
+                    esModule: false,
+                },
+            },
+        ],
+      },
 
       // Images: Copy image files to build folder
       { test: /\.(?:ico|gif|png|jpg|jpeg)$/i, type: 'asset/resource' },
@@ -103,19 +189,28 @@ module.exports = {
       // Fonts and SVGs: Inline files
       { test: /\.(woff(2)?|eot|ttf|otf|svg|)$/, type: 'asset/inline' },
 
-      {
-        test: /\.(sass|scss|css)$/,
-        include: paths.src,
-        use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: { sourceMap: false, importLoaders: 2, modules: false}, 
-          },
-          { loader: 'postcss-loader', options: { sourceMap: false } },
-          { loader: 'sass-loader', options: { sourceMap: false } },
-        ],
-      },
+    //   {
+    //     test: /\.(sass|scss|css)$/,
+    //     include: paths.src,
+    //     // exclude: /node_modules/,
+    //     // type: "asset/resource",
+    //     // generator: {
+    //     //   filename: "bundle.css",
+    //     // },
+    //     use: [
+    //       MiniCssExtractPlugin.loader,
+    //       {
+    //         loader: 'css-loader',
+    //         options: { sourceMap: false, importLoaders: 2, modules: false}, 
+    //       },
+    //       { loader: 'postcss-loader', options: { sourceMap: false } },
+    //       { loader: 'sass-loader', 
+    //         options: { 
+    //             sourceMap: false,
+    //         } 
+    //       },
+    //     ],
+    //   },
 
     ],
   },
