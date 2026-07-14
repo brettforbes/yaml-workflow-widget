@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spiderfeet.local/schemas/workflow_v1.schema.json",
+  "title": "SpiderFeet Workflow v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "id", "info", "inputs", "steps"],
+  "properties": {
+    "apiVersion": {
+      "const": "spiderfeet.workflow/v1"
+    },
+    "kind": {
+      "const": "Workflow"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^workflow--[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "info": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "author": { "type": "string" },
+        "created": { "type": "string" }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/WorkflowInput" }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Step" }
+    }
+  },
+  "$defs": {
+    "WorkflowInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "string_list" },
+        "description": { "type": "string" },
+        "default": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "Step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "uses", "input", "config"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "uses": {
+          "type": "string",
+          "pattern": "^tool\\.(nmap|netdiscover|nerva|pius|subfinder|httpx|katana|nuclei)$"
+        },
+        "needs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "input": { "$ref": "#/$defs/StepInput" },
+        "config": { "$ref": "#/$defs/StepConfig" },
+        "output": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "vars": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/GseBinding" }
+            }
+          }
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "export": {
+              "type": "string",
+              "enum": ["scan_graph", "none"]
+            }
+          }
+        }
+      }
+    },
+    "StepInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from"],
+      "properties": {
+        "type": { "const": "string_list" },
+        "from": { "type": "string", "minLength": 1 },
+        "normalize": {
+          "type": "string",
+          "enum": ["hostname_from_url"]
+        },
+        "empty": {
+          "type": "string",
+          "enum": ["error", "skip_step", "continue"]
+        }
+      }
+    },
+    "StepConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["argv", "files", "capture"],
+      "properties": {
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["input", "output"],
+          "properties": {
+            "input": { "$ref": "#/$defs/FileSpec" },
+            "output": { "$ref": "#/$defs/FileSpec" }
+          }
+        },
+        "capture": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["family", "adapter"],
+          "properties": {
+            "family": {
+              "type": "string",
+              "enum": ["structured_native"]
+            },
+            "adapter": {
+              "type": "string",
+              "enum": [
+                "nmap",
+                "netdiscover",
+                "nerva",
+                "pius",
+                "subfinder",
+                "httpx",
+                "katana",
+                "nuclei"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "FileSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["auto", "none", "path"]
+        },
+        "format": {
+          "type": "string",
+          "enum": ["line_text", "jsonl", "xml", "json"]
+        },
+        "path": { "type": "string" }
+      }
+    },
+    "GseBinding": {
+      "description": "Embedded GSE binding (full standalone schema lands in E1-S3).",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "string_list" },
+        "select": { "type": "object" },
+        "union": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "literal": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "from_var": { "type": "string" },
+        "distinct": { "type": "boolean" }
+      },
+      "oneOf": [
+        { "required": ["select"] },
+        { "required": ["union"] },
+        { "required": ["literal"] },
+        { "required": ["from_var"] }
+      ],
+      "additionalProperties": false
+    }
+  }
+}
