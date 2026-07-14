@@ -4,7 +4,7 @@
 |-------|-------|
 | Status | Active |
 | Created | 2026-07-15 |
-| Tracking | TBD (Epic W1, created alongside this doc) |
+| Tracking | [#81](https://github.com/brettforbes/yaml-workflow-widget/issues/81) |
 | Depends on | SPEC-007 (workflow DSL / `needs` DAG), Epic D1 in `yaml-workflow-dag` (vertical Nice-DAG model — see `CLI_WORKFLOW_VIEW_DESIGN.md` there) |
 | Supersedes (conceptually) | SPEC-010 (reverted — see PR #79; SPEC-010 stays closed, this is a fresh spec number, not a reopen) |
 | Non-goals | Bi-directional YAML↔diagram transformer, Monaco/CodeMirror, Langium/AST wiring, drag-and-drop diagram editing, multi-circle output ports |
@@ -66,13 +66,13 @@ The finished Vue components are built first in `yaml-workflow-dag` (Epic D1) as 
 
 | ID | Issue | Outcome |
 |----|------:|---------|
-| W1-S1 | TBD | Scaffold Vite+Vue3 sub-app |
-| W1-S2 | TBD | Vendor components from yaml-workflow-dag Epic D1 |
-| W1-S3 | TBD | Two-column Bootstrap layout + collapse toggle |
-| W1-S4 | TBD | Load real 12A content |
-| W1-S5 | TBD | Full-page vs embed modes |
-| W1-S6 | TBD | `start-workflow-dag-viewer.ps1` |
-| W1-S7 | TBD | Acceptance pass + promote to main |
+| W1-S1 | [#82](https://github.com/brettforbes/yaml-workflow-widget/issues/82) | Scaffold Vite+Vue3 sub-app |
+| W1-S2 | [#83](https://github.com/brettforbes/yaml-workflow-widget/issues/83) | Vendor components from yaml-workflow-dag Epic D1 |
+| W1-S3 | [#84](https://github.com/brettforbes/yaml-workflow-widget/issues/84) | Two-column Bootstrap layout + collapse toggle |
+| W1-S4 | [#85](https://github.com/brettforbes/yaml-workflow-widget/issues/85) | Load real 12A content |
+| W1-S5 | [#86](https://github.com/brettforbes/yaml-workflow-widget/issues/86) | Full-page vs embed modes |
+| W1-S6 | [#87](https://github.com/brettforbes/yaml-workflow-widget/issues/87) | `start-workflow-dag-viewer.ps1` |
+| W1-S7 | [#88](https://github.com/brettforbes/yaml-workflow-widget/issues/88) | Acceptance pass + promote to main |
 
 ## Acceptance (program)
 
