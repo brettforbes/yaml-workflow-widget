@@ -404,9 +404,11 @@ Tracked so earlier Langium interest is not lost, but **must not block SPEC-007**
 
 ## Definition of done (program)
 
-- [ ] R7-01..R7-06 requirement rows have PR evidence
-- [ ] 12A schema-valid
-- [ ] GSE cascade non-empty `ip:port` on nmap fixture
-- [ ] Dry-run E2E merges context only for export steps
-- [ ] README enables a new agent to add a driver without redesigning DSL
-- [ ] E8 not started unless a new SPEC explicitly opens Langium work
+- [x] R7-01..R7-06 requirement rows have PR evidence
+- [x] 12A schema-valid
+- [x] GSE cascade non-empty `ip:port` on nmap fixture
+- [x] Dry-run E2E merges context only for export steps
+- [x] README enables a new agent to add a driver without redesigning DSL
+- [x] E8 not started unless a new SPEC explicitly opens Langium work
+
+See `.seed/SPEC-007-CONTINUITY.md` for PR links and handoff.
