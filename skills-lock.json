@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "lai": {
+      "source": "eclipse-langium/langium-ai",
+      "sourceType": "github",
+      "skillPath": "skills/lai/SKILL.md",
+      "computedHash": "fe16e19ae7fee55c3fdd05920a55dc8412408f2c9d166bcbfcc9b5ed7a09d59f"
+    },
+    "lai-gen-descriptor": {
+      "source": "eclipse-langium/langium-ai",
+      "sourceType": "github",
+      "skillPath": "skills/lai-gen-descriptor/SKILL.md",
+      "computedHash": "db9ee5d7aa983936ca6ccb1b9d18b04b15229d73f34c780f84e64f21b9c932d8"
+    },
+    "lai-gen-evals": {
+      "source": "eclipse-langium/langium-ai",
+      "sourceType": "github",
+      "skillPath": "skills/lai-gen-evals/SKILL.md",
+      "computedHash": "4770906cd3fa9b7ca6f34bdbf9fa1a77bfcdfdfac5ea1a9d18ac1e5c48e906a1"
+    },
+    "lai-gen-language-skill": {
+      "source": "eclipse-langium/langium-ai",
+      "sourceType": "github",
+      "skillPath": "skills/lai-gen-language-skill/SKILL.md",
+      "computedHash": "4d15b8feba57fd15a1fbadbbaed741dc1f425d1629db31a5a7befeef5f80a44b"
+    },
+    "lai-gen-mcp": {
+      "source": "eclipse-langium/langium-ai",
+      "sourceType": "github",
+      "skillPath": "skills/lai-gen-mcp/SKILL.md",
+      "computedHash": "aa3b0fab14b5bcd96f2f0bd7c7db396b55f362f8f62812a50f0027fb8bd4cc82"
+    },
+    "lai-gen-sysprompt": {
+      "source": "eclipse-langium/langium-ai",
+      "sourceType": "github",
+      "skillPath": "skills/lai-gen-sysprompt/SKILL.md",
+      "computedHash": "1db5b002f9a9108cbcf4ab814d6723d811bd158fb8c9c9c9769b0e554ae2c9bf"
+    },
+    "langium": {
+      "source": "eclipse-langium/langium-ai",
+      "sourceType": "github",
+      "skillPath": "skills/langium/SKILL.md",
+      "computedHash": "74a996bdf94a92df40778fdd0f721d558124be728a0f8fdd8c90bc7324011148"
+    }
+  }
+}
