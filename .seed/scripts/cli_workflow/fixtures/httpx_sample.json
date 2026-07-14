@@ -1,0 +1,17 @@
+{
+  "nodes": [
+    {"id": "host--live-a", "nugget_id": "HOST", "nugget_data": "www.example.com"},
+    {"id": "domain--www", "nugget_id": "DOMAIN_NAME", "nugget_data": "www.example.com"},
+    {"id": "status--200", "nugget_id": "HTTP_STATUS_CODE", "nugget_data": "200"},
+    {"id": "host--live-b", "nugget_id": "CDN", "nugget_data": "cdn.example.com"},
+    {"id": "domain--cdn", "nugget_id": "DOMAIN_NAME", "nugget_data": "cdn.example.com"},
+    {"id": "status--301", "nugget_id": "HTTP_STATUS_CODE", "nugget_data": "301"},
+    {"id": "host--dead", "nugget_id": "HOST", "nugget_data": "dead.example.com"}
+  ],
+  "edges": [
+    {"source": "host--live-a", "target": "domain--www", "relation": "contains"},
+    {"source": "host--live-a", "target": "status--200", "relation": "contains"},
+    {"source": "host--live-b", "target": "domain--cdn", "relation": "contains"},
+    {"source": "host--live-b", "target": "status--301", "relation": "contains"}
+  ]
+}

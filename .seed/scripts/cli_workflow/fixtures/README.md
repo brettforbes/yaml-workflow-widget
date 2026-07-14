@@ -56,3 +56,19 @@ Used for: transitive reachability, cascade `for_each`/`collect`/`emit`.
 Minimal 2-node/1-edge graph using `nugget_instance_id` instead of `id`, to
 exercise the node-identity fallback (12C §1) and a single-hop (non-transitive)
 `contains` walk independent of the larger fixtures.
+
+### `httpx_sample.json`
+
+Dry-run fixture for 12A `httpx_live` (`live_hosts` cascade): `HOST`/`CDN`
+roots with transitive `contains` to `DOMAIN_NAME` + `HTTP_STATUS_CODE`, plus
+one HOST without status (no emit).
+
+### `katana_sample.json`
+
+Dry-run fixture for 12A `katana_crawl` (`crawl_urls`): `LINKED_URL_INTERNAL`,
+`LINKED_URL_EXTERNAL`, and a `DOMAIN_NAME` fallback node.
+
+### `nerva_sample.json` / `nuclei_sample.json`
+
+Minimal unique-node graphs so dry-run context export merges are observable
+for `nerva_services` / `nuclei_vulns` (no GSE vars in 12A for these steps).
