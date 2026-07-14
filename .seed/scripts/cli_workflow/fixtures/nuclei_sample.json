@@ -1,0 +1,7 @@
+{
+  "nodes": [
+    {"id": "nuclei--finding-1", "nugget_id": "VULNERABILITY", "nugget_data": "CVE-2021-44228"},
+    {"id": "nuclei--finding-2", "nugget_id": "VULNERABILITY", "nugget_data": "CVE-2023-44487"}
+  ],
+  "edges": []
+}

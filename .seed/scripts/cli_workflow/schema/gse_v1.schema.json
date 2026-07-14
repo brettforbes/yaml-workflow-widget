@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spiderfeet.local/schemas/gse_v1.schema.json",
+  "title": "Graph Select Language (GSE) v1",
+  "$ref": "#/$defs/GseBinding",
+  "$defs": {
+    "GseBinding": {
+      "description": "Workflow output variable binding: exactly one select, union, literal, or from_var shape.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "string_list" },
+        "select": { "$ref": "#/$defs/Select" },
+        "union": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "literal": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "from_var": { "type": "string", "minLength": 1 },
+        "distinct": { "type": "boolean" }
+      },
+      "oneOf": [
+        { "required": ["select"] },
+        { "required": ["union"] },
+        { "required": ["literal"] },
+        { "required": ["from_var"] }
+      ]
+    },
+    "Select": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "nodes": { "$ref": "#/$defs/NodeMatch" },
+        "for_each": { "$ref": "#/$defs/ForEach" },
+        "project": { "type": "string" },
+        "distinct": { "type": "boolean" }
+      },
+      "oneOf": [
+        { "required": ["nodes"] },
+        { "required": ["for_each"] }
+      ]
+    },
+    "NodeMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nugget_id": { "type": "string" },
+        "nugget_id_in": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "nugget_data_equals": { "type": "string" },
+        "nugget_data_regex": { "type": "string" },
+        "where": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/WherePredicate" },
+          "minItems": 1
+        }
+      }
+    },
+    "WherePredicate": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["related"],
+          "properties": {
+            "related": { "$ref": "#/$defs/RelatedPredicate" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["not"],
+          "properties": {
+            "not": { "$ref": "#/$defs/NotPredicateBody" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["attr"],
+          "properties": {
+            "attr": { "$ref": "#/$defs/AttrPredicate" }
+          }
+        }
+      ]
+    },
+    "NotPredicateBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["related"],
+          "properties": {
+            "related": { "$ref": "#/$defs/RelatedPredicate" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["attr"],
+          "properties": {
+            "attr": { "$ref": "#/$defs/AttrPredicate" }
+          }
+        }
+      ]
+    },
+    "RelatedPredicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction", "relation"],
+      "properties": {
+        "direction": { "enum": ["out", "in"] },
+        "relation": { "enum": ["contains", "had", "listens-to"] },
+        "transitive": { "type": "boolean" },
+        "nugget_id": { "type": "string" },
+        "nugget_id_in": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
+    "AttrPredicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "op", "value"],
+      "properties": {
+        "field": { "type": "string" },
+        "op": { "type": "string" },
+        "value": { "type": "string" }
+      }
+    },
+    "ForEach": {
+      "oneOf": [
+        { "$ref": "#/$defs/ForEachOuter" },
+        { "$ref": "#/$defs/ForEachNested" }
+      ]
+    },
+    "ForEachOuter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["as", "nodes"],
+      "properties": {
+        "as": { "type": "string", "minLength": 1 },
+        "nodes": { "$ref": "#/$defs/NodeMatch" },
+        "collect": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Collect" },
+          "minItems": 1
+        },
+        "emit": { "$ref": "#/$defs/Emit" },
+        "for_each": { "$ref": "#/$defs/ForEach" }
+      }
+    },
+    "ForEachNested": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["as", "reachable_from", "along", "nodes"],
+      "properties": {
+        "as": { "type": "string", "minLength": 1 },
+        "reachable_from": { "type": "string", "minLength": 1 },
+        "along": { "$ref": "#/$defs/Along" },
+        "nodes": { "$ref": "#/$defs/NodeMatch" },
+        "collect": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Collect" },
+          "minItems": 1
+        },
+        "emit": { "$ref": "#/$defs/Emit" },
+        "for_each": { "$ref": "#/$defs/ForEach" }
+      }
+    },
+    "Collect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["as", "reachable_from", "along", "nodes"],
+      "properties": {
+        "as": { "type": "string", "minLength": 1 },
+        "reachable_from": { "type": "string", "minLength": 1 },
+        "along": { "$ref": "#/$defs/Along" },
+        "nodes": { "$ref": "#/$defs/NodeMatch" },
+        "project": { "type": "string" }
+      }
+    },
+    "Along": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relation"],
+      "properties": {
+        "relation": { "enum": ["contains", "had", "listens-to"] },
+        "transitive": { "type": "boolean" },
+        "direction": { "enum": ["out", "in"] }
+      }
+    },
+    "Emit": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["product", "join"],
+          "properties": {
+            "product": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "join": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["product", "format"],
+          "properties": {
+            "product": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            },
+            "format": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["values"],
+          "properties": {
+            "values": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}

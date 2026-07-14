@@ -1,0 +1,29 @@
+---
+description: Langium / langium-ai skills live under .cursor/skills (not .agents)
+alwaysApply: true
+---
+
+# Langium AI skills location
+
+Canonical path for Langium / langium-ai agent skills in this repo:
+
+`C:\projects\yaml-workflow-widget\.cursor\skills\`
+
+## Installed skills
+
+| Skill | Path |
+|-------|------|
+| `langium` | `.cursor/skills/langium/SKILL.md` |
+| `lai` | `.cursor/skills/lai/SKILL.md` |
+| `lai-gen-descriptor` | `.cursor/skills/lai-gen-descriptor/SKILL.md` |
+| `lai-gen-sysprompt` | `.cursor/skills/lai-gen-sysprompt/SKILL.md` |
+| `lai-gen-evals` | `.cursor/skills/lai-gen-evals/SKILL.md` |
+| `lai-gen-mcp` | `.cursor/skills/lai-gen-mcp/SKILL.md` |
+| `lai-gen-language-skill` | `.cursor/skills/lai-gen-language-skill/SKILL.md` |
+
+## Required behavior
+
+- When Langium, LAI CLI, descriptors, system prompts, evals, MCP generation, or DSL skill generation is relevant: **read the matching `SKILL.md` from `.cursor/skills/<name>/` before acting**.
+- Do **not** look under `.agents/` or `.agents/skills/` for these skills. That tree is retired.
+- Generated language skills from `lai-gen-language-skill` must be written under `.cursor/skills/<language-name>/SKILL.md`.
+- Prefer these project skills over generic Langium guidance when they conflict.
