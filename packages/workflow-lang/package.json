@@ -11,10 +11,15 @@
     "clean": "rimraf out src/language/generated",
     "eval:syntax": "npm run build && node evals/syntax.baseline.mjs",
     "smoke:parse": "npm run build && node out/smoke-parse.js",
-    "smoke:validate": "npm run build && node out/smoke-validate.js"
+    "smoke:validate": "npm run build && node out/smoke-validate.js",
+    "mcp:smoke": "npm run build && node mcp/smoke.mjs",
+    "mcp:start": "npm run build && npx --yes tsx mcp/mcp-server.ts"
   },
   "dependencies": {
-    "langium": "~4.3.1"
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "langium": "~4.3.1",
+    "langium-ai-tools": "^5.0.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "langium-cli": "~4.3.0",
