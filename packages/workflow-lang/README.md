@@ -36,11 +36,42 @@ npm run build
 | Nested multi-level `for_each` | structural (same rules; depth not special-cased) |
 | YAML round-trip | deferred (`SPEC_GAP` in SPEC-008 R8-02-03) |
 
-## Parse smoke
+## Parse / validate smoke
 
 ```bash
-npm run build
-node out/smoke-parse.js
+npm run smoke:parse
+npm run smoke:validate
+```
+
+## LAI loop (R8-04)
+
+| Artifact | Path |
+|----------|------|
+| Config | `lai.config.jsonc` |
+| Descriptor | `language.descriptor.yml` |
+| System prompt | `language.sysprompt.md` |
+| Baseline evals | `evals/syntax.baseline.mjs` |
+
+```bash
+# CI baseline (no LLM)
+npm run eval:syntax
+
+# When LLM provider configured in lai.config.jsonc:
+lai gen descriptor   # optional refresh
+lai gen sysprompt    # optional refresh
+lai evaluate
+lai show latest
+```
+
+See [evals/README.md](evals/README.md).
+
+## MCP validate tool (R8-05)
+
+Optional stdio MCP server: [mcp/README.md](mcp/README.md)
+
+```bash
+npm run mcp:smoke
+npm run mcp:start
 ```
 
 ## Notes

@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "langium": {
+    "configPath": "./langium-config.json",
+    "grammarPath": "./src/language/workflow.langium"
+  },
+  "descriptor": {
+    "path": "language.descriptor.yml",
+    "autoVersion": true
+  },
+  "sysprompt": {
+    "path": "language.sysprompt.md",
+    "autoVersion": true
+  },
+  "llm": {
+    "provider": "ollama",
+    "model": "llama3.2",
+    "baseUrl": "http://127.0.0.1:11434"
+  },
+  "evaluations": {
+    "directory": "evals"
+  }
+}

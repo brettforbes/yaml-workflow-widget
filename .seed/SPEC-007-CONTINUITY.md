@@ -33,12 +33,12 @@ See `.seed/scripts/cli_workflow/README.md`.
 python -m pytest .tests -k cli_workflow -q
 ```
 
-## Next work (out of SPEC-007)
+## Next work (post SPEC-007 / SPEC-008 core)
 
-- **E8 Langium Phase 2** (deferred): issues #11, #39–#43 — use `.cursor/skills/lai*` / `langium`
-- Promote `develop` → `main` when operators want the default branch updated
-- Optional: deeper live adapter E2E against real CLI binaries + SpiderFeet harvest fixtures
+- Optional deeper live adapter E2E against real CLI binaries + SpiderFeet harvest fixtures
+- Promote `develop` → `main` after each epic slice when operators want default branch current
+- LLM-backed `lai evaluate` once a real provider is configured (syntax baseline already CI-green)
 
 ## Non-goals still deferred
 
-Langium grammar, Monaco, visual DAG sync, `sfp_*` EVENT rewrite, context force-graph UI.
+Monaco embed, visual DAG sync, `sfp_*` EVENT rewrite, context force-graph UI.
