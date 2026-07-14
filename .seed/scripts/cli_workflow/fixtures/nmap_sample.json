@@ -1,0 +1,37 @@
+{
+  "nodes": [
+    { "id": "host--alpha", "nugget_id": "HOST", "nugget_data": "alpha-host" },
+    { "id": "networks--alpha", "nugget_id": "NETWORKS", "nugget_data": "eth0" },
+    { "id": "ip--alpha-1", "nugget_id": "IP_ADDRESS", "nugget_data": "10.0.0.5" },
+    { "id": "ip--alpha-2", "nugget_id": "IP_ADDRESS", "nugget_data": "10.0.0.6" },
+    { "id": "transport--alpha", "nugget_id": "TRANSPORT", "nugget_data": "tcp" },
+    { "id": "port--alpha-22", "nugget_id": "PORT", "nugget_data": "22" },
+    { "id": "port--alpha-80", "nugget_id": "PORT", "nugget_data": "80" },
+    { "id": "port--alpha-443", "nugget_id": "PORT", "nugget_data": "443" },
+
+    { "id": "host--beta", "nugget_id": "HOST", "nugget_data": "beta-host" },
+    { "id": "networks--beta", "nugget_id": "NETWORKS", "nugget_data": "eth0" },
+    { "id": "ip--beta-1", "nugget_id": "IP_ADDRESS", "nugget_data": "192.168.1.10" },
+    { "id": "transport--beta", "nugget_id": "TRANSPORT", "nugget_data": "tcp" },
+    { "id": "port--beta-8080", "nugget_id": "PORT", "nugget_data": "8080" },
+
+    { "id": "host--gamma", "nugget_id": "HOST", "nugget_data": "gamma-host" },
+    { "id": "networks--gamma", "nugget_id": "NETWORKS", "nugget_data": "eth1" }
+  ],
+  "edges": [
+    { "source": "host--alpha", "target": "networks--alpha", "relation": "contains" },
+    { "source": "networks--alpha", "target": "ip--alpha-1", "relation": "contains" },
+    { "source": "networks--alpha", "target": "ip--alpha-2", "relation": "contains" },
+    { "source": "host--alpha", "target": "transport--alpha", "relation": "contains" },
+    { "source": "transport--alpha", "target": "port--alpha-22", "relation": "contains" },
+    { "source": "transport--alpha", "target": "port--alpha-80", "relation": "contains" },
+    { "source": "transport--alpha", "target": "port--alpha-443", "relation": "contains" },
+
+    { "source": "host--beta", "target": "networks--beta", "relation": "contains" },
+    { "source": "networks--beta", "target": "ip--beta-1", "relation": "contains" },
+    { "source": "host--beta", "target": "transport--beta", "relation": "contains" },
+    { "source": "transport--beta", "target": "port--beta-8080", "relation": "contains" },
+
+    { "source": "host--gamma", "target": "networks--gamma", "relation": "contains" }
+  ]
+}

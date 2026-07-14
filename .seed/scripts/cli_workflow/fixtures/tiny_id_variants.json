@@ -1,0 +1,9 @@
+{
+  "nodes": [
+    { "nugget_instance_id": "n1", "nugget_id": "HOST", "nugget_data": "tiny-host" },
+    { "nugget_instance_id": "n2", "nugget_id": "IP_ADDRESS", "nugget_data": "1.2.3.4" }
+  ],
+  "edges": [
+    { "source": "n1", "target": "n2", "relation": "contains" }
+  ]
+}

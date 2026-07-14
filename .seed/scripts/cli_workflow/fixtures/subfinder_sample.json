@@ -1,0 +1,56 @@
+{
+  "nodes": [
+    {
+      "id": "domain--apex-example",
+      "nugget_id": "DOMAIN_NAME",
+      "nugget_data": "example.com"
+    },
+    {
+      "id": "domain--apex-another",
+      "nugget_id": "DOMAIN_NAME",
+      "nugget_data": "another.org"
+    },
+    {
+      "id": "domain--sub-www",
+      "nugget_id": "DOMAIN_NAME",
+      "nugget_data": "www.example.com"
+    },
+    {
+      "id": "domain--sub-api",
+      "nugget_id": "DOMAIN_NAME",
+      "nugget_data": "api.example.com"
+    },
+    {
+      "id": "domain--sub-shop",
+      "nugget_id": "DOMAIN_NAME",
+      "nugget_data": "shop.another.org"
+    },
+    {
+      "id": "domain_parent--example",
+      "nugget_id": "DOMAIN_NAME_PARENT",
+      "nugget_data": "example.com"
+    },
+    {
+      "id": "domain_parent--another",
+      "nugget_id": "DOMAIN_NAME_PARENT",
+      "nugget_data": "another.org"
+    }
+  ],
+  "edges": [
+    {
+      "source": "domain--sub-www",
+      "target": "domain_parent--example",
+      "relation": "had"
+    },
+    {
+      "source": "domain--sub-api",
+      "target": "domain_parent--example",
+      "relation": "had"
+    },
+    {
+      "source": "domain--sub-shop",
+      "target": "domain_parent--another",
+      "relation": "had"
+    }
+  ]
+}
