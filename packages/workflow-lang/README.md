@@ -65,6 +65,15 @@ lai show latest
 
 See [evals/README.md](evals/README.md).
 
+## MCP validate tool (R8-05)
+
+Optional stdio MCP server: [mcp/README.md](mcp/README.md)
+
+```bash
+npm run mcp:smoke
+npm run mcp:start
+```
+
 ## Notes
 
 - Does **not** replace the Python `cli_workflow` dry-run runtime (SPEC-007).
