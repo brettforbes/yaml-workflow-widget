@@ -66,22 +66,26 @@
       }
     },
     "WherePredicate": {
-      "type": "object",
-      "additionalProperties": false,
       "oneOf": [
         {
+          "type": "object",
+          "additionalProperties": false,
           "required": ["related"],
           "properties": {
             "related": { "$ref": "#/$defs/RelatedPredicate" }
           }
         },
         {
+          "type": "object",
+          "additionalProperties": false,
           "required": ["not"],
           "properties": {
             "not": { "$ref": "#/$defs/NotPredicateBody" }
           }
         },
         {
+          "type": "object",
+          "additionalProperties": false,
           "required": ["attr"],
           "properties": {
             "attr": { "$ref": "#/$defs/AttrPredicate" }
@@ -90,16 +94,18 @@
       ]
     },
     "NotPredicateBody": {
-      "type": "object",
-      "additionalProperties": false,
       "oneOf": [
         {
+          "type": "object",
+          "additionalProperties": false,
           "required": ["related"],
           "properties": {
             "related": { "$ref": "#/$defs/RelatedPredicate" }
           }
         },
         {
+          "type": "object",
+          "additionalProperties": false,
           "required": ["attr"],
           "properties": {
             "attr": { "$ref": "#/$defs/AttrPredicate" }

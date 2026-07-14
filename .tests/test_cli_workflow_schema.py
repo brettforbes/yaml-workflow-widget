@@ -1,46 +1,32 @@
-"""E1-S2: workflow_v1.schema.json loads and rejects invalid docs (R7-01)."""
+"""E1-S2/S4: workflow_v1.schema.json loads and validates docs (R7-01)."""
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
+import yaml
 from jsonschema import Draft202012Validator
-from referencing import Registry, Resource
-from referencing.jsonschema import DRAFT202012
+
+from cli_workflow.schema_util import WORKFLOW_SCHEMA_PATH, workflow_validator as make_validator
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_DIR = ROOT / ".seed" / "scripts" / "cli_workflow" / "schema"
-SCHEMA_PATH = SCHEMA_DIR / "workflow_v1.schema.json"
-GSE_SCHEMA_PATH = SCHEMA_DIR / "gse_v1.schema.json"
-
-
-def _workflow_schema_registry() -> Registry:
-    workflow = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    gse = json.loads(GSE_SCHEMA_PATH.read_text(encoding="utf-8"))
-    return Registry().with_resources(
-        [
-            (gse["$id"], Resource.from_contents(gse, default_specification=DRAFT202012)),
-            (
-                workflow["$id"],
-                Resource.from_contents(workflow, default_specification=DRAFT202012),
-            ),
-        ]
-    )
+EXAMPLE_12A = ROOT / ".seed" / "12A_Workflow_YAML_Example.yaml"
 
 
 @pytest.fixture(scope="module")
 def workflow_validator() -> Draft202012Validator:
-    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    registry = _workflow_schema_registry()
-    Draft202012Validator.check_schema(schema)
-    return Draft202012Validator(schema, registry=registry)
+    return make_validator()
 
 
 def test_schema_file_exists():
-    assert SCHEMA_PATH.is_file()
+    assert WORKFLOW_SCHEMA_PATH.is_file()
 
+
+def test_12a_example_validates(workflow_validator: Draft202012Validator):
+    """R7-01-07 / R7-05-02: canonical example must validate."""
+    doc = yaml.safe_load(EXAMPLE_12A.read_text(encoding="utf-8"))
+    workflow_validator.validate(doc)
 
 def test_minimal_valid_workflow(workflow_validator: Draft202012Validator):
     doc = {
