@@ -7,7 +7,8 @@
 | [12A_Workflow_YAML_Example.yaml](12A_Workflow_YAML_Example.yaml) | Canonical example workflow (corrected) |
 | [12C_Graph_Select_Language.md](12C_Graph_Select_Language.md) | Graph Select Language (GSE) for output variables |
 | [SPEC007_SKETCH_GAP_NOTES.md](../.governance/project/SPEC007_SKETCH_GAP_NOTES.md) | Sketch → v1 defect inventory (review before schema/GSE changes) |
-| [SPEC-007](../.governance/specs/SPEC-007-cli-workflow-dsl.md) | Implementation requirements + epics |
+| [SPEC-007](../.governance/specs/SPEC-007-cli-workflow-dsl.md) | Implementation requirements |
+| [SPEC-007 agent plan](../.governance/specs/SPEC-007-AGENT-PLAN.md) | Epics / stories / GitHub issue map |
 
 This document is the **logic master** for the Workflow YAML DSL. The example YAML must encode everything described here. Informal sketch expressions such as `concat({{IP_ADDRESS}}, ":", {{PORT}})` are **invalid** — use GSE (12C).
 
