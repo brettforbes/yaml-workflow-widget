@@ -28,7 +28,7 @@ YAML remains the **canonical interchange** (SPEC-007). Langium models the same A
 
 - **R8-02-01** Grammar rule shape MUST track `workflow_v1.schema.json` + `gse_v1.schema.json` (1:1 AST concepts).
 - **R8-02-02** Must not invent DSL constructs absent from 12A/12B/12C / JSON Schema.
-- **R8-02-03** Surface syntax MAY be Langium-native for v1 editing; YAML round-trip is a later story (`SPEC_GAP` until specified).
+- **R8-02-03** Surface syntax MAY be Langium-native for v1 editing; YAML round-trip is **deferred** (SPEC-009 decision: YAML remains canonical interchange; see `.seed/YAML_SFW_CONCEPT_MAP.md`).
 
 ### R8-03 — Validators
 
