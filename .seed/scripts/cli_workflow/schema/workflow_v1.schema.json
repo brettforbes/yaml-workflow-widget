@@ -175,30 +175,7 @@
       }
     },
     "GseBinding": {
-      "description": "Embedded GSE binding (full standalone schema lands in E1-S3).",
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": { "const": "string_list" },
-        "select": { "type": "object" },
-        "union": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "literal": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "from_var": { "type": "string" },
-        "distinct": { "type": "boolean" }
-      },
-      "oneOf": [
-        { "required": ["select"] },
-        { "required": ["union"] },
-        { "required": ["literal"] },
-        { "required": ["from_var"] }
-      ],
-      "additionalProperties": false
+      "$ref": "https://spiderfeet.local/schemas/gse_v1.schema.json#/$defs/GseBinding"
     }
   }
 }

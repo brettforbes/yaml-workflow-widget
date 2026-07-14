@@ -7,16 +7,35 @@ from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT202012
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_PATH = ROOT / ".seed" / "scripts" / "cli_workflow" / "schema" / "workflow_v1.schema.json"
+SCHEMA_DIR = ROOT / ".seed" / "scripts" / "cli_workflow" / "schema"
+SCHEMA_PATH = SCHEMA_DIR / "workflow_v1.schema.json"
+GSE_SCHEMA_PATH = SCHEMA_DIR / "gse_v1.schema.json"
+
+
+def _workflow_schema_registry() -> Registry:
+    workflow = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    gse = json.loads(GSE_SCHEMA_PATH.read_text(encoding="utf-8"))
+    return Registry().with_resources(
+        [
+            (gse["$id"], Resource.from_contents(gse, default_specification=DRAFT202012)),
+            (
+                workflow["$id"],
+                Resource.from_contents(workflow, default_specification=DRAFT202012),
+            ),
+        ]
+    )
 
 
 @pytest.fixture(scope="module")
 def workflow_validator() -> Draft202012Validator:
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    registry = _workflow_schema_registry()
     Draft202012Validator.check_schema(schema)
-    return Draft202012Validator(schema)
+    return Draft202012Validator(schema, registry=registry)
 
 
 def test_schema_file_exists():
