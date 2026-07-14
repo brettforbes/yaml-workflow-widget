@@ -4,6 +4,12 @@
       "type": "stdio",
       "command": "codegraph",
       "args": ["serve", "--mcp"]
+    },
+    "sf-workflow": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["--yes", "tsx", "packages/workflow-lang/mcp/mcp-server.ts"],
+      "cwd": "C:/projects/yaml-workflow-widget"
     }
   }
 }
