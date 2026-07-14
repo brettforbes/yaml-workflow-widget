@@ -3,3 +3,7 @@ dist/
 .hub/
 .idea/
 .codegraph/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
