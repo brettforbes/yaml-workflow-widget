@@ -31,9 +31,19 @@ python -m pip install pytest pyyaml jsonschema referencing
 python -m pytest .tests -k cli_workflow -q
 ```
 
-### Langium
+### Langium (SPEC-008)
 
-Langium Phase 2 is **deferred** (Epic E8 / issues #11, #39–#43). Project skills live under `.cursor/skills/` (`langium`, `lai`, `lai-gen-*`). Do not start Langium under SPEC-007 unless a new SPEC opens that work.
+| Doc | Path |
+|-----|------|
+| Spec | `.seed/SPEC-008-langium-workflow-gse.md` |
+| Package | `packages/workflow-lang/` |
+| Skills | `.cursor/skills/langium`, `.cursor/skills/lai*` |
+
+Epic [#11](https://github.com/brettforbes/yaml-workflow-widget/issues/11); start at [#39](https://github.com/brettforbes/yaml-workflow-widget/issues/39).
+
+```bash
+cd packages/workflow-lang && npm install && npm run build
+```
 
 ### Governance
 

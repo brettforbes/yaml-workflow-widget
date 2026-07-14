@@ -1,0 +1,24 @@
+{
+  "name": "workflow-lang",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Langium grammar + services for SpiderFeet Workflow + GSE (SPEC-008)",
+  "type": "module",
+  "scripts": {
+    "langium:generate": "langium generate",
+    "build": "npm run langium:generate && tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "clean": "rimraf out src/language/generated"
+  },
+  "dependencies": {
+    "langium": "~4.3.1"
+  },
+  "devDependencies": {
+    "langium-cli": "~4.3.0",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

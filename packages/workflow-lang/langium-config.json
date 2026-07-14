@@ -1,0 +1,14 @@
+{
+  "projectName": "Workflow",
+  "languages": [
+    {
+      "id": "sf-workflow",
+      "grammar": "src/language/workflow.langium",
+      "fileExtensions": [".sfw"],
+      "textMate": {
+        "out": "syntaxes/sf-workflow.tmLanguage.json"
+      }
+    }
+  ],
+  "out": "src/language/generated"
+}
