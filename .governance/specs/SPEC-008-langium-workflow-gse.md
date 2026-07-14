@@ -50,6 +50,6 @@ YAML remains the **canonical interchange** (SPEC-007). Langium models the same A
 
 ## Acceptance (program)
 
-1. `packages/workflow-lang` builds and `langium generate` succeeds
-2. Grammar grows to cover workflow header + step + GSE select stub with tests
-3. Stories #39–#43 closed with PR evidence; epic #11 closed when R8-01–R8-03 done (R8-04/05 may remain optional)
+1. [x] `packages/workflow-lang` builds and `langium generate` succeeds
+2. [x] Grammar covers workflow header + step + GSE shapes with parse/validate smokes
+3. [x] Stories #39–#43 closed with PR evidence; epic #11 closable (R8-01–R8-05 done)
