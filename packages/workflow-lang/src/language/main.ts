@@ -1,5 +1,5 @@
 /**
- * SfWorkflow language entry — service construction (SPEC-008 / R8-01).
+ * SfWorkflow language entry — service construction (SPEC-008 / R8-01 / R8-03).
  */
 import {
     EmptyFileSystem,
@@ -12,7 +12,11 @@ import {
     SfWorkflowGeneratedModule,
     WorkflowGeneratedSharedModule,
 } from './generated/module.js';
-import { SfWorkflowModule, type SfWorkflowServices } from './workflow-module.js';
+import {
+    SfWorkflowModule,
+    finalizeSfWorkflowServices,
+    type SfWorkflowServices,
+} from './workflow-module.js';
 
 export function createSfWorkflowServices(
     context: DefaultSharedCoreModuleContext = EmptyFileSystem,
@@ -24,6 +28,7 @@ export function createSfWorkflowServices(
         SfWorkflowModule,
     );
     shared.ServiceRegistry.register(Workflow);
+    finalizeSfWorkflowServices(Workflow);
     return { shared, Workflow };
 }
 
