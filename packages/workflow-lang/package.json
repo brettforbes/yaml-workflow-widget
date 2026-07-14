@@ -8,7 +8,10 @@
     "langium:generate": "langium generate",
     "build": "npm run langium:generate && tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
-    "clean": "rimraf out src/language/generated"
+    "clean": "rimraf out src/language/generated",
+    "eval:syntax": "npm run build && node evals/syntax.baseline.mjs",
+    "smoke:parse": "npm run build && node out/smoke-parse.js",
+    "smoke:validate": "npm run build && node out/smoke-validate.js"
   },
   "dependencies": {
     "langium": "~4.3.1"

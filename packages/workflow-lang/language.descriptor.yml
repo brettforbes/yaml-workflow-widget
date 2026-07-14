@@ -1,0 +1,38 @@
+name: sf-workflow
+version: 1.0.0
+description: >
+  SpiderFeet Workflow + Graph Select Language (GSE) editor surface for SPEC-008.
+  Canonical interchange remains YAML (SPEC-007 12A/12B/12C + JSON Schema);
+  this Langium language models the same AST for LSP/editor/agent tooling.
+langium_config: ./langium-config.json
+case_sensitive: true
+grammar: ./src/language/workflow.langium
+
+services:
+  module: ./src/language/main.ts
+  validator: ./src/language/validator.ts
+
+examples:
+  - name: Minimal recon workflow
+    description: >
+      Subfinder-shaped step with GSE apex domain select and context export.
+      Mirrors concepts from .seed/12A_Workflow_YAML_Example.yaml (not a YAML round-trip).
+    file: ./examples/minimal.sfw
+    tags: [beginner, workflow, gse]
+
+documentation:
+  - name: SPEC-008
+    src: ../../.seed/SPEC-008-langium-workflow-gse.md
+    priority: high
+  - name: SPEC-007 (runtime / YAML truth)
+    src: ../../.seed/SPEC-007-cli-workflow-dsl.md
+    priority: high
+  - name: Workflow DSL (12B)
+    src: ../../.seed/12B_Workflow_DSL_Description.md
+    priority: medium
+  - name: GSE (12C)
+    src: ../../.seed/12C_Graph_Select_Language.md
+    priority: medium
+  - name: Package README
+    src: ./README.md
+    priority: low
