@@ -7,3 +7,12 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
+# Retired skill install path (canonical: .cursor/skills/)
+.agents/
+
+# Agent/local scratch (never commit)
+.governance/tmp-*
+packages/workflow-lang/out/
+packages/workflow-lang/src/language/generated/
+packages/workflow-lang/syntaxes/
+
