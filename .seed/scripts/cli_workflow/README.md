@@ -41,6 +41,17 @@ print(reg.list_registered())
 CI default remains **fixture dry-run** (`runtime.executor.dry_run_workflow`).
 Live drivers skip cleanly when the CLI binary is missing.
 
+## Optional SPEC-004 adapter E2E
+
+When SpiderFeet `cli_corpus` is importable:
+
+```bash
+python -m pytest .tests/test_cli_workflow_live_e2e.py -q
+```
+
+Uses `fixtures/subfinder_live_sample.jsonl` → `subfinder.to_graph` (no live CLI required).
+Live binary smoke remains skip-if-missing.
+
 ## Add a tool driver
 
 1. Confirm the adapter id is in `tools.registry.KNOWN_TOOL_IDS` (schema enum too).
