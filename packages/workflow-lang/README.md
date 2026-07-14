@@ -20,8 +20,28 @@ npm run build
 ## Layout
 
 - `langium-config.json` — language id `sf-workflow`, extension `.sfw`
-- `src/language/workflow.langium` — stub grammar (E8-S1); expand in E8-S2
+- `src/language/workflow.langium` — Workflow + GSE AST coverage (E8-S2)
+- `examples/minimal.sfw` — parseable surface sample (YAML truth remains 12A)
 - Generated sources: `src/language/generated/` (gitignored; produced by `langium generate`)
+
+## AST coverage (vs JSON Schema)
+
+| Area | Status |
+|------|--------|
+| Workflow header / info / inputs / steps | covered |
+| Step input / config / files / capture / context | covered |
+| GSE `select` + `nodes` + `where`/`related`/`not`/`attr` | covered |
+| GSE `for_each` / `collect` / `emit` | covered |
+| GSE `union` / `literal` / `from_var` | covered |
+| Nested multi-level `for_each` | structural (same rules; depth not special-cased) |
+| YAML round-trip | deferred (`SPEC_GAP` in SPEC-008 R8-02-03) |
+
+## Parse smoke
+
+```bash
+npm run build
+node out/smoke-parse.js
+```
 
 ## Notes
 

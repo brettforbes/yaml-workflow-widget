@@ -1,0 +1,57 @@
+// Minimal SfWorkflow surface example (SPEC-008).
+// YAML interchange remains .seed/12A_Workflow_YAML_Example.yaml.
+workflow recon {
+    apiVersion "spiderfeet.workflow/v1"
+    kind "Workflow"
+    id "workflow--1c51e712-b5b5-4ef2-9967-e11debbcc607"
+    info {
+        name "Recon Attack Surface"
+    }
+    input targets {
+        type string_list
+        default "https://example.com"
+    }
+    step subfinder_enum {
+        uses "tool.subfinder"
+        input {
+            type string_list
+            from "$workflow.inputs.targets"
+            normalize "hostname_from_url"
+            empty "error"
+        }
+        config {
+            argv "-silent"
+            files {
+                input { mode "none" }
+                output { mode "auto" format "jsonl" }
+            }
+            capture {
+                family "structured_native"
+                adapter "subfinder"
+            }
+        }
+        output {
+            var apex_domains {
+                type string_list
+                select {
+                    source "$step.scan_graph"
+                    nodes {
+                        nugget_id "DOMAIN_NAME"
+                        where {
+                            not {
+                                related {
+                                    direction "out"
+                                    relation "had"
+                                    nugget_id "DOMAIN_NAME_PARENT"
+                                }
+                            }
+                        }
+                    }
+                    project "nugget_data"
+                    distinct true
+                }
+            }
+        }
+        context { export "scan_graph" }
+    }
+}
