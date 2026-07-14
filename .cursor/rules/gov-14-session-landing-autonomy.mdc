@@ -1,0 +1,25 @@
+# Governance: Session Landing Autonomy
+
+## Purpose
+
+Allow a human to grant a bounded, explicit session permission so agents can finish a delivery chain end-to-end without per-step confirmation for otherwise-gated GitHub/git write actions.
+
+## Rule
+
+- `GOV-14-LAND-001` By default, agents still respect user rules that require an explicit request before committing, creating PRs, pushing, merging, or closing issues.
+- `GOV-14-LAND-002` When the human **explicitly grants session landing autonomy** for a stated scope (epic, issue list, overnight run, or “finish all issues … without asking”), the agent is authorized to:
+  1. create issue-scoped branches from the correct base (`develop` or `main` for hotfixes / single-branch repos),
+  2. commit and push bounded work,
+  3. open pull requests linking governing issues/specs,
+  4. merge those PRs when checks allow (or when the human has already authorized landing for the session),
+  5. comment progress/evidence on issues,
+  6. close issues whose acceptance criteria are met,
+  7. open and merge promotion PRs (`develop` → `main`) when the program acceptance for that unit requires it,
+  8. continue to the next unblocked story in the same grant without pausing for confirmation.
+- `GOV-14-LAND-003` A session landing grant does **not** authorize destructive git (force-push to protected branches, hard reset of shared history, bypassing hooks) unless those are separately and explicitly requested.
+- `GOV-14-LAND-004` A session landing grant does **not** waive branch-model rules in `gov-02` (no direct commits to `main`/`develop`; still PR-based landing; return to resting branch at turn end).
+- `GOV-14-LAND-005` The grant ends when the stated scope is finished, the human revokes it, or the agent hits a hard blocker that needs a human decision outside the grant (credentials, contradictory requirements, security boundary).
+
+## Example grant language
+
+Sufficient (non-exhaustive): “finish all of the issues so I can look tomorrow”, “go ahead without asking”, “you are allowed to PR, commit, push, merge, and close”, “land everything overnight”.

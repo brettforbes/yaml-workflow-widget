@@ -1,0 +1,345 @@
+apiVersion: spiderfeet.workflow/v1
+kind: Workflow
+id: workflow--1c51e712-b5b5-4ef2-9967-e11debbcc607
+
+info:
+  name: Recon Attack Surface
+  description: >
+    Enumerate domains, map ports/services, and map live web surface + vulns.
+    Ports/services chain and web/vuln chain share subfinder_enum, then fan out.
+  author: Modeller
+  created: "2026-07-07T21:58:32+10:00"
+
+inputs:
+  targets:
+    type: string_list
+    description: Seed domains or URLs (normalized to hostnames for DNS tools)
+    default:
+      - https://example.com
+
+# DAG (not a linear-only list):
+#   subfinder_enum ─┬─► nmap_ports ─► nerva_services
+#                   └─► httpx_live ─► katana_crawl ─► nuclei_vulns
+steps:
+  - id: subfinder_enum
+    uses: tool.subfinder
+    needs: []
+    input:
+      type: string_list
+      from: $workflow.inputs.targets
+      normalize: hostname_from_url
+      empty: error
+    config:
+      argv:
+        - "-d"
+        - "$step.input.values[0]"
+        - "-oJ"
+        - "-cs"
+        - "-o"
+        - "$step.files.output"
+        - "-silent"
+      files:
+        input:
+          mode: none
+        output:
+          mode: auto
+          format: jsonl
+      capture:
+        family: structured_native
+        adapter: subfinder
+    output:
+      vars:
+        # Ontology reality: subfinder emits DOMAIN_NAME (+ DOMAIN_NAME_PARENT for children).
+        # There is no SUBDOMAIN nugget_id in nuggets.json.
+        apex_domains:
+          type: string_list
+          select:
+            source: $step.scan_graph
+            nodes:
+              nugget_id: DOMAIN_NAME
+              where:
+                - not:
+                    related:
+                      direction: out
+                      relation: had
+                      nugget_id: DOMAIN_NAME_PARENT
+            project: nugget_data
+            distinct: true
+        subdomains:
+          type: string_list
+          select:
+            source: $step.scan_graph
+            nodes:
+              nugget_id: DOMAIN_NAME
+              where:
+                - related:
+                    direction: out
+                    relation: had
+                    nugget_id: DOMAIN_NAME_PARENT
+            project: nugget_data
+            distinct: true
+        all_domains:
+          type: string_list
+          union:
+            - $step.vars.apex_domains
+            - $step.vars.subdomains
+          distinct: true
+    context:
+      export: scan_graph
+
+  - id: nmap_ports
+    uses: tool.nmap
+    needs: [subfinder_enum]
+    input:
+      type: string_list
+      from: $steps.subfinder_enum.vars.all_domains
+      empty: error
+    config:
+      argv:
+        - "-sT"
+        - "-T3"
+        - "-p-"
+        - "--open"
+        - "-iL"
+        - "$step.files.input"
+        - "-oX"
+        - "$step.files.output"
+      files:
+        input:
+          mode: auto
+          format: line_text
+        output:
+          mode: auto
+          format: xml
+      capture:
+        family: structured_native
+        adapter: nmap
+    output:
+      vars:
+        # Cascade: for each endpoint, cartesian IP × PORT under that endpoint.
+        ip_port_list:
+          type: string_list
+          select:
+            source: $step.scan_graph
+            for_each:
+              as: endpoint
+              nodes:
+                nugget_id_in: [HOST, SYSTEM, DEVICE, CDN, SERVER]
+              collect:
+                - as: ip
+                  reachable_from: endpoint
+                  along:
+                    relation: contains
+                    transitive: true
+                  nodes:
+                    nugget_id_in: [IP_ADDRESS, IPV6_ADDRESS]
+                  project: nugget_data
+                - as: port
+                  reachable_from: endpoint
+                  along:
+                    relation: contains
+                    transitive: true
+                  nodes:
+                    nugget_id: PORT
+                  project: nugget_data
+              emit:
+                product: [ip, port]
+                join: ":"
+            distinct: true
+    context:
+      export: scan_graph
+
+  - id: nerva_services
+    uses: tool.nerva
+    needs: [nmap_ports]
+    input:
+      type: string_list
+      from: $steps.nmap_ports.vars.ip_port_list
+      empty: skip_step
+    config:
+      argv:
+        - "--json"
+        - "-iL"
+        - "$step.files.input"
+      files:
+        input:
+          mode: auto
+          format: line_text
+        output:
+          mode: auto
+          format: jsonl
+      capture:
+        family: structured_native
+        adapter: nerva
+    context:
+      export: scan_graph
+
+  - id: httpx_live
+    uses: tool.httpx
+    needs: [subfinder_enum]
+    input:
+      type: string_list
+      from: $steps.subfinder_enum.vars.all_domains
+      empty: error
+    config:
+      argv:
+        - "-l"
+        - "$step.files.input"
+        - "-status-code"
+        - "-title"
+        - "-tech-detect"
+        - "-server"
+        - "-cdn"
+        - "-ip"
+        - "-json"
+        - "-no-stdin"
+        - "-o"
+        - "$step.files.output"
+        - "-silent"
+        - "-threads"
+        - "10"
+        - "-timeout"
+        - "15"
+        - "-rate-limit"
+        - "25"
+      files:
+        input:
+          mode: auto
+          format: line_text
+        output:
+          mode: auto
+          format: jsonl
+      capture:
+        family: structured_native
+        adapter: httpx
+    output:
+      vars:
+        # Live web hosts: DOMAIN_NAME under a HOST tree that has HTTP_STATUS_CODE.
+        live_hosts:
+          type: string_list
+          select:
+            source: $step.scan_graph
+            for_each:
+              as: endpoint
+              nodes:
+                nugget_id_in: [HOST, CDN]
+              collect:
+                - as: host
+                  reachable_from: endpoint
+                  along:
+                    relation: contains
+                    transitive: true
+                  nodes:
+                    nugget_id: DOMAIN_NAME
+                  project: nugget_data
+                - as: status
+                  reachable_from: endpoint
+                  along:
+                    relation: contains
+                    transitive: true
+                  nodes:
+                    nugget_id: HTTP_STATUS_CODE
+                  project: nugget_data
+              emit:
+                values: host
+            distinct: true
+    # Interim — do not export to context
+    context:
+      export: none
+
+  - id: katana_crawl
+    uses: tool.katana
+    needs: [httpx_live]
+    input:
+      type: string_list
+      from: $steps.httpx_live.vars.live_hosts
+      empty: skip_step
+    config:
+      argv:
+        - "-list"
+        - "$step.files.input"
+        - "-j"
+        - "-duc"
+        - "-ob"
+        - "-or"
+        - "-o"
+        - "$step.files.output"
+        - "-depth"
+        - "2"
+        - "-c"
+        - "5"
+        - "-timeout"
+        - "10"
+        - "-fs"
+        - "fqdn"
+        - "-ct"
+        - "8m"
+      files:
+        input:
+          mode: auto
+          format: line_text
+        output:
+          mode: auto
+          format: jsonl
+      capture:
+        family: structured_native
+        adapter: katana
+    output:
+      vars:
+        # Prefer URL-bearing nuggets when present; fall back to DOMAIN_NAME values.
+        # Exact ids must match katana structure doc / corpus graphs when wiring E2E tests.
+        crawl_urls:
+          type: string_list
+          select:
+            source: $step.scan_graph
+            nodes:
+              nugget_id_in:
+                - LINKED_URL_INTERNAL
+                - LINKED_URL_EXTERNAL
+                - DOMAIN_NAME
+            project: nugget_data
+            distinct: true
+    context:
+      export: none
+
+  - id: nuclei_vulns
+    uses: tool.nuclei
+    needs: [katana_crawl]
+    input:
+      type: string_list
+      from: $steps.katana_crawl.vars.crawl_urls
+      empty: skip_step
+    config:
+      argv:
+        - "-l"
+        - "$step.files.input"
+        - "-silent"
+        - "-jsonl"
+        - "-omit-raw"
+        - "-omit-template"
+        - "-tags"
+        - "cve"
+        - "-no-interactsh"
+        - "-etags"
+        - "dos,fuzz,misc"
+        - "-duc"
+        - "-retries"
+        - "1"
+        - "-c"
+        - "25"
+        - "-timeout"
+        - "15"
+        - "-jle"
+        - "$step.files.output"
+      files:
+        input:
+          mode: auto
+          format: line_text
+        output:
+          mode: auto
+          format: jsonl
+      capture:
+        family: structured_native
+        adapter: nuclei
+    context:
+      export: scan_graph

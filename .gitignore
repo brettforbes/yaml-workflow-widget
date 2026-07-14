@@ -16,3 +16,8 @@ packages/workflow-lang/out/
 packages/workflow-lang/src/language/generated/
 packages/workflow-lang/syntaxes/
 
+
+# Vite sub-apps
+apps/**/node_modules/
+apps/**/dist/
+
