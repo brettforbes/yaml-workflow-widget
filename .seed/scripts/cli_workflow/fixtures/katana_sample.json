@@ -1,0 +1,9 @@
+{
+  "nodes": [
+    {"id": "url--internal-1", "nugget_id": "LINKED_URL_INTERNAL", "nugget_data": "https://www.example.com/"},
+    {"id": "url--internal-2", "nugget_id": "LINKED_URL_INTERNAL", "nugget_data": "https://www.example.com/login"},
+    {"id": "url--external-1", "nugget_id": "LINKED_URL_EXTERNAL", "nugget_data": "https://cdn.example.com/app.js"},
+    {"id": "domain--fallback", "nugget_id": "DOMAIN_NAME", "nugget_data": "api.example.com"}
+  ],
+  "edges": []
+}

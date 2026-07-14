@@ -1,0 +1,7 @@
+{
+  "nodes": [
+    {"id": "nerva--svc-1", "nugget_id": "SOFTWARE_NAME", "nugget_data": "nginx"},
+    {"id": "nerva--svc-2", "nugget_id": "SOFTWARE_NAME", "nugget_data": "openssh"}
+  ],
+  "edges": []
+}
