@@ -107,7 +107,7 @@ class TestReserveOutputPath:
 
 class TestMaterializeStepFilesAndCleanup:
     def test_nmap_shaped_config_round_trip(self):
-        """Mirrors 12A nmap_ports: auto line_text input, auto xml output."""
+        """Mirrors 12A sfp_cli_nmap: auto line_text input, auto xml output."""
         files_config = {
             "input": {"mode": "auto", "format": "line_text"},
             "output": {"mode": "auto", "format": "xml"},
@@ -127,7 +127,7 @@ class TestMaterializeStepFilesAndCleanup:
         assert not resolved.output.exists()
 
     def test_subfinder_shaped_config_input_none(self):
-        """Mirrors 12A subfinder_enum: files.input.mode: none, output auto jsonl."""
+        """Mirrors 12A sfp_cli_subfinder: files.input.mode: none, output auto jsonl."""
         files_config = {
             "input": {"mode": "none"},
             "output": {"mode": "auto", "format": "jsonl"},

@@ -109,7 +109,7 @@ class TestShouldExport:
 
 class TestMaybeMergeStepExportNoneSkips:
     def test_export_none_skips_merge_entirely(self):
-        """12A shape: httpx_live / katana_crawl are interim (`export: none`)."""
+        """12A shape: sfp_cli_httpx / sfp_cli_katana are interim (`export: none`)."""
         context = new_context()
         step_graph = {"nodes": [node("live-host")], "edges": [edge("a", "b", "contains")]}
         maybe_merge_step(context, step_graph, {"export": "none"})
@@ -134,18 +134,18 @@ class TestMultiStepMergeSequence:
         """Mirrors 12A: subfinder/nmap/nerva/nuclei export; httpx/katana are interim."""
         context = new_context()
         step_specs = {
-            "subfinder_enum": "scan_graph",
-            "nmap_ports": "scan_graph",
-            "nerva_services": "scan_graph",
-            "httpx_live": "none",
-            "katana_crawl": "none",
-            "nuclei_vulns": "scan_graph",
+            "sfp_cli_subfinder": "scan_graph",
+            "sfp_cli_nmap": "scan_graph",
+            "sfp_cli_nerva": "scan_graph",
+            "sfp_cli_httpx": "none",
+            "sfp_cli_katana": "none",
+            "sfp_cli_nuclei": "scan_graph",
         }
         for step_id, export in step_specs.items():
             step_graph = {"nodes": [node(step_id)], "edges": []}
             maybe_merge_step(context, step_graph, {"export": export})
 
         merged_ids = {n["id"] for n in context["nodes"]}
-        assert merged_ids == {"subfinder_enum", "nmap_ports", "nerva_services", "nuclei_vulns"}
-        assert "httpx_live" not in merged_ids
-        assert "katana_crawl" not in merged_ids
+        assert merged_ids == {"sfp_cli_subfinder", "sfp_cli_nmap", "sfp_cli_nerva", "sfp_cli_nuclei"}
+        assert "sfp_cli_httpx" not in merged_ids
+        assert "sfp_cli_katana" not in merged_ids

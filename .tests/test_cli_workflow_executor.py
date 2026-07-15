@@ -42,7 +42,7 @@ def test_empty_policy_error_skip_continue():
 
 def test_run_step_subfinder_shaped_pipeline():
     doc = load_workflow(EXAMPLE_12A)
-    step = next(s for s in doc.steps if s.id == "subfinder_enum")
+    step = next(s for s in doc.steps if s.id == "sfp_cli_subfinder")
     env = WorkflowEnv(inputs={"targets": ["https://example.com"]})
 
     def provider(_step, _env, _values):
@@ -80,7 +80,7 @@ def test_run_step_skip_on_empty_input():
         "inputs": {"targets": {"type": "string_list", "default": []}},
         "steps": [
             {
-                "id": "nerva_services",
+                "id": "sfp_cli_nerva",
                 "uses": "tool.nerva",
                 "needs": [],
                 "input": {

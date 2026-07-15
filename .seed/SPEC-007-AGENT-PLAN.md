@@ -267,7 +267,7 @@ E8 Langium (DEFERRED — not SPEC-007)
 ### E3-S2 — DAG
 
 - **Outcome:** Topological layers; detect cycles; unknown `needs` ids; identify parallel-ready roots.
-- **AC:** 12A yields fan-out after `subfinder_enum`; synthetic cycle rejected.
+- **AC:** 12A yields fan-out after `sfp_cli_subfinder`; synthetic cycle rejected.
 - **Verify:** `test_cli_workflow_dag.py`.
 
 ### E3-S3 — Variables

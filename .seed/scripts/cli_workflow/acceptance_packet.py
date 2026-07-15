@@ -31,7 +31,7 @@ def main() -> None:
     workflow_validator().validate(raw)
     print("OK 12A schema validates")
 
-    nmap_step = next(s for s in load_workflow(EXAMPLE).steps if s.id == "nmap_ports")
+    nmap_step = next(s for s in load_workflow(EXAMPLE).steps if s.id == "sfp_cli_nmap")
     binding = nmap_step.output_vars["ip_port_list"]
     graph = load_fixture_graph("nmap_sample")
     values = eval_binding(binding, {"$step.scan_graph": graph})

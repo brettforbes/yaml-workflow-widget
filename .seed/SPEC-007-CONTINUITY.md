@@ -22,7 +22,7 @@
 
 1. **12A validates** — `test_cli_workflow_schema.py`
 2. **GSE nmap cascade yields non-empty `ip:port`** — `test_cli_workflow_gse.py` / dry-run e2e
-3. **Dry-run E2E context merges only export steps** (`subfinder_enum`, `nmap_ports`, `nerva_services`, `nuclei_vulns`; not `httpx_live` / `katana_crawl`) — `test_cli_workflow_e2e_dry_run.py`
+3. **Dry-run E2E context merges only export steps** (`sfp_cli_subfinder`, `sfp_cli_nmap`, `sfp_cli_nerva`, `sfp_cli_nuclei`; not `sfp_cli_httpx` / `sfp_cli_katana`) — `test_cli_workflow_e2e_dry_run.py`
 4. Operator docs: 12A/12B/12C + package README + `AGENTS.md`
 
 ## How to run

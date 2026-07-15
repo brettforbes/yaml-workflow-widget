@@ -96,19 +96,19 @@ v1 context merge = **append unique nodes by id + append unique edges by (source,
 Two logical chains after subdomain enum:
 
 ```text
-subfinder_enum ─┬─► nmap_ports ─► nerva_services        (ports/services → context)
-                └─► httpx_live ─► katana_crawl ─► nuclei_vulns
+sfp_cli_subfinder ─┬─► sfp_cli_nmap ─► sfp_cli_nerva        (ports/services → context)
+                └─► sfp_cli_httpx ─► sfp_cli_katana ─► sfp_cli_nuclei
                       (httpx/katana interim; nuclei → context)
 ```
 
 | Step id | Tool | Context export | Downstream vars |
 |---------|------|----------------|-----------------|
-| `subfinder_enum` | subfinder | yes | `apex_domains`, `subdomains`, `all_domains` |
-| `nmap_ports` | nmap | yes | `ip_port_list` |
-| `nerva_services` | nerva | yes | (none required) |
-| `httpx_live` | httpx | no | `live_hosts` |
-| `katana_crawl` | katana | no | `crawl_urls` |
-| `nuclei_vulns` | nuclei | yes | (none required) |
+| `sfp_cli_subfinder` | subfinder | yes | `apex_domains`, `subdomains`, `all_domains` |
+| `sfp_cli_nmap` | nmap | yes | `ip_port_list` |
+| `sfp_cli_nerva` | nerva | yes | (none required) |
+| `sfp_cli_httpx` | httpx | no | `live_hosts` |
+| `sfp_cli_katana` | katana | no | `crawl_urls` |
+| `sfp_cli_nuclei` | nuclei | yes | (none required) |
 
 **Ontology note (sketch fix):** There is no `SUBDOMAIN` nugget in `nuggets.json`. Subfinder emits `DOMAIN_NAME` (+ `DOMAIN_NAME_PARENT` for children). GSE must filter on that reality — see 12C §4.1.
 
@@ -229,7 +229,7 @@ context:
 
 ## 5. Per-step logic (example workflow)
 
-### 5.1 `subfinder_enum`
+### 5.1 `sfp_cli_subfinder`
 
 - **Input:** `$workflow.inputs.targets` → normalize hostname
 - **Config:** subfinder JSONL → adapter `subfinder`
@@ -239,40 +239,40 @@ context:
   - `all_domains` — union of both
 - **Context:** export scan graph
 
-### 5.2 `nmap_ports`
+### 5.2 `sfp_cli_nmap`
 
-- **Input:** `$steps.subfinder_enum.vars.all_domains`
+- **Input:** `$steps.sfp_cli_subfinder.vars.all_domains`
 - **Config:** nmap `-oX` → adapter `nmap`
 - **Output vars:**
   - `ip_port_list` — GSE `for_each` endpoint → product `IP` × `PORT` joined by `:`
 - **Context:** export
 
-### 5.3 `nerva_services`
+### 5.3 `sfp_cli_nerva`
 
-- **Input:** `$steps.nmap_ports.vars.ip_port_list`
+- **Input:** `$steps.sfp_cli_nmap.vars.ip_port_list`
 - **Config:** nerva `--json` → adapter `nerva`
 - **Output vars:** none required for this example
 - **Context:** export
 
-### 5.4 `httpx_live`
+### 5.4 `sfp_cli_httpx`
 
-- **Input:** `$steps.subfinder_enum.vars.all_domains`
+- **Input:** `$steps.sfp_cli_subfinder.vars.all_domains`
 - **Config:** httpx JSON → adapter `httpx`
 - **Output vars:**
   - `live_hosts` — host/domain values under successful probes (GSE with `where` on status/liveness)
 - **Context:** none (interim)
 
-### 5.5 `katana_crawl`
+### 5.5 `sfp_cli_katana`
 
-- **Input:** `$steps.httpx_live.vars.live_hosts`
+- **Input:** `$steps.sfp_cli_httpx.vars.live_hosts`
 - **Config:** katana JSON → adapter `katana`
 - **Output vars:**
   - `crawl_urls` — URL-bearing `nugget_data` values from crawl graph (exact `nugget_id`s per katana structure doc)
 - **Context:** none (interim)
 
-### 5.6 `nuclei_vulns`
+### 5.6 `sfp_cli_nuclei`
 
-- **Input:** `$steps.katana_crawl.vars.crawl_urls`
+- **Input:** `$steps.sfp_cli_katana.vars.crawl_urls`
 - **Config:** nuclei JSONL → adapter `nuclei`
 - **Context:** export
 
