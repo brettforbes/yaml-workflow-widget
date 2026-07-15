@@ -69,7 +69,7 @@ all_domains:
 # Shape C — from prior step
 hosts_in:
   type: string_list
-  from_var: $steps.subfinder_enum.vars.all_domains
+  from_var: $steps.sfp_cli_subfinder.vars.all_domains
 ```
 
 ---

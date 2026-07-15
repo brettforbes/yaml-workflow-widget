@@ -37,7 +37,7 @@ def test_minimal_valid_workflow(workflow_validator: Draft202012Validator):
         "inputs": {"targets": {"type": "string_list", "default": ["example.com"]}},
         "steps": [
             {
-                "id": "subfinder_enum",
+                "id": "sfp_cli_subfinder",
                 "uses": "tool.subfinder",
                 "needs": [],
                 "input": {

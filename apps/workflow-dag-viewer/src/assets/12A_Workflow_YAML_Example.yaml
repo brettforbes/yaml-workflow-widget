@@ -6,7 +6,7 @@ info:
   name: Recon Attack Surface
   description: >
     Enumerate domains, map ports/services, and map live web surface + vulns.
-    Ports/services chain and web/vuln chain share subfinder_enum, then fan out.
+    Ports/services chain and web/vuln chain share sfp_cli_subfinder, then fan out.
   author: Modeller
   created: "2026-07-07T21:58:32+10:00"
 
@@ -18,10 +18,10 @@ inputs:
       - https://example.com
 
 # DAG (not a linear-only list):
-#   subfinder_enum ─┬─► nmap_ports ─► nerva_services
-#                   └─► httpx_live ─► katana_crawl ─► nuclei_vulns
+#   sfp_cli_subfinder ─┬─► sfp_cli_nmap ─► sfp_cli_nerva
+#                   └─► sfp_cli_httpx ─► sfp_cli_katana ─► sfp_cli_nuclei
 steps:
-  - id: subfinder_enum
+  - id: sfp_cli_subfinder
     uses: tool.subfinder
     needs: []
     input:
@@ -87,12 +87,12 @@ steps:
     context:
       export: scan_graph
 
-  - id: nmap_ports
+  - id: sfp_cli_nmap
     uses: tool.nmap
-    needs: [subfinder_enum]
+    needs: [sfp_cli_subfinder]
     input:
       type: string_list
-      from: $steps.subfinder_enum.vars.all_domains
+      from: $steps.sfp_cli_subfinder.vars.all_domains
       empty: error
     config:
       argv:
@@ -149,12 +149,12 @@ steps:
     context:
       export: scan_graph
 
-  - id: nerva_services
+  - id: sfp_cli_nerva
     uses: tool.nerva
-    needs: [nmap_ports]
+    needs: [sfp_cli_nmap]
     input:
       type: string_list
-      from: $steps.nmap_ports.vars.ip_port_list
+      from: $steps.sfp_cli_nmap.vars.ip_port_list
       empty: skip_step
     config:
       argv:
@@ -174,12 +174,12 @@ steps:
     context:
       export: scan_graph
 
-  - id: httpx_live
+  - id: sfp_cli_httpx
     uses: tool.httpx
-    needs: [subfinder_enum]
+    needs: [sfp_cli_subfinder]
     input:
       type: string_list
-      from: $steps.subfinder_enum.vars.all_domains
+      from: $steps.sfp_cli_subfinder.vars.all_domains
       empty: error
     config:
       argv:
@@ -247,12 +247,12 @@ steps:
     context:
       export: none
 
-  - id: katana_crawl
+  - id: sfp_cli_katana
     uses: tool.katana
-    needs: [httpx_live]
+    needs: [sfp_cli_httpx]
     input:
       type: string_list
-      from: $steps.httpx_live.vars.live_hosts
+      from: $steps.sfp_cli_httpx.vars.live_hosts
       empty: skip_step
     config:
       argv:
@@ -302,12 +302,12 @@ steps:
     context:
       export: none
 
-  - id: nuclei_vulns
+  - id: sfp_cli_nuclei
     uses: tool.nuclei
-    needs: [katana_crawl]
+    needs: [sfp_cli_katana]
     input:
       type: string_list
-      from: $steps.katana_crawl.vars.crawl_urls
+      from: $steps.sfp_cli_katana.vars.crawl_urls
       empty: skip_step
     config:
       argv:

@@ -11,7 +11,7 @@ workflow recon {
         type string_list
         default "https://example.com"
     }
-    step subfinder_enum {
+    step sfp_cli_subfinder {
         uses "tool.subfinder"
         input {
             type string_list

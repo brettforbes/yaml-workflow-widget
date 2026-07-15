@@ -557,10 +557,10 @@ class TestUnionLiteralFromVar:
         assert eval_binding(binding, {}) == ["z", "a", "a"]
 
     def test_from_var_alias(self):
-        env = {"$steps.subfinder_enum.vars.all_domains": ["b.com", "a.com"]}
+        env = {"$steps.sfp_cli_subfinder.vars.all_domains": ["b.com", "a.com"]}
         binding = {
             "type": "string_list",
-            "from_var": "$steps.subfinder_enum.vars.all_domains",
+            "from_var": "$steps.sfp_cli_subfinder.vars.all_domains",
         }
         assert eval_binding(binding, env) == ["a.com", "b.com"]
 

@@ -22,7 +22,7 @@ from cli_workflow.core.variables import (
 
 def make_env() -> WorkflowEnv:
     subfinder = StepRuntime(
-        step_id="subfinder_enum",
+        step_id="sfp_cli_subfinder",
         input_values=["example.com"],
         files={"output": "/tmp/subfinder_out.jsonl"},
         vars={
@@ -35,7 +35,7 @@ def make_env() -> WorkflowEnv:
     env = WorkflowEnv(
         inputs={"targets": ["https://example.com"]},
         context={"nodes": [], "edges": []},
-        steps={"subfinder_enum": subfinder},
+        steps={"sfp_cli_subfinder": subfinder},
     )
     return env
 
@@ -66,46 +66,46 @@ class TestCurrentStepRefs:
 
     def test_step_scan_graph_resolves_when_current(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         result = resolve_ref("$step.scan_graph", env)
         assert result["nodes"][0]["nugget_data"] == "example.com"
 
     def test_step_vars_resolves(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         assert resolve_ref("$step.vars.apex_domains", env) == ["example.com"]
 
     def test_step_vars_unknown_name_raises(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         with pytest.raises(VariableError):
             resolve_ref("$step.vars.does_not_exist", env)
 
     def test_step_files_output_resolves(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         assert resolve_ref("$step.files.output", env) == "/tmp/subfinder_out.jsonl"
 
     def test_step_files_input_missing_raises(self):
-        """subfinder_enum's fixture only bound `files.output` (mode: none for input)."""
+        """sfp_cli_subfinder's fixture only bound `files.output` (mode: none for input)."""
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         with pytest.raises(VariableError):
             resolve_ref("$step.files.input", env)
 
     def test_step_input_values_full_list(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         assert resolve_ref("$step.input.values", env) == ["example.com"]
 
     def test_step_input_values_indexed(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         assert resolve_ref("$step.input.values[0]", env) == "example.com"
 
     def test_step_input_values_index_out_of_range_raises(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         with pytest.raises(VariableError):
             resolve_ref("$step.input.values[5]", env)
 
@@ -120,7 +120,7 @@ class TestCurrentStepRefs:
 class TestStepsRefs:
     def test_steps_vars_resolves_completed_step(self):
         env = make_env()
-        assert resolve_ref("$steps.subfinder_enum.vars.all_domains", env) == [
+        assert resolve_ref("$steps.sfp_cli_subfinder.vars.all_domains", env) == [
             "example.com",
             "www.example.com",
         ]
@@ -128,16 +128,16 @@ class TestStepsRefs:
     def test_steps_vars_unknown_step_id_raises(self):
         env = make_env()
         with pytest.raises(VariableError):
-            resolve_ref("$steps.nmap_ports.vars.ip_port_list", env)
+            resolve_ref("$steps.sfp_cli_nmap.vars.ip_port_list", env)
 
     def test_steps_vars_unknown_var_name_raises(self):
         env = make_env()
         with pytest.raises(VariableError):
-            resolve_ref("$steps.subfinder_enum.vars.does_not_exist", env)
+            resolve_ref("$steps.sfp_cli_subfinder.vars.does_not_exist", env)
 
     def test_steps_scan_graph_resolves(self):
         env = make_env()
-        graph = resolve_ref("$steps.subfinder_enum.scan_graph", env)
+        graph = resolve_ref("$steps.sfp_cli_subfinder.scan_graph", env)
         assert graph["nodes"][0]["id"] == "d1"
 
     def test_steps_scan_graph_unknown_step_raises(self):
@@ -171,7 +171,7 @@ class TestResolveStringList:
 
     def test_rejects_graph_ref_scan_graph(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         with pytest.raises(VariableError):
             resolve_string_list("$step.scan_graph", env)
 
@@ -180,13 +180,13 @@ class TestBuildGseEnv:
     def test_includes_completed_step_scan_graph_and_vars(self):
         env = make_env()
         flat = build_gse_env(env)
-        assert flat["$steps.subfinder_enum.scan_graph"]["nodes"][0]["id"] == "d1"
-        assert flat["$steps.subfinder_enum.vars.apex_domains"] == ["example.com"]
+        assert flat["$steps.sfp_cli_subfinder.scan_graph"]["nodes"][0]["id"] == "d1"
+        assert flat["$steps.sfp_cli_subfinder.vars.apex_domains"] == ["example.com"]
         assert flat["$workflow.context"] == {"nodes": [], "edges": []}
 
     def test_includes_current_step_shorthand_keys(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         flat = build_gse_env(env)
         assert flat["$step.scan_graph"]["nodes"][0]["id"] == "d1"
         assert flat["$step.vars.subdomains"] == ["www.example.com"]
@@ -201,28 +201,28 @@ class TestBuildGseEnv:
 class TestExpandArgv:
     def test_literal_strings_pass_through(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         assert expand_argv(["-silent", "-oJ"], env) == ["-silent", "-oJ"]
 
     def test_expands_whole_token_file_ref(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         assert expand_argv(["$step.files.output"], env) == ["/tmp/subfinder_out.jsonl"]
 
     def test_expands_indexed_value_ref(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         assert expand_argv(["-d", "$step.input.values[0]"], env) == ["-d", "example.com"]
 
     def test_expands_embedded_ref_within_larger_string(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         result = expand_argv(["prefix-$step.files.output-suffix"], env)
         assert result == ["prefix-/tmp/subfinder_out.jsonl-suffix"]
 
     def test_multiple_argv_items_all_expanded(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         argv = ["-d", "$step.input.values[0]", "-o", "$step.files.output", "-silent"]
         assert expand_argv(argv, env) == [
             "-d",
@@ -235,12 +235,12 @@ class TestExpandArgv:
     def test_non_scalar_ref_in_argv_raises(self):
         """$step.input.values (no index) resolves to a list -> cannot embed in argv."""
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         with pytest.raises(VariableError):
             expand_argv(["$step.input.values"], env)
 
     def test_unknown_ref_in_argv_raises(self):
         env = make_env()
-        env.current_step_id = "subfinder_enum"
+        env.current_step_id = "sfp_cli_subfinder"
         with pytest.raises(VariableError):
             expand_argv(["$step.vars.does_not_exist"], env)
