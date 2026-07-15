@@ -3,7 +3,7 @@
  * Spec: .seed/CLI_WORKFLOW_VIEW_DESIGN.md §2
  */
 
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 
 const CATEGORIES = ["input", "config", "output", "context"];
 
