@@ -24,7 +24,7 @@
 
 <script>
 import { ref, watch } from "vue";
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 import { PrismEditor } from "vue-prism-editor";
 import "vue-prism-editor/dist/prismeditor.min.css";
 import { highlight, languages } from "prismjs/components/prism-core";

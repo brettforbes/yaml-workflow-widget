@@ -82,7 +82,7 @@
 
 <script>
 import { computed, onMounted, ref } from "vue";
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 import { NiceDagNodes, NiceDagEdges, useNiceDag } from "@ebay/nice-dag-vue3";
 import { PrismEditor } from "vue-prism-editor";
 import "vue-prism-editor/dist/prismeditor.min.css";
