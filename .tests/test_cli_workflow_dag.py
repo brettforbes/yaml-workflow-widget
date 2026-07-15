@@ -34,49 +34,49 @@ class Test12AFanOut:
 
     def test_all_step_ids_present(self, dag: Dag):
         assert set(dag.step_ids) == {
-            "subfinder_enum",
-            "nmap_ports",
-            "nerva_services",
-            "httpx_live",
-            "katana_crawl",
-            "nuclei_vulns",
+            "sfp_cli_subfinder",
+            "sfp_cli_nmap",
+            "sfp_cli_nerva",
+            "sfp_cli_httpx",
+            "sfp_cli_katana",
+            "sfp_cli_nuclei",
         }
 
     def test_single_root(self, dag: Dag):
-        """Only subfinder_enum has no `needs` (12A DAG)."""
-        assert dag.roots == ("subfinder_enum",)
+        """Only sfp_cli_subfinder has no `needs` (12A DAG)."""
+        assert dag.roots == ("sfp_cli_subfinder",)
 
     def test_first_layer_is_the_root(self, dag: Dag):
-        assert dag.layers[0] == ("subfinder_enum",)
+        assert dag.layers[0] == ("sfp_cli_subfinder",)
 
-    def test_fan_out_after_subfinder_enum(self, dag: Dag):
-        """nmap_ports and httpx_live both only need subfinder_enum -> same
+    def test_fan_out_after_sfp_cli_subfinder(self, dag: Dag):
+        """sfp_cli_nmap and sfp_cli_httpx both only need sfp_cli_subfinder -> same
         (parallel-ready) layer, one after the root."""
-        assert dag.layer_of("nmap_ports") == dag.layer_of("httpx_live") == 1
-        assert set(dag.layers[1]) == {"nmap_ports", "httpx_live"}
+        assert dag.layer_of("sfp_cli_nmap") == dag.layer_of("sfp_cli_httpx") == 1
+        assert set(dag.layers[1]) == {"sfp_cli_nmap", "sfp_cli_httpx"}
 
     def test_second_fan_out_layer(self, dag: Dag):
-        """nerva_services needs nmap_ports; katana_crawl needs httpx_live ->
+        """sfp_cli_nerva needs sfp_cli_nmap; sfp_cli_katana needs sfp_cli_httpx ->
         both ready together in the next layer."""
-        assert dag.layer_of("nerva_services") == dag.layer_of("katana_crawl") == 2
-        assert set(dag.layers[2]) == {"nerva_services", "katana_crawl"}
+        assert dag.layer_of("sfp_cli_nerva") == dag.layer_of("sfp_cli_katana") == 2
+        assert set(dag.layers[2]) == {"sfp_cli_nerva", "sfp_cli_katana"}
 
-    def test_nuclei_vulns_is_last(self, dag: Dag):
-        assert dag.layer_of("nuclei_vulns") == 3
-        assert dag.layers[3] == ("nuclei_vulns",)
+    def test_sfp_cli_nuclei_is_last(self, dag: Dag):
+        assert dag.layer_of("sfp_cli_nuclei") == 3
+        assert dag.layers[3] == ("sfp_cli_nuclei",)
 
     def test_ready_order_respects_dependencies(self, dag: Dag):
         order = dag.ready_order()
         assert len(order) == 6
-        assert order.index("subfinder_enum") < order.index("nmap_ports")
-        assert order.index("subfinder_enum") < order.index("httpx_live")
-        assert order.index("nmap_ports") < order.index("nerva_services")
-        assert order.index("httpx_live") < order.index("katana_crawl")
-        assert order.index("katana_crawl") < order.index("nuclei_vulns")
+        assert order.index("sfp_cli_subfinder") < order.index("sfp_cli_nmap")
+        assert order.index("sfp_cli_subfinder") < order.index("sfp_cli_httpx")
+        assert order.index("sfp_cli_nmap") < order.index("sfp_cli_nerva")
+        assert order.index("sfp_cli_httpx") < order.index("sfp_cli_katana")
+        assert order.index("sfp_cli_katana") < order.index("sfp_cli_nuclei")
 
     def test_needs_map_matches_source(self, dag: Dag):
-        assert dag.needs["nmap_ports"] == ("subfinder_enum",)
-        assert dag.needs["subfinder_enum"] == ()
+        assert dag.needs["sfp_cli_nmap"] == ("sfp_cli_subfinder",)
+        assert dag.needs["sfp_cli_subfinder"] == ()
 
 
 class TestCycleRejection:

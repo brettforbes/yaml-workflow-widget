@@ -31,7 +31,7 @@ def _minimal_doc(**overrides) -> dict:
         "inputs": {"targets": {"type": "string_list", "default": ["example.com"]}},
         "steps": [
             {
-                "id": "subfinder_enum",
+                "id": "sfp_cli_subfinder",
                 "uses": "tool.subfinder",
                 "needs": [],
                 "input": {
@@ -71,32 +71,32 @@ class Test12ALoads:
 
     def test_all_step_ids_and_order(self, doc: WorkflowDocument):
         assert [step.id for step in doc.steps] == [
-            "subfinder_enum",
-            "nmap_ports",
-            "nerva_services",
-            "httpx_live",
-            "katana_crawl",
-            "nuclei_vulns",
+            "sfp_cli_subfinder",
+            "sfp_cli_nmap",
+            "sfp_cli_nerva",
+            "sfp_cli_httpx",
+            "sfp_cli_katana",
+            "sfp_cli_nuclei",
         ]
 
     def test_step_by_id_lookup(self, doc: WorkflowDocument):
-        step = doc.step_by_id("nmap_ports")
+        step = doc.step_by_id("sfp_cli_nmap")
         assert isinstance(step, Step)
-        assert step.needs == ["subfinder_enum"]
+        assert step.needs == ["sfp_cli_subfinder"]
 
     def test_step_by_id_unknown_raises(self, doc: WorkflowDocument):
         with pytest.raises(KeyError):
             doc.step_by_id("does_not_exist")
 
     def test_step_uses_and_input_ref(self, doc: WorkflowDocument):
-        step = doc.step_by_id("subfinder_enum")
+        step = doc.step_by_id("sfp_cli_subfinder")
         assert step.uses == "tool.subfinder"
         assert step.input.from_ref == "$workflow.inputs.targets"
         assert step.input.normalize == "hostname_from_url"
         assert step.input.empty == "error"
 
     def test_step_config_argv_and_files(self, doc: WorkflowDocument):
-        step = doc.step_by_id("nmap_ports")
+        step = doc.step_by_id("sfp_cli_nmap")
         assert "$step.files.input" in step.config.argv
         assert step.config.files["input"].mode == "auto"
         assert step.config.files["input"].format == "line_text"
@@ -104,22 +104,22 @@ class Test12ALoads:
         assert step.config.capture == {"family": "structured_native", "adapter": "nmap"}
 
     def test_output_vars_present_for_subfinder(self, doc: WorkflowDocument):
-        step = doc.step_by_id("subfinder_enum")
+        step = doc.step_by_id("sfp_cli_subfinder")
         assert set(step.output_vars) == {"apex_domains", "subdomains", "all_domains"}
 
     def test_step_without_output_vars_defaults_empty(self, doc: WorkflowDocument):
-        step = doc.step_by_id("nerva_services")
+        step = doc.step_by_id("sfp_cli_nerva")
         assert step.output_vars == {}
 
     def test_context_export_flags_match_12b(self, doc: WorkflowDocument):
         exports = {step.id: step.context.export for step in doc.steps}
         assert exports == {
-            "subfinder_enum": "scan_graph",
-            "nmap_ports": "scan_graph",
-            "nerva_services": "scan_graph",
-            "httpx_live": "none",
-            "katana_crawl": "none",
-            "nuclei_vulns": "scan_graph",
+            "sfp_cli_subfinder": "scan_graph",
+            "sfp_cli_nmap": "scan_graph",
+            "sfp_cli_nerva": "scan_graph",
+            "sfp_cli_httpx": "none",
+            "sfp_cli_katana": "none",
+            "sfp_cli_nuclei": "scan_graph",
         }
 
 

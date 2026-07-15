@@ -161,7 +161,7 @@ def test_workflow_schema_resolves_gse_ref(workflow_validator: Draft202012Validat
         "inputs": {"targets": {"type": "string_list", "default": ["example.com"]}},
         "steps": [
             {
-                "id": "subfinder_enum",
+                "id": "sfp_cli_subfinder",
                 "uses": "tool.subfinder",
                 "input": {
                     "type": "string_list",
