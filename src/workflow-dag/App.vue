@@ -47,8 +47,8 @@
               v-model="yamlText"
               :highlight="highlightYaml"
               line-numbers
-              readonly
             />
+            <!-- E1-S2: editable in-memory YAML. Diagram refresh from code is E5 (Langium sync). -->
           </div>
         </div>
         <div
