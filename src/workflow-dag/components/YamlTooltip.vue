@@ -2,9 +2,19 @@
   <div class="wf-yaml-tooltip" @click.stop>
     <div class="wf-yaml-tooltip-title">
       <span>{{ title }}</span>
-      <button type="button" class="wf-yaml-tooltip-edit" @click="$emit('edit')">
-        Edit
-      </button>
+      <span class="wf-yaml-tooltip-actions">
+        <button
+          v-if="showForm"
+          type="button"
+          class="wf-yaml-tooltip-edit"
+          @click="$emit('form')"
+        >
+          Form
+        </button>
+        <button type="button" class="wf-yaml-tooltip-edit" @click="$emit('edit')">
+          Edit
+        </button>
+      </span>
     </div>
     <pre class="wf-yaml-tooltip-body" v-html="highlighted" />
   </div>
@@ -21,8 +31,9 @@ export default {
   props: {
     yaml: { type: String, default: "" },
     title: { type: String, default: "" },
+    showForm: { type: Boolean, default: false },
   },
-  emits: ["edit"],
+  emits: ["edit", "form"],
   setup(props) {
     const highlighted = computed(() => {
       const code = props.yaml || "";
@@ -70,6 +81,10 @@ export default {
   background: #3a3a3a;
   font-size: 12px;
   color: #eee;
+}
+.wf-yaml-tooltip-actions {
+  display: flex;
+  gap: 6px;
 }
 .wf-yaml-tooltip-edit {
   border: 1px solid #888;

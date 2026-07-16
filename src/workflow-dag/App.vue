@@ -132,6 +132,7 @@
             v-else-if="slotProps.node.data?.category"
             :node="slotProps.node"
             @edit="openEdit"
+            @form="openConfigForm"
           />
           <CliAppNode v-else :node="slotProps.node" @edit="openEdit" />
         </NiceDagNodes>
@@ -154,6 +155,12 @@
       :yaml="modalYaml"
       :node="modalNode"
       @close="modalOpen = false"
+    />
+    <ConfigFormModal
+      :open="configFormOpen"
+      :node="configFormNode"
+      :uses="configFormUses"
+      @close="configFormOpen = false"
     />
   </div>
 </template>
@@ -183,6 +190,7 @@ import ContextCollectorNode from "./components/ContextCollectorNode.vue";
 import WorkflowEdge from "./components/WorkflowEdge.vue";
 import EdgeLegend from "./components/EdgeLegend.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
+import ConfigFormModal from "./components/ConfigFormModal.vue";
 import "./components/CliWorkflowView.css";
 import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
@@ -257,6 +265,7 @@ export default {
     WorkflowEdge,
     EdgeLegend,
     YamlEditModal,
+    ConfigFormModal,
   },
   setup() {
     const isEmbed = computed(() => {
@@ -279,6 +288,9 @@ export default {
     const modalTitle = ref("");
     const modalYaml = ref("");
     const modalNode = ref(null);
+    const configFormOpen = ref(false);
+    const configFormNode = ref(null);
+    const configFormUses = ref("");
 
     const getEdgeAttributes = (edge) => {
       const type =
@@ -471,6 +483,12 @@ export default {
       modalOpen.value = true;
     };
 
+    const openConfigForm = ({ node, uses }) => {
+      configFormNode.value = node;
+      configFormUses.value = uses || node?.data?.uses || "";
+      configFormOpen.value = true;
+    };
+
     return {
       isEmbed,
       codeCollapsed,
@@ -493,6 +511,10 @@ export default {
       modalYaml,
       modalNode,
       openEdit,
+      configFormOpen,
+      configFormNode,
+      configFormUses,
+      openConfigForm,
     };
   },
 };

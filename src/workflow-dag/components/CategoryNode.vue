@@ -23,7 +23,9 @@
       v-if="showTooltip"
       :yaml="node.data?.yaml || ''"
       :title="node.data?.category || 'category'"
+      :show-form="isConfig"
       @edit="onEdit"
+      @form="onForm"
       @mouseenter="keepOpen = true"
       @mouseleave="hideSoon"
     />
@@ -40,15 +42,15 @@ export default {
   props: {
     node: { type: Object, required: true },
   },
-  emits: ["edit"],
+  emits: ["edit", "form"],
   setup(props, { emit }) {
     const showTooltip = ref(false);
     const keepOpen = ref(false);
     let hideTimer = null;
 
     const isContext = computed(() => props.node.data?.category === "context");
+    const isConfig = computed(() => props.node.data?.category === "config");
     const contextSide = computed(() => {
-      // Prefer parent step side when available via data; default right.
       return props.node.data?.contextSide || "right";
     });
 
@@ -75,16 +77,26 @@ export default {
         title: props.node.data?.category || "category",
       });
     };
+    const onForm = () => {
+      showTooltip.value = false;
+      emit("form", {
+        node: props.node,
+        uses: props.node.data?.uses || "",
+        category: props.node.data?.category,
+      });
+    };
 
     return {
       showTooltip,
       keepOpen,
       isContext,
+      isConfig,
       contextSide,
       onEnter,
       onLeave,
       hideSoon,
       onEdit,
+      onForm,
     };
   },
 };
