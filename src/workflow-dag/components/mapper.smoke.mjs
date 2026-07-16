@@ -1,5 +1,5 @@
 /**
- * Lightweight mapper checks for E2-S2 (no-inputs fixture omits target).
+ * Lightweight mapper checks for E2-S2 / E2-S3 / E2-S5.
  * Run: node src/workflow-dag/components/mapper.smoke.mjs
  */
 import fs from "node:fs";
@@ -12,6 +12,7 @@ import {
   WORKFLOW_TARGET_ID,
   workflowDocToNiceDagModel,
 } from "./mapper.js";
+import { EDGE_TYPE, edgeKey } from "./edgeMeta.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturePath = path.join(
@@ -24,7 +25,7 @@ const samplePath = path.join(
 );
 
 const noInputs = yaml.load(fs.readFileSync(fixturePath, "utf8"));
-const noInputsModel = workflowDocToNiceDagModel(noInputs);
+const { nodes: noInputsModel } = workflowDocToNiceDagModel(noInputs);
 const hasTarget = noInputsModel.some(
   (n) => n.id === WORKFLOW_TARGET_ID || n.data?.kind === NODE_KIND.TARGET
 );
@@ -34,7 +35,7 @@ if (hasTarget) {
 }
 
 const sample = yaml.load(fs.readFileSync(samplePath, "utf8"));
-const sampleModel = workflowDocToNiceDagModel(sample);
+const { nodes: sampleModel, edgeMeta } = workflowDocToNiceDagModel(sample);
 const sampleHasTarget = sampleModel.some(
   (n) => n.id === WORKFLOW_TARGET_ID || n.data?.kind === NODE_KIND.TARGET
 );
@@ -51,4 +52,33 @@ if (!sampleHasEnd) {
   process.exit(1);
 }
 
-console.log("OK: target omit/present + end context node");
+const usedBy = edgeKey("sfp_cli_subfinder", "sfp_cli_nmap");
+if (edgeMeta.get(usedBy) !== EDGE_TYPE.USED_BY) {
+  console.error("FAIL: subfinder→nmap must be used-by", edgeMeta.get(usedBy));
+  process.exit(1);
+}
+
+const nmap = sampleModel.find((n) => n.id === "sfp_cli_nmap");
+if (!nmap || nmap.dependencies.length !== 1) {
+  console.error("FAIL: nmap must have exactly one inbound");
+  process.exit(1);
+}
+
+if (
+  edgeMeta.get(edgeKey("__workflow_start__", WORKFLOW_TARGET_ID)) !==
+  EDGE_TYPE.FOLLOWS
+) {
+  console.error("FAIL: start→target must be follows");
+  process.exit(1);
+}
+
+const targetSubfinder = edgeKey(WORKFLOW_TARGET_ID, "sfp_cli_subfinder");
+if (edgeMeta.get(targetSubfinder) !== EDGE_TYPE.USED_BY) {
+  console.error(
+    "FAIL: target→subfinder must be used-by",
+    edgeMeta.get(targetSubfinder)
+  );
+  process.exit(1);
+}
+
+console.log("OK: target/end + used-by priority + single inbound");

@@ -167,7 +167,6 @@ import sampleYaml from "./assets/12A_Workflow_YAML_Example.yaml";
 import { workflowDocToNiceDagModel, NODE_KIND } from "./components/mapper";
 import {
   EDGE_TYPE,
-  buildEdgeMetaFromNodes,
   edgeKey,
   resolveEdgeColor,
 } from "./components/edgeMeta";
@@ -262,8 +261,9 @@ export default {
     const edgeColored = ref(true);
     const yamlText = ref(sampleYaml);
     const workflowDoc = yaml.load(sampleYaml);
-    const initNodes = workflowDocToNiceDagModel(workflowDoc || {});
-    const edgeMeta = ref(buildEdgeMetaFromNodes(initNodes));
+    const mapped = workflowDocToNiceDagModel(workflowDoc || {});
+    const initNodes = mapped.nodes;
+    const edgeMeta = ref(mapped.edgeMeta);
 
     const modalOpen = ref(false);
     const modalTitle = ref("");
