@@ -49,7 +49,19 @@
 
 <script>
 import { computed, ref } from "vue";
+import * as yaml from "js-yaml";
 import YamlTooltip from "./YamlTooltip.vue";
+
+function bodyYamlWithoutIO(node) {
+  const raw = node?.data?.raw;
+  if (raw && typeof raw === "object") {
+    const omit = { ...raw };
+    delete omit.input;
+    delete omit.output;
+    return yaml.dump(omit, { lineWidth: 120, noRefs: true }).trimEnd();
+  }
+  return node?.data?.yaml || "";
+}
 
 export default {
   name: "CliAppNode",
@@ -61,7 +73,7 @@ export default {
   setup(props, { emit }) {
     const showTooltip = ref(false);
     const keepOpen = ref(false);
-    const portMode = ref(null); // 'input' | 'output' | null (chrome)
+    const portMode = ref(null); // 'input' | 'output' | null (body/chrome)
     let hideTimer = null;
 
     const isExpanded = computed(
@@ -75,6 +87,8 @@ export default {
       return child?.data?.yaml || "";
     };
 
+    const bodyYaml = computed(() => bodyYamlWithoutIO(props.node));
+
     const tooltipYaml = computed(() => {
       if (!isExpanded.value && portMode.value === "input") {
         return categoryYaml("input");
@@ -82,12 +96,16 @@ export default {
       if (!isExpanded.value && portMode.value === "output") {
         return categoryYaml("output");
       }
+      if (!isExpanded.value) {
+        return bodyYaml.value;
+      }
       return props.node.data?.yaml || "";
     });
 
     const tooltipTitle = computed(() => {
       if (!isExpanded.value && portMode.value === "input") return "input";
       if (!isExpanded.value && portMode.value === "output") return "output";
+      if (!isExpanded.value) return `${props.node.id} (body)`;
       return props.node.id;
     });
 
@@ -102,8 +120,13 @@ export default {
     };
 
     const onChromeEnter = () => {
-      if (!isExpanded.value) return;
       clearHide();
+      if (!isExpanded.value) {
+        portMode.value = null;
+        showTooltip.value = true;
+        return;
+      }
+      // Expanded: parent body has no tooltip (E2); keep prior chrome behavior until E2-S8.
       portMode.value = null;
       showTooltip.value = true;
     };
@@ -124,10 +147,12 @@ export default {
 
     const onEdit = () => {
       showTooltip.value = false;
+      const isBody =
+        !isExpanded.value && portMode.value !== "input" && portMode.value !== "output";
       emit("edit", {
         node: props.node,
-        yaml: props.node.data?.yaml || "",
-        title: props.node.id,
+        yaml: isBody ? bodyYaml.value : tooltipYaml.value,
+        title: tooltipTitle.value,
       });
     };
 
