@@ -81,4 +81,16 @@ if (edgeMeta.get(targetSubfinder) !== EDGE_TYPE.USED_BY) {
   process.exit(1);
 }
 
-console.log("OK: target/end + used-by priority + single inbound");
+const semantic = edgeKey("sfp_cli_subfinder", "__ctxcol_sfp_cli_subfinder__");
+if (edgeMeta.get(semantic) !== EDGE_TYPE.SEMANTIC) {
+  console.error("FAIL: step→collector must be semantic-subgraph");
+  process.exit(1);
+}
+
+const httpx = sampleModel.find((n) => n.id === "sfp_cli_httpx");
+if (!httpx || httpx.data?.lane !== 1 || httpx.data?.contextSide !== "left") {
+  console.error("FAIL: httpx (right of split) should be lane 1 / context left", httpx?.data);
+  process.exit(1);
+}
+
+console.log("OK: target/end + used-by + context rail semantic");
