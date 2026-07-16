@@ -1,12 +1,24 @@
 <template>
   <div
     class="wf-category-node"
+    :class="{ 'wf-category-context': isContext }"
     @mouseenter="onEnter"
     @mouseleave="onLeave"
   >
+    <!-- Category ports are silent (no tooltips) per E2-S8. -->
     <div class="wf-connector wf-connector-in" />
     <span class="wf-category-label">{{ node.data?.label || node.data?.category }}</span>
     <div class="wf-connector wf-connector-out" />
+    <div
+      v-if="isContext"
+      class="wf-connector wf-connector-context"
+      :class="
+        contextSide === 'left'
+          ? 'wf-connector-context-left'
+          : 'wf-connector-context-right'
+      "
+      title="context export"
+    />
     <YamlTooltip
       v-if="showTooltip"
       :yaml="node.data?.yaml || ''"
@@ -19,7 +31,7 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import YamlTooltip from "./YamlTooltip.vue";
 
 export default {
@@ -33,6 +45,12 @@ export default {
     const showTooltip = ref(false);
     const keepOpen = ref(false);
     let hideTimer = null;
+
+    const isContext = computed(() => props.node.data?.category === "context");
+    const contextSide = computed(() => {
+      // Prefer parent step side when available via data; default right.
+      return props.node.data?.contextSide || "right";
+    });
 
     const onEnter = () => {
       clearTimeout(hideTimer);
@@ -58,7 +76,16 @@ export default {
       });
     };
 
-    return { showTooltip, keepOpen, onEnter, onLeave, hideSoon, onEdit };
+    return {
+      showTooltip,
+      keepOpen,
+      isContext,
+      contextSide,
+      onEnter,
+      onLeave,
+      hideSoon,
+      onEdit,
+    };
   },
 };
 </script>
@@ -76,31 +103,12 @@ export default {
   justify-content: center;
   box-sizing: border-box;
 }
+.wf-category-context {
+  border-color: #009e73;
+}
 .wf-category-label {
   font-size: 13px;
   color: #333;
   text-transform: lowercase;
-}
-</style>
-
-<style>
-.wf-connector {
-  width: 16px;
-  height: 16px;
-  border: 1px solid black;
-  border-radius: 50%;
-  background: white;
-  position: absolute;
-  z-index: 2;
-}
-.wf-connector-in {
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-.wf-connector-out {
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
 }
 </style>

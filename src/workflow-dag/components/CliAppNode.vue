@@ -134,13 +134,9 @@ export default {
     };
 
     const onChromeEnter = () => {
+      // Expanded parent: no body tooltip (details live on category children).
+      if (isExpanded.value) return;
       clearHide();
-      if (!isExpanded.value) {
-        portMode.value = null;
-        showTooltip.value = true;
-        return;
-      }
-      // Expanded: parent body has no tooltip (E2); keep prior chrome behavior until E2-S8.
       portMode.value = null;
       showTooltip.value = true;
     };
@@ -205,6 +201,9 @@ export default {
   width: 100%;
   height: 100%;
   min-height: 48px;
+  border: 2px solid #666;
+  background: rgba(250, 250, 250, 0.92);
+  box-shadow: inset 0 0 0 1px #ddd;
 }
 .wf-cli-app-header {
   display: flex;

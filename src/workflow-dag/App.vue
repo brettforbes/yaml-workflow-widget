@@ -293,8 +293,8 @@ export default {
       {
         initNodes,
         getNodeSize,
-        graphLabel: { rankdir: "TB", ranksep: 48, edgesep: 24 },
-        subViewPadding: { top: 48, bottom: 24, left: 24, right: 24 },
+        graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
+        subViewPadding: { top: 56, bottom: 36, left: 36, right: 48 },
         getEdgeAttributes,
       },
       false

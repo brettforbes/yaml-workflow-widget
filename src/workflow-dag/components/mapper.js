@@ -12,7 +12,7 @@ import {
   topoStepIds,
 } from "./contextRail.js";
 
-const CATEGORIES = ["input", "config", "output", "context"];
+const CATEGORIES = ["input", "config", "context", "output"];
 
 export const NODE_KIND = {
   START: "workflow-start",
@@ -165,8 +165,12 @@ export function workflowDocToNiceDagModel(doc) {
   const lanes = assignLanes(stepNodes);
   for (const node of stepNodes) {
     const lane = lanes.get(node.id) || 0;
+    const side = contextSideForLane(lane);
     node.data.lane = lane;
-    node.data.contextSide = contextSideForLane(lane);
+    node.data.contextSide = side;
+    for (const child of node.children || []) {
+      child.data.contextSide = side;
+    }
   }
 
   nodes.push(...stepNodes);
@@ -277,6 +281,7 @@ export function workflowStepsToNiceDagModel(
           raw,
           yaml: yamlText,
           label: category,
+          contextSide: null, // filled from parent after lanes assigned
         },
       };
     });
