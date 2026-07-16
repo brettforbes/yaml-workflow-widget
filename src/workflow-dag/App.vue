@@ -99,6 +99,11 @@
             :node="slotProps.node"
             @edit="openEdit"
           />
+          <EndContextNode
+            v-else-if="slotProps.node.data?.kind === 'workflow-end'"
+            :node="slotProps.node"
+            @edit="openEdit"
+          />
           <CategoryNode
             v-else-if="slotProps.node.data?.category"
             :node="slotProps.node"
@@ -134,6 +139,7 @@ import CategoryNode from "./components/CategoryNode.vue";
 import CliAppNode from "./components/CliAppNode.vue";
 import StartNode from "./components/StartNode.vue";
 import TargetNode from "./components/TargetNode.vue";
+import EndContextNode from "./components/EndContextNode.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
 import "./components/CliWorkflowView.css";
 import "./theme.css";
@@ -146,6 +152,7 @@ const COLLAPSED_H = 64;
 const START_SIZE = 72;
 const TARGET_W = 140;
 const TARGET_H = 48;
+const END_SIZE = 88;
 const CODE_PANE_WIDTH_KEY = "workflow-dag:codePaneWidth";
 const CODE_PANE_MIN = 200;
 const CODE_PANE_MAX_RATIO = 0.75;
@@ -180,6 +187,9 @@ function getNodeSize(node) {
   if (node.data?.kind === NODE_KIND.TARGET) {
     return { width: TARGET_W, height: TARGET_H };
   }
+  if (node.data?.kind === NODE_KIND.END) {
+    return { width: END_SIZE, height: END_SIZE };
+  }
   if (node.data?.category) {
     return { width: CATEGORY_W, height: CATEGORY_H };
   }
@@ -194,6 +204,7 @@ export default {
     NiceDagEdges,
     StartNode,
     TargetNode,
+    EndContextNode,
     CategoryNode,
     CliAppNode,
     YamlEditModal,

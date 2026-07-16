@@ -99,6 +99,37 @@ export function workflowDocToNiceDagModel(doc) {
   }
 
   nodes.push(...stepNodes);
+
+  // Final context circle depends on leaf steps (no other step depends on them).
+  const dependedOn = new Set();
+  for (const node of stepNodes) {
+    for (const dep of node.dependencies || []) {
+      if (dep !== WORKFLOW_START_ID && dep !== WORKFLOW_TARGET_ID) {
+        dependedOn.add(dep);
+      }
+    }
+  }
+  const leafIds = stepNodes
+    .map((n) => n.id)
+    .filter((id) => !dependedOn.has(id));
+  const endDeps =
+    leafIds.length > 0
+      ? leafIds
+      : entryParentId
+        ? [entryParentId]
+        : [WORKFLOW_START_ID];
+
+  nodes.push({
+    id: WORKFLOW_END_ID,
+    dependencies: endDeps,
+    data: {
+      kind: NODE_KIND.END,
+      label: "final context",
+      yaml: "context:\n  # Aggregated semantic-subgraph outcomes (E2-S6+)",
+      raw: null,
+    },
+  });
+
   return nodes;
 }
 

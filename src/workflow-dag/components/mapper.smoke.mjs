@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import {
   NODE_KIND,
+  WORKFLOW_END_ID,
   WORKFLOW_TARGET_ID,
   workflowDocToNiceDagModel,
 } from "./mapper.js";
@@ -42,4 +43,12 @@ if (!sampleHasTarget) {
   process.exit(1);
 }
 
-console.log("OK: target omitted for no-inputs; present for 12A");
+const sampleHasEnd = sampleModel.some(
+  (n) => n.id === WORKFLOW_END_ID || n.data?.kind === NODE_KIND.END
+);
+if (!sampleHasEnd) {
+  console.error("FAIL: 12A sample must include end context node");
+  process.exit(1);
+}
+
+console.log("OK: target omit/present + end context node");
