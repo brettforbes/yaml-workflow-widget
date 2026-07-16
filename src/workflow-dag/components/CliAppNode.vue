@@ -10,8 +10,10 @@
       @mouseenter.stop="onPortEnter('input')"
       @mouseleave.stop="onPortLeave"
     />
-    <div class="wf-cli-app-header">
-      <span class="wf-cli-app-label">{{ node.data?.label || node.id }}</span>
+    <div
+      class="wf-cli-app-header"
+      :class="chromeMirrored ? 'wf-chrome-mirrored' : 'wf-chrome-default'"
+    >
       <button
         v-if="isExpanded"
         type="button"
@@ -30,6 +32,7 @@
       >
         +
       </button>
+      <span class="wf-cli-app-label">{{ node.data?.label || node.id }}</span>
     </div>
     <div
       class="wf-connector wf-connector-out"
@@ -88,6 +91,8 @@ export default {
     const contextSide = computed(
       () => props.node.data?.contextSide || "right"
     );
+    /** Right-of-split lanes mirror: label left, toggle right (DOM order reversed via CSS). */
+    const chromeMirrored = computed(() => contextSide.value === "left");
 
     const categoryYaml = (category) => {
       const child = props.node.children?.find(
@@ -168,6 +173,7 @@ export default {
     return {
       isExpanded,
       contextSide,
+      chromeMirrored,
       showTooltip,
       keepOpen,
       tooltipYaml,
@@ -203,10 +209,16 @@ export default {
 .wf-cli-app-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   padding: 8px 12px;
   height: 100%;
   box-sizing: border-box;
+}
+.wf-chrome-default {
+  flex-direction: row;
+}
+.wf-chrome-mirrored {
+  flex-direction: row-reverse;
 }
 .wf-cli-app-node.expanded .wf-cli-app-header {
   height: auto;
