@@ -185,17 +185,34 @@ module.exports = {
         ],
         use: ['style-loader', 'css-loader'],
       },
+      // YAML as source string for workflow-dag assets
+      {
+        test: /\.ya?ml$/,
+        include: path.resolve(__dirname, 'src/workflow-dag'),
+        type: 'asset/source',
+      },
       // Workflow-dag JS: real ES modules (exclude from raw-loader)
       {
         test: /\.js$/,
-        include: path.resolve(__dirname, 'src/workflow-dag'),
+        include: [
+          path.resolve(__dirname, 'src/workflow-dag'),
+          path.resolve(__dirname, 'apps/nice-dag'),
+        ],
         use: ['babel-loader'],
+      },
+      // Transpile selected node_modules used by the Vue app
+      {
+        test: /\.m?js$/,
+        include: /node_modules[\\/](vue-prism-editor|prismjs|js-yaml)/,
+        use: ['babel-loader'],
+        resolve: { fullySpecified: false },
       },
       // Legacy widget JS: loaded as raw text for MergeIntoSingleFilePlugin
       {
         test: /\.js$/,
         exclude: [
           path.resolve(__dirname, 'src/workflow-dag'),
+          path.resolve(__dirname, 'apps/nice-dag'),
           /node_modules/,
         ],
         use: [
