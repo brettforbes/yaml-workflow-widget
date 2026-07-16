@@ -15,6 +15,15 @@
       >
         ⚙
       </button>
+      <button
+        type="button"
+        class="icon-btn"
+        title="Reset view"
+        aria-label="Reset diagram view"
+        @click="resetView"
+      >
+        ⌖
+      </button>
       <a
         v-if="!isEmbed"
         class="btn btn-sm btn-outline-secondary"
@@ -73,7 +82,12 @@
         class="diagram-column"
         :class="{ 'embed-diagram': isEmbed }"
       >
-        <div class="diagram-pane h-100 position-relative" ref="niceDagEl" />
+        <div
+          class="diagram-pane h-100 position-relative"
+          ref="niceDagEl"
+          @wheel="onDiagramWheel"
+          @mousedown="onDiagramPanStart"
+        />
         <NiceDagNodes v-slot="slotProps" :niceDagReactive="niceDagReactive">
           <CategoryNode
             v-if="slotProps.node.data?.category"
@@ -121,6 +135,9 @@ const CODE_PANE_WIDTH_KEY = "workflow-dag:codePaneWidth";
 const CODE_PANE_MIN = 200;
 const CODE_PANE_MAX_RATIO = 0.75;
 const CODE_PANE_DEFAULT = 480;
+const DEFAULT_DAG_SCALE = 1;
+const MIN_DAG_SCALE = 0.25;
+const MAX_DAG_SCALE = 1;
 
 function readStoredCodePaneWidth() {
   try {
@@ -165,6 +182,7 @@ export default {
     });
     const codeCollapsed = ref(false);
     const codePaneWidth = ref(readStoredCodePaneWidth());
+    const dagScale = ref(DEFAULT_DAG_SCALE);
     const theme = ref(readStoredTheme());
     const yamlText = ref(sampleYaml);
     const workflowDoc = yaml.load(sampleYaml);
@@ -239,17 +257,84 @@ export default {
       document.addEventListener("mouseup", onUp);
     };
 
+    const getMainLayer = () =>
+      niceDagEl.value?.querySelector(".nice-dag-main-layer");
+
+    const applyCenter = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag || !niceDagEl.value) return;
+      const bounds = niceDagEl.value.getBoundingClientRect();
+      niceDag.center({
+        width: bounds.width,
+        height: Math.max(bounds.height, 500),
+      });
+    };
+
+    const resetView = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag) return;
+      dagScale.value = DEFAULT_DAG_SCALE;
+      niceDag.setScale(DEFAULT_DAG_SCALE);
+      applyCenter();
+      const main = getMainLayer();
+      if (main) {
+        main.scrollLeft = 0;
+        main.scrollTop = 0;
+      }
+    };
+
+    const onDiagramWheel = (event) => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag) return;
+      event.preventDefault();
+      const delta = event.deltaY > 0 ? -0.06 : 0.06;
+      const next = Math.min(
+        MAX_DAG_SCALE,
+        Math.max(MIN_DAG_SCALE, +(dagScale.value + delta).toFixed(2))
+      );
+      if (next === dagScale.value) return;
+      dagScale.value = next;
+      niceDag.setScale(next);
+    };
+
+    const onDiagramPanStart = (event) => {
+      if (event.button !== 0 && event.button !== 1) return;
+      if (
+        event.target.closest(
+          ".wf-cli-app-node, .wf-category-node, button, .wf-yaml-tooltip, .wf-connector"
+        )
+      ) {
+        return;
+      }
+      const main = getMainLayer();
+      if (!main) return;
+      event.preventDefault();
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const startLeft = main.scrollLeft;
+      const startTop = main.scrollTop;
+      main.classList.add("wd-panning");
+      const onMove = (e) => {
+        main.scrollLeft = startLeft - (e.clientX - startX);
+        main.scrollTop = startTop - (e.clientY - startY);
+      };
+      const onUp = () => {
+        main.classList.remove("wd-panning");
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+      };
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    };
+
     onMounted(() => {
       window.addEventListener("message", onHostMessage);
       const hostWidth = document.querySelector(".split-layout")?.clientWidth;
       persistCodePaneWidth(clampCodePaneWidth(codePaneWidth.value, hostWidth));
       const niceDag = niceDagReactive.use();
-      if (niceDag && niceDagEl.value) {
-        const bounds = niceDagEl.value.getBoundingClientRect();
-        niceDag.center({
-          width: bounds.width,
-          height: Math.max(bounds.height, 500),
-        });
+      if (niceDag) {
+        niceDag.setScale(DEFAULT_DAG_SCALE);
+        applyCenter();
       }
     });
 
@@ -279,6 +364,9 @@ export default {
       startDividerDrag,
       theme,
       toggleTheme,
+      resetView,
+      onDiagramWheel,
+      onDiagramPanStart,
       yamlText,
       niceDagEl,
       niceDagReactive,
@@ -394,6 +482,14 @@ body.wd-divider-dragging {
   min-height: 480px;
   height: 100%;
   background: var(--wd-surface-muted);
+  overflow: hidden;
+}
+.diagram-pane .nice-dag-main-layer {
+  overflow: auto !important;
+  cursor: grab;
+}
+.diagram-pane .nice-dag-main-layer.wd-panning {
+  cursor: grabbing;
 }
 .dag-host.embed .embed-diagram {
   max-width: 33.333%;
