@@ -37,6 +37,16 @@
       <button
         type="button"
         class="icon-btn"
+        :title="editMode ? 'Exit edit mode' : 'Enter edit mode'"
+        :aria-pressed="editMode ? 'true' : 'false'"
+        aria-label="Toggle diagram edit mode"
+        @click="toggleEditMode"
+      >
+        ✎
+      </button>
+      <button
+        type="button"
+        class="icon-btn"
         title="Reset view"
         aria-label="Reset diagram view"
         @click="resetView"
@@ -99,7 +109,7 @@
       </button>
       <div
         class="diagram-column"
-        :class="{ 'embed-diagram': isEmbed }"
+        :class="{ 'embed-diagram': isEmbed, 'edit-mode': editMode }"
         @click="settingsOpen = false"
       >
         <div
@@ -301,6 +311,7 @@ export default {
     const theme = ref(readStoredTheme());
     const settingsOpen = ref(false);
     const edgeColored = ref(true);
+    const editMode = ref(false);
     const yamlText = ref(sampleYaml);
     const workflowDoc = yaml.load(sampleYaml);
     const mapped = workflowDocToNiceDagModel(workflowDoc || {});
@@ -368,13 +379,27 @@ export default {
         getNodeSize,
         graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
         subViewPadding: { top: 56, bottom: 36, left: 36, right: 48 },
+        gridConfig: { size: 20, color: "rgba(128,128,128,0.35)" },
         getEdgeAttributes,
       },
-      false
+      true
     );
 
     const setTheme = (next) => {
       theme.value = normalizeTheme(next);
+    };
+
+    const toggleEditMode = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag) return;
+      if (editMode.value) {
+        niceDag.stopEditing();
+        editMode.value = false;
+      } else {
+        niceDag.startEditing();
+        if ("gridVisible" in niceDag) niceDag.gridVisible = true;
+        editMode.value = true;
+      }
     };
 
     const refreshEdgeStrokes = () => {
@@ -579,6 +604,8 @@ export default {
       setTheme,
       settingsOpen,
       edgeColored,
+      editMode,
+      toggleEditMode,
       edgeMeta,
       resetView,
       onDiagramWheel,
@@ -750,6 +777,12 @@ body.wd-divider-dragging {
 }
 .diagram-pane .nice-dag-main-layer.wd-panning {
   cursor: grabbing;
+}
+.diagram-column.edit-mode .diagram-pane {
+  outline: 1px dashed var(--wd-border);
+}
+.diagram-column.edit-mode .nice-dag-editor-bkg {
+  opacity: 1;
 }
 .dag-host.embed .embed-diagram {
   max-width: 33.333%;
