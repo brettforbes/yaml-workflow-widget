@@ -89,8 +89,13 @@
           @mousedown="onDiagramPanStart"
         />
         <NiceDagNodes v-slot="slotProps" :niceDagReactive="niceDagReactive">
+          <StartNode
+            v-if="slotProps.node.data?.kind === 'workflow-start'"
+            :node="slotProps.node"
+            @edit="openEdit"
+          />
           <CategoryNode
-            v-if="slotProps.node.data?.category"
+            v-else-if="slotProps.node.data?.category"
             :node="slotProps.node"
             @edit="openEdit"
           />
@@ -119,9 +124,10 @@ import { highlight, languages } from "prismjs/components/prism-core";
 import "prismjs/components/prism-yaml";
 import "bootstrap/dist/css/bootstrap.min.css";
 import sampleYaml from "./assets/12A_Workflow_YAML_Example.yaml";
-import { workflowStepsToNiceDagModel } from "./components/mapper";
+import { workflowDocToNiceDagModel, NODE_KIND } from "./components/mapper";
 import CategoryNode from "./components/CategoryNode.vue";
 import CliAppNode from "./components/CliAppNode.vue";
+import StartNode from "./components/StartNode.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
 import "./components/CliWorkflowView.css";
 import "./theme.css";
@@ -131,6 +137,7 @@ const CATEGORY_W = 160;
 const CATEGORY_H = 56;
 const COLLAPSED_W = 180;
 const COLLAPSED_H = 64;
+const START_SIZE = 72;
 const CODE_PANE_WIDTH_KEY = "workflow-dag:codePaneWidth";
 const CODE_PANE_MIN = 200;
 const CODE_PANE_MAX_RATIO = 0.75;
@@ -159,6 +166,9 @@ function clampCodePaneWidth(width, hostWidth) {
 }
 
 function getNodeSize(node) {
+  if (node.data?.kind === NODE_KIND.START) {
+    return { width: START_SIZE, height: START_SIZE };
+  }
   if (node.data?.category) {
     return { width: CATEGORY_W, height: CATEGORY_H };
   }
@@ -171,6 +181,7 @@ export default {
     PrismEditor,
     NiceDagNodes,
     NiceDagEdges,
+    StartNode,
     CategoryNode,
     CliAppNode,
     YamlEditModal,
@@ -186,7 +197,7 @@ export default {
     const theme = ref(readStoredTheme());
     const yamlText = ref(sampleYaml);
     const workflowDoc = yaml.load(sampleYaml);
-    const initNodes = workflowStepsToNiceDagModel(workflowDoc.steps || []);
+    const initNodes = workflowDocToNiceDagModel(workflowDoc || {});
 
     const modalOpen = ref(false);
     const modalTitle = ref("");

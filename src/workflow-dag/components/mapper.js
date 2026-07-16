@@ -1,11 +1,78 @@
 /**
- * YAML workflow steps → Nice-DAG hierarchical model.
- * Spec: .seed/CLI_WORKFLOW_VIEW_DESIGN.md §2
+ * YAML workflow document → Nice-DAG hierarchical model (SPEC-012 E2+).
+ * Spec: .seed/02_Update_Widget_Requirements.md §2
  */
 
 import * as yaml from "js-yaml";
 
 const CATEGORIES = ["input", "config", "output", "context"];
+
+export const NODE_KIND = {
+  START: "workflow-start",
+  TARGET: "workflow-target",
+  END: "workflow-end",
+  STEP: "cli-step",
+  CATEGORY: "category",
+  CONTEXT_COLLECTOR: "context-collector",
+};
+
+export const WORKFLOW_START_ID = "__workflow_start__";
+export const WORKFLOW_TARGET_ID = "__workflow_target__";
+export const WORKFLOW_END_ID = "__workflow_end__";
+
+/**
+ * Header YAML shown on the start-circle tooltip (apiVersion/kind/id/info).
+ * @param {object} doc
+ * @returns {string}
+ */
+export function dumpWorkflowHeaderYaml(doc) {
+  if (!doc || typeof doc !== "object") return "";
+  const header = {};
+  for (const key of ["apiVersion", "kind", "id", "info"]) {
+    if (doc[key] !== undefined) header[key] = doc[key];
+  }
+  return yaml.dump(header, { lineWidth: 120, noRefs: true }).trimEnd();
+}
+
+/**
+ * @param {object} doc - full workflow document
+ * @returns {object[]} Nice-DAG initNodes
+ */
+export function workflowDocToNiceDagModel(doc) {
+  const steps = Array.isArray(doc?.steps) ? doc.steps : [];
+  const stepNodes = workflowStepsToNiceDagModel(steps);
+
+  const startNode = {
+    id: WORKFLOW_START_ID,
+    dependencies: [],
+    data: {
+      kind: NODE_KIND.START,
+      label: "start",
+      yaml: dumpWorkflowHeaderYaml(doc || {}),
+      raw: {
+        apiVersion: doc?.apiVersion,
+        kind: doc?.kind,
+        id: doc?.id,
+        info: doc?.info,
+      },
+    },
+  };
+
+  // First steps with no needs (or empty needs) hang off start for now.
+  // Target insertion (E2-S2) will rewire this when inputs exist.
+  const entryIds = new Set(
+    stepNodes
+      .filter((n) => !n.dependencies || n.dependencies.length === 0)
+      .map((n) => n.id)
+  );
+  for (const node of stepNodes) {
+    if (entryIds.has(node.id)) {
+      node.dependencies = [WORKFLOW_START_ID];
+    }
+  }
+
+  return [startNode, ...stepNodes];
+}
 
 /**
  * @param {object[]} steps - workflow.steps from parsed YAML
@@ -42,6 +109,7 @@ export function workflowStepsToNiceDagModel(steps) {
         id: `${step.id}__${category}`,
         dependencies: childDeps,
         data: {
+          kind: NODE_KIND.CATEGORY,
           category,
           raw,
           yaml: yamlText,
@@ -56,6 +124,7 @@ export function workflowStepsToNiceDagModel(steps) {
       collapse: true,
       children,
       data: {
+        kind: NODE_KIND.STEP,
         stepId: step.id,
         uses: step.uses,
         raw: step,
@@ -71,8 +140,7 @@ export function workflowStepsToNiceDagModel(steps) {
  * Call from browser console: window.__runCliWorkflowMapperHarness()
  */
 export function runMapperHarness(workflowDoc) {
-  const steps = workflowDoc?.steps || [];
-  const model = workflowStepsToNiceDagModel(steps);
+  const model = workflowDocToNiceDagModel(workflowDoc || {});
   const topLevel = model.length;
   const categories = model.reduce(
     (n, node) => n + (node.children?.length || 0),
@@ -81,16 +149,6 @@ export function runMapperHarness(workflowDoc) {
   console.log("[cli-workflow mapper] top-level nodes:", topLevel);
   console.log("[cli-workflow mapper] category leaves:", categories);
   console.log("[cli-workflow mapper] model:", model);
-  model.forEach((node) => {
-    const emptyOutput = node.children?.find(
-      (c) => c.data.category === "output" && c.data.raw === null
-    );
-    if (emptyOutput) {
-      console.log(
-        `[cli-workflow mapper] empty output category on: ${node.id}`
-      );
-    }
-  });
   return model;
 }
 
