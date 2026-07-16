@@ -122,29 +122,39 @@
           <StartNode
             v-if="slotProps.node.data?.kind === 'workflow-start'"
             :node="slotProps.node"
+            :editable="editMode"
             @edit="openEdit"
           />
           <TargetNode
             v-else-if="slotProps.node.data?.kind === 'workflow-target'"
             :node="slotProps.node"
+            :editable="editMode"
             @edit="openEdit"
           />
           <EndContextNode
             v-else-if="slotProps.node.data?.kind === 'workflow-end'"
             :node="slotProps.node"
+            :editable="editMode"
             @edit="openEdit"
           />
           <ContextCollectorNode
             v-else-if="slotProps.node.data?.kind === 'context-collector'"
             :node="slotProps.node"
+            :editable="editMode"
           />
           <CategoryNode
             v-else-if="slotProps.node.data?.category"
             :node="slotProps.node"
+            :editable="editMode"
             @edit="openEdit"
             @form="openCategoryForm"
           />
-          <CliAppNode v-else :node="slotProps.node" @edit="openEdit" />
+          <CliAppNode
+            v-else
+            :node="slotProps.node"
+            :editable="editMode"
+            @edit="openEdit"
+          />
         </NiceDagNodes>
         <NiceDagEdges v-slot="slotProps" :niceDagReactive="niceDagReactive">
           <WorkflowEdge
