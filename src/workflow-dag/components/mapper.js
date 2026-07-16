@@ -282,6 +282,8 @@ export function workflowStepsToNiceDagModel(
           yaml: yamlText,
           label: category,
           contextSide: null, // filled from parent after lanes assigned
+          uses: step.uses,
+          stepId: step.id,
         },
       };
     });

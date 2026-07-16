@@ -191,6 +191,12 @@ module.exports = {
         include: path.resolve(__dirname, 'src/workflow-dag'),
         type: 'asset/source',
       },
+      // CLI / nugget content markdown as source strings
+      {
+        test: /\.md$/,
+        include: path.resolve(__dirname, 'src/content'),
+        type: 'asset/source',
+      },
       // Workflow-dag JS: real ES modules (exclude from raw-loader)
       {
         test: /\.js$/,
