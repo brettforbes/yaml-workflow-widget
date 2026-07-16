@@ -1,7 +1,20 @@
 <template>
-  <div class="dag-host" :class="{ embed: isEmbed }">
+  <div
+    class="dag-host"
+    :class="{ embed: isEmbed }"
+    :data-theme="theme"
+  >
     <div class="toolbar border-bottom px-2 py-1 d-flex align-items-center gap-2">
       <strong class="me-auto">CLI Workflow DAG</strong>
+      <button
+        type="button"
+        class="icon-btn"
+        :title="`Theme: ${theme} (click to toggle)`"
+        aria-label="Toggle theme"
+        @click="toggleTheme"
+      >
+        ⚙
+      </button>
       <button
         v-if="!isEmbed"
         type="button"
@@ -26,7 +39,7 @@
           :class="codeCollapsed ? 'col-0 d-none' : 'col-6'"
         >
           <div class="code-pane h-100 d-flex flex-column">
-            <div class="px-2 py-1 small text-muted border-bottom">
+            <div class="px-2 py-1 small code-pane-label border-bottom">
               12A_Workflow_YAML_Example.yaml
             </div>
             <prism-editor
@@ -72,7 +85,7 @@
 </template>
 
 <script>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import * as yaml from "js-yaml";
 import { NiceDagNodes, NiceDagEdges, useNiceDag } from "@ebay/nice-dag-vue3";
 import { PrismEditor } from "vue-prism-editor";
@@ -86,6 +99,8 @@ import CategoryNode from "./components/CategoryNode.vue";
 import CliAppNode from "./components/CliAppNode.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
 import "./components/CliWorkflowView.css";
+import "./theme.css";
+import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
 
 const CATEGORY_W = 160;
 const CATEGORY_H = 56;
@@ -115,6 +130,7 @@ export default {
       return q.get("embed") === "1";
     });
     const codeCollapsed = ref(false);
+    const theme = ref(readStoredTheme());
     const yamlText = ref(sampleYaml);
     const workflowDoc = yaml.load(sampleYaml);
     const initNodes = workflowStepsToNiceDagModel(workflowDoc.steps || []);
@@ -134,7 +150,34 @@ export default {
       false
     );
 
+    const setTheme = (next) => {
+      theme.value = normalizeTheme(next);
+    };
+
+    const toggleTheme = () => {
+      setTheme(theme.value === "dark" ? "light" : "dark");
+    };
+
+    /** E1 stub / E6 host contract: listen for setTheme from parent */
+    const onHostMessage = (event) => {
+      const data = event?.data;
+      if (!data || typeof data !== "object") return;
+      if (data.type === "setTheme" || data.action === "setTheme") {
+        const value = data.payload?.theme ?? data.theme ?? data.payload;
+        if (value) setTheme(value);
+      }
+    };
+
+    watch(
+      theme,
+      (t) => {
+        applyTheme(t);
+      },
+      { immediate: true }
+    );
+
     onMounted(() => {
+      window.addEventListener("message", onHostMessage);
       const niceDag = niceDagReactive.use();
       if (niceDag && niceDagEl.value) {
         const bounds = niceDagEl.value.getBoundingClientRect();
@@ -143,6 +186,10 @@ export default {
           height: Math.max(bounds.height, 500),
         });
       }
+    });
+
+    onBeforeUnmount(() => {
+      window.removeEventListener("message", onHostMessage);
     });
 
     const highlightYaml = (code) => {
@@ -163,6 +210,8 @@ export default {
     return {
       isEmbed,
       codeCollapsed,
+      theme,
+      toggleTheme,
       yamlText,
       niceDagEl,
       niceDagReactive,
@@ -188,11 +237,30 @@ body,
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #f7f7f7;
+  background: var(--wd-bg);
+  color: var(--wd-text);
+}
+.toolbar {
+  background: var(--wd-toolbar-bg);
+  border-color: var(--wd-border) !important;
+}
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--wd-text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  color: var(--wd-text);
+  background: var(--wd-surface-muted);
 }
 .yaml-editor {
-  background: #2d2d2d;
-  color: #ccc;
+  background: var(--wd-code-bg);
+  color: var(--wd-code-fg);
   font-family: Consolas, Menlo, monospace;
   font-size: 12px;
   line-height: 1.45;
@@ -201,15 +269,20 @@ body,
 }
 .diagram-pane {
   min-height: 480px;
-  background: #fafafa;
+  background: var(--wd-surface-muted);
 }
 .dag-host.embed .embed-diagram {
   max-width: 33.333%;
   margin: 0 auto;
 }
 .code-pane {
-  background: #1e1e1e;
+  background: var(--wd-code-bg);
   height: 100%;
+  color: var(--wd-code-fg);
+}
+.code-pane-label {
+  color: var(--wd-text-muted);
+  border-color: var(--wd-border) !important;
 }
 .prism-editor__textarea:focus {
   outline: none;
