@@ -61,9 +61,16 @@ Agent plan / issue map: [`.governance/specs/SPEC-012-AGENT-PLAN.md`](.governance
 | E5 Langium YAML sync + MCP | [#105](https://github.com/brettforbes/yaml-workflow-widget/issues/105) | after E2/E4 |
 | E6 Embed / host protocol | [#106](https://github.com/brettforbes/yaml-workflow-widget/issues/106) | after E1/E5 |
 
-**After F0:** `.\start.ps1` → `http://localhost:4001` (webpack iframe). Do not add features in `yaml-workflow-dag`.
+**F0 landed:** Product UI is `src/workflow-dag/` in the webpack iframe. Launcher: `.\start.ps1` → `http://localhost:4001`. Nice-DAG library only under `apps/nice-dag/`. The Vite app `apps/workflow-dag-viewer` is retired. Do not add features in `yaml-workflow-dag`.
 
-Nice-DAG skill (copied for agents working in this repo): [`.cursor/skills/nice-dag/SKILL.md`](.cursor/skills/nice-dag/SKILL.md). Prefer this path over reading the skill from `yaml-workflow-dag` (still do not modify that repo for product work).
+| Concern | Path |
+|---------|------|
+| Vue UI | `src/workflow-dag/` |
+| 12A asset (runtime) | `src/workflow-dag/assets/12A_Workflow_YAML_Example.yaml` |
+| Nice-DAG lib | `apps/nice-dag/` |
+| Host postMessage helpers | `src/js/#events.js` |
+
+Nice-DAG skill: [`.cursor/skills/nice-dag/SKILL.md`](.cursor/skills/nice-dag/SKILL.md).
 
 ### Governance
 
