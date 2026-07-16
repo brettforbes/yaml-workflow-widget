@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MergeIntoSingleFilePlugin = require('webpack-merge-and-include-globally');
 const fs = require('fs');
+const path = require('path');
 
 const paths = require('./webpack._paths')
 
@@ -240,6 +241,9 @@ module.exports = {
     alias: {
       '@': paths.src,
       assets: paths.public,
+      // SPEC-012 F0-S1: Nice-DAG library lives only under apps/nice-dag/
+      '@ebay/nice-dag-core': path.resolve(__dirname, 'apps/nice-dag/nice-dag-core'),
+      '@ebay/nice-dag-vue3': path.resolve(__dirname, 'apps/nice-dag/nice-dag-vue3'),
     },
   },
 

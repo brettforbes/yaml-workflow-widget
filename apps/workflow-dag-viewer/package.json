@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ebay/nice-dag-core": "^1.0.45",
-    "@ebay/nice-dag-vue3": "^1.0.33",
+    "@ebay/nice-dag-core": "file:../nice-dag/nice-dag-core",
+    "@ebay/nice-dag-vue3": "file:../nice-dag/nice-dag-vue3",
     "bootstrap": "^5.3.3",
     "js-yaml": "^4.1.0",
     "prismjs": "^1.29.0",

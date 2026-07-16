@@ -1,0 +1,11 @@
+import NiceDagTypes from "@ebay/nice-dag-core/lib/types";
+import type { NiceDagReactiveType } from "../niceDagReactive";
+import type { PropType } from "vue";
+declare const _sfc_main: import("vue").DefineComponent<{
+    niceDagReactive: PropType<NiceDagReactiveType>;
+}, {
+    getDomRef(node: NiceDagTypes.Node): HTMLElement | undefined;
+}, unknown, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps, Readonly<import("vue").ExtractPropTypes<{
+    niceDagReactive: PropType<NiceDagReactiveType>;
+}>>, {}>;
+export default _sfc_main;
