@@ -5,6 +5,12 @@
 
 import * as yaml from "js-yaml";
 import { EDGE_TYPE, edgeKey } from "./edgeMeta.js";
+import {
+  assignLanes,
+  collectorId,
+  contextSideForLane,
+  topoStepIds,
+} from "./contextRail.js";
 
 const CATEGORIES = ["input", "config", "output", "context"];
 
@@ -155,23 +161,47 @@ export function workflowDocToNiceDagModel(doc) {
   }
 
   const stepNodes = workflowStepsToNiceDagModel(steps, entryParentId, edgeMeta);
+
+  const lanes = assignLanes(stepNodes);
+  for (const node of stepNodes) {
+    const lane = lanes.get(node.id) || 0;
+    node.data.lane = lane;
+    node.data.contextSide = contextSideForLane(lane);
+  }
+
   nodes.push(...stepNodes);
 
-  // Final context circle depends on leaf steps (no other step depends on them).
-  const dependedOn = new Set();
-  for (const node of stepNodes) {
-    for (const dep of node.dependencies || []) {
-      if (dep !== WORKFLOW_START_ID && dep !== WORKFLOW_TARGET_ID) {
-        dependedOn.add(dep);
-      }
+  // Context collectors + semantic-subgraph rail (E2-S6).
+  const order = topoStepIds(stepNodes);
+  const collectors = [];
+  let prevCollectorId = null;
+  for (const stepId of order) {
+    const cid = collectorId(stepId);
+    const deps = [stepId];
+    if (prevCollectorId) deps.push(prevCollectorId);
+    const col = {
+      id: cid,
+      dependencies: deps,
+      data: {
+        kind: NODE_KIND.CONTEXT_COLLECTOR,
+        label: "ctx",
+        forStep: stepId,
+        lane: lanes.get(stepId) || 0,
+      },
+    };
+    collectors.push(col);
+    edgeMeta.set(edgeKey(stepId, cid), EDGE_TYPE.SEMANTIC);
+    if (prevCollectorId) {
+      edgeMeta.set(edgeKey(prevCollectorId, cid), EDGE_TYPE.SEMANTIC);
     }
+    prevCollectorId = cid;
   }
-  const leafIds = stepNodes
-    .map((n) => n.id)
-    .filter((id) => !dependedOn.has(id));
+  nodes.push(...collectors);
+
+  // End depends on final collector(s): last in topo rail, or entry parent if none.
   const endDeps =
-    leafIds.length > 0
-      ? leafIds
+    collectors.length > 0
+      ? [collectors[collectors.length - 1].id]
       : entryParentId
         ? [entryParentId]
         : [WORKFLOW_START_ID];
@@ -182,12 +212,15 @@ export function workflowDocToNiceDagModel(doc) {
     data: {
       kind: NODE_KIND.END,
       label: "final context",
-      yaml: "context:\n  # Aggregated semantic-subgraph outcomes (E2-S6+)",
+      yaml: "context:\n  # Aggregated semantic-subgraph outcomes",
       raw: null,
     },
   });
   for (const dep of endDeps) {
-    edgeMeta.set(edgeKey(dep, WORKFLOW_END_ID), EDGE_TYPE.FOLLOWS);
+    edgeMeta.set(
+      edgeKey(dep, WORKFLOW_END_ID),
+      collectors.length > 0 ? EDGE_TYPE.SEMANTIC : EDGE_TYPE.FOLLOWS
+    );
   }
 
   return { nodes, edgeMeta };

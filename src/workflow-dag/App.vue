@@ -124,6 +124,10 @@
             :node="slotProps.node"
             @edit="openEdit"
           />
+          <ContextCollectorNode
+            v-else-if="slotProps.node.data?.kind === 'context-collector'"
+            :node="slotProps.node"
+          />
           <CategoryNode
             v-else-if="slotProps.node.data?.category"
             :node="slotProps.node"
@@ -175,6 +179,7 @@ import CliAppNode from "./components/CliAppNode.vue";
 import StartNode from "./components/StartNode.vue";
 import TargetNode from "./components/TargetNode.vue";
 import EndContextNode from "./components/EndContextNode.vue";
+import ContextCollectorNode from "./components/ContextCollectorNode.vue";
 import WorkflowEdge from "./components/WorkflowEdge.vue";
 import EdgeLegend from "./components/EdgeLegend.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
@@ -190,6 +195,7 @@ const START_SIZE = 72;
 const TARGET_W = 140;
 const TARGET_H = 48;
 const END_SIZE = 88;
+const COLLECTOR_SIZE = 28;
 const CODE_PANE_WIDTH_KEY = "workflow-dag:codePaneWidth";
 const CODE_PANE_MIN = 200;
 const CODE_PANE_MAX_RATIO = 0.75;
@@ -227,6 +233,9 @@ function getNodeSize(node) {
   if (node.data?.kind === NODE_KIND.END) {
     return { width: END_SIZE, height: END_SIZE };
   }
+  if (node.data?.kind === NODE_KIND.CONTEXT_COLLECTOR) {
+    return { width: COLLECTOR_SIZE, height: COLLECTOR_SIZE };
+  }
   if (node.data?.category) {
     return { width: CATEGORY_W, height: CATEGORY_H };
   }
@@ -242,6 +251,7 @@ export default {
     StartNode,
     TargetNode,
     EndContextNode,
+    ContextCollectorNode,
     CategoryNode,
     CliAppNode,
     WorkflowEdge,

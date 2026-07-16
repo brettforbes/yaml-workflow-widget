@@ -36,6 +36,11 @@
       @mouseenter.stop="onPortEnter('output')"
       @mouseleave.stop="onPortLeave"
     />
+    <div
+      class="wf-connector wf-connector-context"
+      :class="contextSide === 'left' ? 'wf-connector-context-left' : 'wf-connector-context-right'"
+      title="context export"
+    />
     <YamlTooltip
       v-if="showTooltip"
       :yaml="tooltipYaml"
@@ -78,6 +83,10 @@ export default {
 
     const isExpanded = computed(
       () => props.node.children?.length > 0 && !props.node.collapse
+    );
+
+    const contextSide = computed(
+      () => props.node.data?.contextSide || "right"
     );
 
     const categoryYaml = (category) => {
@@ -158,6 +167,7 @@ export default {
 
     return {
       isExpanded,
+      contextSide,
       showTooltip,
       keepOpen,
       tooltipYaml,
@@ -226,5 +236,25 @@ export default {
   line-height: 1;
   cursor: pointer;
   flex-shrink: 0;
+}
+</style>
+
+<style>
+.wf-connector-context {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #009e73;
+  border-radius: 50%;
+  background: #e8fff6;
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.wf-connector-context-right {
+  right: -8px;
+}
+.wf-connector-context-left {
+  left: -8px;
 }
 </style>
