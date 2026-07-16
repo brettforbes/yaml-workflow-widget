@@ -2,8 +2,8 @@
 
 YAML workflow DSL + GSE + dry-run runtime foundation.
 
-Package root for SPEC-007. See `.seed/SPEC-007-cli-workflow-dsl.md` and
-`.seed/SPEC-007-AGENT-PLAN.md`.
+Package root for SPEC-007. See `.governance/specs/SPEC-007-cli-workflow-dsl.md` and
+`.governance/specs/SPEC-007-AGENT-PLAN.md`.
 
 **Reference grammar:** [REFERENCES.md](REFERENCES.md) (R7-03-03).
 

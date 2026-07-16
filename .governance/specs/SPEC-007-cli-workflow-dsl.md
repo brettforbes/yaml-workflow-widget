@@ -5,7 +5,7 @@
 | Status | Active |
 | Created | 2026-07-13 |
 | Seed docs | `.seed/12A_Workflow_YAML_Example.yaml`, `.seed/12B_Workflow_DSL_Description.md`, `.seed/12C_Graph_Select_Language.md` |
-| Agent plan | `.seed/SPEC-007-AGENT-PLAN.md` (epics/stories + GitHub issue map) |
+| Agent plan | `.governance/specs/SPEC-007-AGENT-PLAN.md` (epics/stories + GitHub issue map) |
 | Tracking | https://github.com/brettforbes/yaml-workflow-widget/issues/3 |
 | Depends on | SPEC-004 (adapters/graphs), SPEC-005 (narrative — not required for runtime), SPEC-006 (structure docs — ontology truth) |
 | Out of scope | Langium, Monaco, visual schematic, AST↔diagram sync, legacy `sfp_*` EVENT rewrite, context force-graph UI |

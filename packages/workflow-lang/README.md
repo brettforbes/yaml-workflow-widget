@@ -4,7 +4,7 @@ Langium package for SpiderFeet **Workflow + GSE** editor/AST tooling.
 
 | Contract | Path |
 |----------|------|
-| Spec | `../../.seed/SPEC-008-langium-workflow-gse.md` |
+| Spec | `../../.governance/specs/SPEC-008-langium-workflow-gse.md` |
 | YAML DSL truth | `../../.seed/12A…` / `12B…` / `12C…` |
 | JSON Schema | `../../.seed/scripts/cli_workflow/schema/` |
 | Skills | `../../.cursor/skills/langium`, `lai*` |

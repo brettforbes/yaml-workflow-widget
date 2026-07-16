@@ -14,4 +14,4 @@ Informal sketch forms **forbidden** in validated workflows:
 | `cli_options` shell string | Not AST-friendly | `config.argv` list |
 | Implicit `{{scan_graph}}` | Ambiguous | `context.export: scan_graph` |
 
-See also `.seed/SPEC-007-AGENT-PLAN.md` for execution epics.
+See also `.governance/specs/SPEC-007-AGENT-PLAN.md` for execution epics.

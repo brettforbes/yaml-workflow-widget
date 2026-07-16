@@ -1,6 +1,6 @@
 """E3-S4: auto temp file materialization (R7-03-04).
 
-Normative reference: `.seed/SPEC-007-AGENT-PLAN.md` Epic E3-S4.
+Normative reference: `.governance/specs/SPEC-007-AGENT-PLAN.md` Epic E3-S4.
 """
 
 from __future__ import annotations
