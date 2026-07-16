@@ -34,6 +34,15 @@
       </button>
       <span class="wf-cli-app-label">{{ node.data?.label || node.id }}</span>
     </div>
+    <button
+      v-if="editable"
+      type="button"
+      class="wf-node-delete"
+      title="Delete"
+      @click.stop="node.remove()"
+    >
+      ×
+    </button>
     <div
       class="wf-connector wf-connector-out"
       @mouseenter.stop="onPortEnter('output')"
@@ -76,6 +85,7 @@ export default {
   components: { YamlTooltip },
   props: {
     node: { type: Object, required: true },
+    editable: { type: Boolean, default: false },
   },
   emits: ["edit"],
   setup(props, { emit }) {

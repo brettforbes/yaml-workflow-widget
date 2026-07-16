@@ -5,6 +5,15 @@
     @mouseleave="onLeave"
   >
     <span class="wf-start-label">start</span>
+    <button
+      v-if="editable"
+      type="button"
+      class="wf-node-delete"
+      title="Delete"
+      @click.stop="node.remove()"
+    >
+      ×
+    </button>
     <YamlTooltip
       v-if="showTooltip"
       :yaml="node.data?.yaml || ''"
@@ -25,6 +34,7 @@ export default {
   components: { YamlTooltip },
   props: {
     node: { type: Object, required: true },
+    editable: { type: Boolean, default: false },
   },
   emits: ["edit"],
   setup(props, { emit }) {
@@ -79,5 +89,24 @@ export default {
   font-weight: 600;
   color: #222;
   text-transform: lowercase;
+}
+</style>
+
+<style>
+.wf-node-delete {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 5;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid #c00;
+  background: #fff;
+  color: #c00;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
 }
 </style>

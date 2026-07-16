@@ -1,6 +1,15 @@
 <template>
   <div class="wf-context-collector" :title="node.data?.label || 'context'">
     <span class="wf-context-collector-dot" />
+    <button
+      v-if="editable"
+      type="button"
+      class="wf-node-delete"
+      title="Delete"
+      @click.stop="node.remove()"
+    >
+      ×
+    </button>
   </div>
 </template>
 
@@ -9,6 +18,7 @@ export default {
   name: "ContextCollectorNode",
   props: {
     node: { type: Object, required: true },
+    editable: { type: Boolean, default: false },
   },
 };
 </script>

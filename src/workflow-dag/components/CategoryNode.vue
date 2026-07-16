@@ -8,6 +8,15 @@
     <!-- Category ports are silent (no tooltips) per E2-S8. -->
     <div class="wf-connector wf-connector-in" />
     <span class="wf-category-label">{{ node.data?.label || node.data?.category }}</span>
+    <button
+      v-if="editable"
+      type="button"
+      class="wf-node-delete"
+      title="Delete"
+      @click.stop="node.remove()"
+    >
+      ×
+    </button>
     <div class="wf-connector wf-connector-out" />
     <div
       v-if="isContext"
@@ -41,6 +50,7 @@ export default {
   components: { YamlTooltip },
   props: {
     node: { type: Object, required: true },
+    editable: { type: Boolean, default: false },
   },
   emits: ["edit", "form"],
   setup(props, { emit }) {
