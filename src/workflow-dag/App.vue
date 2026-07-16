@@ -6,15 +6,34 @@
   >
     <div class="toolbar border-bottom px-2 py-1 d-flex align-items-center gap-2">
       <strong class="me-auto">CLI Workflow DAG</strong>
-      <button
-        type="button"
-        class="icon-btn"
-        :title="`Theme: ${theme} (click to toggle)`"
-        aria-label="Toggle theme"
-        @click="toggleTheme"
-      >
-        ⚙
-      </button>
+      <div class="settings-wrap">
+        <button
+          type="button"
+          class="icon-btn"
+          title="Settings"
+          aria-label="Settings"
+          :aria-expanded="settingsOpen ? 'true' : 'false'"
+          @click="settingsOpen = !settingsOpen"
+        >
+          ⚙
+        </button>
+        <div v-if="settingsOpen" class="settings-panel" @click.stop>
+          <label class="settings-row">
+            <span>Theme</span>
+            <select v-model="theme" @change="setTheme(theme)">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+          <label class="settings-row">
+            <input v-model="edgeColored" type="checkbox" />
+            <span>Colored edges + labels</span>
+          </label>
+          <p class="settings-hint">
+            Off = single-color edges with labels only
+          </p>
+        </div>
+      </div>
       <button
         type="button"
         class="icon-btn"
@@ -81,6 +100,7 @@
       <div
         class="diagram-column"
         :class="{ 'embed-diagram': isEmbed }"
+        @click="settingsOpen = false"
       >
         <div
           class="diagram-pane h-100 position-relative"
@@ -111,7 +131,17 @@
           />
           <CliAppNode v-else :node="slotProps.node" @edit="openEdit" />
         </NiceDagNodes>
-        <NiceDagEdges :niceDagReactive="niceDagReactive" />
+        <NiceDagEdges v-slot="slotProps" :niceDagReactive="niceDagReactive">
+          <WorkflowEdge
+            :source="slotProps.edge.source"
+            :target="slotProps.edge.target"
+            :edge-meta="edgeMeta"
+            :theme="theme"
+            :colored="edgeColored"
+            :show-labels="true"
+          />
+        </NiceDagEdges>
+        <EdgeLegend :theme="theme" :colored="edgeColored" />
       </div>
     </div>
     <YamlEditModal
@@ -135,11 +165,19 @@ import "prismjs/components/prism-yaml";
 import "bootstrap/dist/css/bootstrap.min.css";
 import sampleYaml from "./assets/12A_Workflow_YAML_Example.yaml";
 import { workflowDocToNiceDagModel, NODE_KIND } from "./components/mapper";
+import {
+  EDGE_TYPE,
+  buildEdgeMetaFromNodes,
+  edgeKey,
+  resolveEdgeColor,
+} from "./components/edgeMeta";
 import CategoryNode from "./components/CategoryNode.vue";
 import CliAppNode from "./components/CliAppNode.vue";
 import StartNode from "./components/StartNode.vue";
 import TargetNode from "./components/TargetNode.vue";
 import EndContextNode from "./components/EndContextNode.vue";
+import WorkflowEdge from "./components/WorkflowEdge.vue";
+import EdgeLegend from "./components/EdgeLegend.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
 import "./components/CliWorkflowView.css";
 import "./theme.css";
@@ -207,6 +245,8 @@ export default {
     EndContextNode,
     CategoryNode,
     CliAppNode,
+    WorkflowEdge,
+    EdgeLegend,
     YamlEditModal,
   },
   setup() {
@@ -218,14 +258,26 @@ export default {
     const codePaneWidth = ref(readStoredCodePaneWidth());
     const dagScale = ref(DEFAULT_DAG_SCALE);
     const theme = ref(readStoredTheme());
+    const settingsOpen = ref(false);
+    const edgeColored = ref(true);
     const yamlText = ref(sampleYaml);
     const workflowDoc = yaml.load(sampleYaml);
     const initNodes = workflowDocToNiceDagModel(workflowDoc || {});
+    const edgeMeta = ref(buildEdgeMetaFromNodes(initNodes));
 
     const modalOpen = ref(false);
     const modalTitle = ref("");
     const modalYaml = ref("");
     const modalNode = ref(null);
+
+    const getEdgeAttributes = (edge) => {
+      const type =
+        edgeMeta.value.get(edgeKey(edge.source.id, edge.target.id)) ||
+        EDGE_TYPE.FOLLOWS;
+      return {
+        color: resolveEdgeColor(type, theme.value, edgeColored.value),
+      };
+    };
 
     const { niceDagEl, niceDagReactive } = useNiceDag(
       {
@@ -233,6 +285,7 @@ export default {
         getNodeSize,
         graphLabel: { rankdir: "TB", ranksep: 48, edgesep: 24 },
         subViewPadding: { top: 48, bottom: 24, left: 24, right: 24 },
+        getEdgeAttributes,
       },
       false
     );
@@ -241,8 +294,20 @@ export default {
       theme.value = normalizeTheme(next);
     };
 
-    const toggleTheme = () => {
-      setTheme(theme.value === "dark" ? "light" : "dark");
+    const refreshEdgeStrokes = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag?.getAllEdges) return;
+      for (const edge of niceDag.getAllEdges()) {
+        const path = edge.pathRef;
+        if (!path) continue;
+        const type =
+          edgeMeta.value.get(edgeKey(edge.source.id, edge.target.id)) ||
+          EDGE_TYPE.FOLLOWS;
+        path.setAttribute(
+          "stroke",
+          resolveEdgeColor(type, theme.value, edgeColored.value)
+        );
+      }
     };
 
     /** E1 stub / E6 host contract: listen for setTheme from parent */
@@ -259,9 +324,14 @@ export default {
       theme,
       (t) => {
         applyTheme(t);
+        refreshEdgeStrokes();
       },
       { immediate: true }
     );
+
+    watch(edgeColored, () => {
+      refreshEdgeStrokes();
+    });
 
     const persistCodePaneWidth = (width) => {
       codePaneWidth.value = width;
@@ -397,7 +467,10 @@ export default {
       codePaneWidth,
       startDividerDrag,
       theme,
-      toggleTheme,
+      setTheme,
+      settingsOpen,
+      edgeColored,
+      edgeMeta,
       resetView,
       onDiagramWheel,
       onDiagramPanStart,
@@ -446,6 +519,38 @@ body,
 .icon-btn:hover {
   color: var(--wd-text);
   background: var(--wd-surface-muted);
+}
+.settings-wrap {
+  position: relative;
+}
+.settings-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  min-width: 220px;
+  padding: 10px 12px;
+  background: var(--wd-surface);
+  border: 1px solid var(--wd-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  color: var(--wd-text);
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.settings-row select {
+  font-size: 12px;
+}
+.settings-hint {
+  margin: 0;
+  font-size: 10px;
+  color: var(--wd-text-muted);
 }
 .split-layout {
   display: flex;
