@@ -37,14 +37,32 @@ python -m pytest .tests -k cli_workflow -q
 |-----|------|
 | Spec | `.governance/specs/SPEC-008-langium-workflow-gse.md` |
 | Package | `packages/workflow-lang/` |
-| Skills | `.cursor/skills/langium`, `.cursor/skills/lai*` |
+| Skills | `.cursor/skills/langium`, `.cursor/skills/lai*` (never `.agents/`) |
 
-Epic [#11](https://github.com/brettforbes/yaml-workflow-widget/issues/11); start at [#39](https://github.com/brettforbes/yaml-workflow-widget/issues/39).
+Epic [#11](https://github.com/brettforbes/yaml-workflow-widget/issues/11) closed. YAML-as-Langium-document work continues under SPEC-012 Epic E5.
 
 ```bash
 cd packages/workflow-lang && npm install && npm run build
 ```
 
+### SPEC-012 — Update Widget Requirements (active)
+
+Source: `.seed/02_Update_Widget_Requirements.md`  
+Spec: [`.governance/specs/SPEC-012-update-widget.md`](.governance/specs/SPEC-012-update-widget.md)  
+Agent plan / issue map: [`.governance/specs/SPEC-012-AGENT-PLAN.md`](.governance/specs/SPEC-012-AGENT-PLAN.md)
+
+| Epic | Issue | Start story |
+|------|------:|-------------|
+| F0 Layout (webpack `src/` + `apps/nice-dag`) | [#100](https://github.com/brettforbes/yaml-workflow-widget/issues/100) | [#107](https://github.com/brettforbes/yaml-workflow-widget/issues/107) |
+| E1 Chrome / UX | [#101](https://github.com/brettforbes/yaml-workflow-widget/issues/101) | after F0 |
+| E2 Workflow model v2 | [#102](https://github.com/brettforbes/yaml-workflow-widget/issues/102) | after E1 |
+| E3 Category form UIs | [#103](https://github.com/brettforbes/yaml-workflow-widget/issues/103) | after E2 |
+| E4 Diagram edit mode | [#104](https://github.com/brettforbes/yaml-workflow-widget/issues/104) | after E2 |
+| E5 Langium YAML sync + MCP | [#105](https://github.com/brettforbes/yaml-workflow-widget/issues/105) | after E2/E4 |
+| E6 Embed / host protocol | [#106](https://github.com/brettforbes/yaml-workflow-widget/issues/106) | after E1/E5 |
+
+**After F0:** `.\start.ps1` → `http://localhost:4001` (webpack iframe). Do not add features in `yaml-workflow-dag`.
+
 ### Governance
 
-VibeGov rules: `.cursor/rules/gov-*.mdc`. Branch from `develop`, PR into `develop`. Canonical specs live under `.governance/specs/`; do not delete `.seed` DSL seed docs (12A/12B/12C) or skill docs.
+VibeGov rules: `.cursor/rules/gov-*.mdc`. Branch from `develop`, PR into `develop`. Canonical specs live under `.governance/specs/`; do not delete `.seed` DSL seed docs (12A/12B/12C) or `.cursor/skills` docs.
