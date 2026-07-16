@@ -23,7 +23,7 @@
       v-if="showTooltip"
       :yaml="node.data?.yaml || ''"
       :title="node.data?.category || 'category'"
-      :show-form="isConfig"
+      :show-form="showForm"
       @edit="onEdit"
       @form="onForm"
       @mouseenter="keepOpen = true"
@@ -50,6 +50,15 @@ export default {
 
     const isContext = computed(() => props.node.data?.category === "context");
     const isConfig = computed(() => props.node.data?.category === "config");
+    const isOutput = computed(() => props.node.data?.category === "output");
+    const isInput = computed(() => props.node.data?.category === "input");
+    const showForm = computed(
+      () =>
+        isConfig.value ||
+        isOutput.value ||
+        isInput.value ||
+        isContext.value
+    );
     const contextSide = computed(() => {
       return props.node.data?.contextSide || "right";
     });
@@ -91,6 +100,7 @@ export default {
       keepOpen,
       isContext,
       isConfig,
+      showForm,
       contextSide,
       onEnter,
       onLeave,

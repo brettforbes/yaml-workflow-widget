@@ -132,7 +132,7 @@
             v-else-if="slotProps.node.data?.category"
             :node="slotProps.node"
             @edit="openEdit"
-            @form="openConfigForm"
+            @form="openCategoryForm"
           />
           <CliAppNode v-else :node="slotProps.node" @edit="openEdit" />
         </NiceDagNodes>
@@ -161,6 +161,12 @@
       :node="configFormNode"
       :uses="configFormUses"
       @close="configFormOpen = false"
+    />
+    <OutputFormModal
+      :open="outputFormOpen"
+      :node="outputFormNode"
+      :uses="outputFormUses"
+      @close="outputFormOpen = false"
     />
   </div>
 </template>
@@ -191,6 +197,7 @@ import WorkflowEdge from "./components/WorkflowEdge.vue";
 import EdgeLegend from "./components/EdgeLegend.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
 import ConfigFormModal from "./components/ConfigFormModal.vue";
+import OutputFormModal from "./components/OutputFormModal.vue";
 import "./components/CliWorkflowView.css";
 import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
@@ -266,6 +273,7 @@ export default {
     EdgeLegend,
     YamlEditModal,
     ConfigFormModal,
+    OutputFormModal,
   },
   setup() {
     const isEmbed = computed(() => {
@@ -291,6 +299,9 @@ export default {
     const configFormOpen = ref(false);
     const configFormNode = ref(null);
     const configFormUses = ref("");
+    const outputFormOpen = ref(false);
+    const outputFormNode = ref(null);
+    const outputFormUses = ref("");
 
     const getEdgeAttributes = (edge) => {
       const type =
@@ -483,10 +494,20 @@ export default {
       modalOpen.value = true;
     };
 
-    const openConfigForm = ({ node, uses }) => {
-      configFormNode.value = node;
-      configFormUses.value = uses || node?.data?.uses || "";
-      configFormOpen.value = true;
+    const openCategoryForm = ({ node, uses, category }) => {
+      const cat = category || node?.data?.category;
+      const u = uses || node?.data?.uses || "";
+      if (cat === "config") {
+        configFormNode.value = node;
+        configFormUses.value = u;
+        configFormOpen.value = true;
+        return;
+      }
+      if (cat === "output") {
+        outputFormNode.value = node;
+        outputFormUses.value = u;
+        outputFormOpen.value = true;
+      }
     };
 
     return {
@@ -514,7 +535,10 @@ export default {
       configFormOpen,
       configFormNode,
       configFormUses,
-      openConfigForm,
+      outputFormOpen,
+      outputFormNode,
+      outputFormUses,
+      openCategoryForm,
     };
   },
 };
