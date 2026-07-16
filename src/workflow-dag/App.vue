@@ -15,14 +15,6 @@
       >
         ⚙
       </button>
-      <button
-        v-if="!isEmbed"
-        type="button"
-        class="btn btn-sm btn-outline-secondary"
-        @click="codeCollapsed = !codeCollapsed"
-      >
-        {{ codeCollapsed ? "Show YAML" : "Hide YAML" }}
-      </button>
       <a
         v-if="!isEmbed"
         class="btn btn-sm btn-outline-secondary"
@@ -55,7 +47,28 @@
         aria-orientation="vertical"
         aria-label="Resize code and diagram panes"
         @mousedown.prevent="startDividerDrag"
-      />
+      >
+        <button
+          type="button"
+          class="split-collapse-btn"
+          title="Collapse code pane"
+          aria-label="Collapse code pane"
+          @mousedown.stop
+          @click.stop="codeCollapsed = true"
+        >
+          ‹
+        </button>
+      </div>
+      <button
+        v-if="!isEmbed && codeCollapsed"
+        type="button"
+        class="split-reopen-btn"
+        title="Show code pane"
+        aria-label="Show code pane"
+        @click="codeCollapsed = false"
+      >
+        ›
+      </button>
       <div
         class="diagram-column"
         :class="{ 'embed-diagram': isEmbed }"
@@ -319,15 +332,43 @@ body,
   width: 100%;
 }
 .split-divider {
-  flex: 0 0 6px;
+  flex: 0 0 10px;
   cursor: col-resize;
   background: var(--wd-border);
   position: relative;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .split-divider:hover,
 body.wd-divider-dragging .split-divider {
   background: var(--wd-text-muted);
+}
+.split-collapse-btn,
+.split-reopen-btn {
+  border: none;
+  background: var(--wd-toolbar-bg);
+  color: var(--wd-text-muted);
+  width: 16px;
+  height: 36px;
+  padding: 0;
+  line-height: 1;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--wd-border);
+}
+.split-collapse-btn:hover,
+.split-reopen-btn:hover {
+  color: var(--wd-text);
+  background: var(--wd-surface-muted);
+}
+.split-reopen-btn {
+  flex: 0 0 16px;
+  align-self: center;
+  margin: 0 2px;
+  z-index: 2;
 }
 body.wd-divider-dragging {
   cursor: col-resize;
