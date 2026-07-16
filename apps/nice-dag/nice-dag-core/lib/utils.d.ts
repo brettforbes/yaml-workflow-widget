@@ -1,0 +1,36 @@
+import { Node, StyleObjectType, ElementAttributesType, Bounds, IViewNode, HtmlElementBounds, Size, Point } from "./types";
+export declare function findEndNodes(nodes?: IViewNode[]): IViewNode[];
+export declare function getInnerSize(element: HTMLElement): Size;
+declare class EditableElement {
+    private pElement;
+    private _exists;
+    constructor(elm: HTMLElement | SVGElement, exists?: boolean);
+    get alreadyExists(): boolean;
+    withStyle: (style: StyleObjectType) => EditableElement;
+    withAttributes: (attr: ElementAttributesType) => EditableElement;
+    withAbsolutePoint: (point: Point) => EditableElement;
+    withAbsolutePosition: (bounds: Bounds) => EditableElement;
+    withSize: (size: Size) => EditableElement;
+    withWidth: (width: number) => EditableElement;
+    withHeight: (height: number) => EditableElement;
+    withClassNames: (...classNames: string[]) => EditableElement;
+    get htmlElement(): HTMLElement;
+    get svgElement(): SVGElement;
+}
+export declare function editHtmlElement(htmlElement: HTMLElement | SVGElement): EditableElement;
+export declare function createElement(parentElement?: HTMLElement, className?: string): EditableElement;
+export declare function createElementIfAbsent(parentElement: HTMLElement, className: string): EditableElement;
+export declare function createSvgElement(svg: SVGElement, name: string): EditableElement;
+export declare function createSvgIfAbsent(parentElement: HTMLElement, selector?: string, markerId?: string): EditableElement;
+export declare function isEmpty(arr?: Array<any>): boolean;
+export declare function uuid(): string;
+export declare function float2Int(v: number): number;
+export declare function resetBoundsWithRatio(bounds: HtmlElementBounds, ratio: number): HtmlElementBounds;
+export declare function contains(point: Point, bounds: Bounds): boolean;
+export declare function htmlElementBounds(element: HTMLElement | SVGElement): HtmlElementBounds;
+export declare function withDefaultValues(target: any, defaultValues: any): any;
+export declare function calcAngle(opposite: number, adjacent: number): number;
+export declare function flattenToHirerarchy(nodes: Node[]): Node[];
+export declare function getDirection(graphLabel: dagre.GraphLabel): string;
+export declare function valueWithDefault<T>(value: T, defaultValue: T): T;
+export {};
