@@ -22,10 +22,10 @@ examples:
 
 documentation:
   - name: SPEC-008
-    src: ../../.seed/SPEC-008-langium-workflow-gse.md
+    src: ../../.governance/specs/SPEC-008-langium-workflow-gse.md
     priority: high
   - name: SPEC-007 (runtime / YAML truth)
-    src: ../../.seed/SPEC-007-cli-workflow-dsl.md
+    src: ../../.governance/specs/SPEC-007-cli-workflow-dsl.md
     priority: high
   - name: Workflow DSL (12B)
     src: ../../.seed/12B_Workflow_DSL_Description.md

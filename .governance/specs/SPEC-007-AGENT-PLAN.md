@@ -411,4 +411,4 @@ Tracked so earlier Langium interest is not lost, but **must not block SPEC-007**
 - [x] README enables a new agent to add a driver without redesigning DSL
 - [x] E8 not started unless a new SPEC explicitly opens Langium work
 
-See `.seed/SPEC-007-CONTINUITY.md` for PR links and handoff.
+See `.governance/specs/SPEC-007-CONTINUITY.md` for PR links and handoff.

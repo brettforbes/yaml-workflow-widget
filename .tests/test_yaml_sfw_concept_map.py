@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MAP = ROOT / ".seed" / "YAML_SFW_CONCEPT_MAP.md"
-SPEC = ROOT / ".seed" / "SPEC-009-post-foundation.md"
+SPEC = ROOT / ".governance" / "specs" / "SPEC-009-post-foundation.md"
 GRAMMAR = ROOT / "packages" / "workflow-lang" / "src" / "language" / "workflow.langium"
 
 

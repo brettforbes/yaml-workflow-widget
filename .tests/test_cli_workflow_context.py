@@ -1,6 +1,6 @@
 """E3-S5: context graph merge uniqueness (R7-03-06, R7-05-04).
 
-Normative reference: `.seed/SPEC-007-AGENT-PLAN.md` Epic E3-S5,
+Normative reference: `.governance/specs/SPEC-007-AGENT-PLAN.md` Epic E3-S5,
 `.seed/12B_Workflow_DSL_Description.md` §2.5.
 """
 
