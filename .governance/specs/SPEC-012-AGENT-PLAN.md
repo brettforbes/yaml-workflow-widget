@@ -7,8 +7,8 @@
 | Product surface after F0 | `src/` webpack iframe — `.\start.ps1` → `http://localhost:4001` |
 | Nice-DAG library | `apps/nice-dag/` only |
 | Langium package | `packages/workflow-lang/` |
-| Nice-DAG skill (read-only) | `yaml-workflow-dag/.cursor/skills/nice-dag/SKILL.md` |
-| Skills | `.cursor/skills/langium`, `.cursor/skills/lai*` — **never** `.agents/` |
+| Nice-DAG skill | `.cursor/skills/nice-dag/SKILL.md` (vendored copy; do not modify `yaml-workflow-dag` for product work) |
+| Skills | `.cursor/skills/langium`, `.cursor/skills/lai*`, `.cursor/skills/nice-dag` — **never** `.agents/` |
 
 ## Execution order
 
