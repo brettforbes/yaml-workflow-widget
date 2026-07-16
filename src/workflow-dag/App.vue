@@ -167,6 +167,23 @@
           />
         </NiceDagEdges>
         <EdgeLegend :theme="theme" :colored="edgeColored" />
+        <div v-if="editMode" class="edit-palette" @click.stop>
+          <button type="button" title="Add step" @click="addNodeKind('step')">
+            + step
+          </button>
+          <button type="button" title="Add start" @click="addNodeKind('start')">
+            + start
+          </button>
+          <button type="button" title="Add target" @click="addNodeKind('target')">
+            + target
+          </button>
+          <button type="button" title="Add collector" @click="addNodeKind('collector')">
+            + ctx
+          </button>
+          <button type="button" title="Add end" @click="addNodeKind('end')">
+            + end
+          </button>
+        </div>
       </div>
     </div>
     <YamlEditModal
@@ -227,7 +244,13 @@ import ContextCollectorNode from "./components/ContextCollectorNode.vue";
 import WorkflowEdge from "./components/WorkflowEdge.vue";
 import EdgeLegend from "./components/EdgeLegend.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
-import ConfigFormModal from "./components/ConfigFormModal.vue";
+import {
+  createCollectorNode,
+  createEndNode,
+  createStartNode,
+  createStepNode,
+  createTargetNode,
+} from "./components/nodeFactories";
 import OutputFormModal from "./components/OutputFormModal.vue";
 import InputFormModal from "./components/InputFormModal.vue";
 import ContextFormModal from "./components/ContextFormModal.vue";
@@ -572,6 +595,24 @@ export default {
       }
     };
 
+    const addNodeKind = (kind) => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag || !editMode.value) return;
+      const point = { x: 48, y: 48 };
+      let node;
+      if (kind === "step") node = createStepNode();
+      else if (kind === "start") node = createStartNode();
+      else if (kind === "target") node = createTargetNode();
+      else if (kind === "end") node = createEndNode();
+      else if (kind === "collector") node = createCollectorNode();
+      else return;
+      niceDag.addNode(node, point);
+      if (kind === "step") {
+        const col = createCollectorNode(node.id);
+        niceDag.addNode(col, { x: point.x + 220, y: point.y });
+      }
+    };
+
     const openEdit = ({ node, yaml: y, title }) => {
       modalNode.value = node;
       modalYaml.value = y || "";
@@ -641,6 +682,7 @@ export default {
       contextFormOpen,
       contextFormNode,
       openCategoryForm,
+      addNodeKind,
     };
   },
 };
@@ -793,6 +835,28 @@ body.wd-divider-dragging {
 }
 .diagram-column.edit-mode .nice-dag-editor-bkg {
   opacity: 1;
+}
+.edit-palette {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 220px;
+}
+.edit-palette button {
+  border: 1px solid var(--wd-border);
+  background: var(--wd-surface);
+  color: var(--wd-text-muted);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.edit-palette button:hover {
+  color: var(--wd-text);
 }
 .dag-host.embed .embed-diagram {
   max-width: 33.333%;
