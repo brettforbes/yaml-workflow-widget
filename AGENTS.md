@@ -63,6 +63,8 @@ Agent plan / issue map: [`.governance/specs/SPEC-012-AGENT-PLAN.md`](.governance
 
 **After F0:** `.\start.ps1` → `http://localhost:4001` (webpack iframe). Do not add features in `yaml-workflow-dag`.
 
+Nice-DAG skill (copied for agents working in this repo): [`.cursor/skills/nice-dag/SKILL.md`](.cursor/skills/nice-dag/SKILL.md). Prefer this path over reading the skill from `yaml-workflow-dag` (still do not modify that repo for product work).
+
 ### Governance
 
 VibeGov rules: `.cursor/rules/gov-*.mdc`. Branch from `develop`, PR into `develop`. Canonical specs live under `.governance/specs/`; do not delete `.seed` DSL seed docs (12A/12B/12C) or `.cursor/skills` docs.
