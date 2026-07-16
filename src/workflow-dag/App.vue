@@ -168,6 +168,17 @@
       :uses="outputFormUses"
       @close="outputFormOpen = false"
     />
+    <InputFormModal
+      :open="inputFormOpen"
+      :node="inputFormNode"
+      :sources="inputSources"
+      @close="inputFormOpen = false"
+    />
+    <ContextFormModal
+      :open="contextFormOpen"
+      :node="contextFormNode"
+      @close="contextFormOpen = false"
+    />
   </div>
 </template>
 
@@ -198,6 +209,8 @@ import EdgeLegend from "./components/EdgeLegend.vue";
 import YamlEditModal from "./components/YamlEditModal.vue";
 import ConfigFormModal from "./components/ConfigFormModal.vue";
 import OutputFormModal from "./components/OutputFormModal.vue";
+import InputFormModal from "./components/InputFormModal.vue";
+import ContextFormModal from "./components/ContextFormModal.vue";
 import "./components/CliWorkflowView.css";
 import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
@@ -274,6 +287,8 @@ export default {
     YamlEditModal,
     ConfigFormModal,
     OutputFormModal,
+    InputFormModal,
+    ContextFormModal,
   },
   setup() {
     const isEmbed = computed(() => {
@@ -302,6 +317,41 @@ export default {
     const outputFormOpen = ref(false);
     const outputFormNode = ref(null);
     const outputFormUses = ref("");
+    const inputFormOpen = ref(false);
+    const inputFormNode = ref(null);
+    const contextFormOpen = ref(false);
+    const contextFormNode = ref(null);
+
+    const inputSources = computed(() => {
+      const doc = (() => {
+        try {
+          return yaml.load(yamlText.value) || {};
+        } catch {
+          return workflowDoc || {};
+        }
+      })();
+      const sources = [];
+      const inputs = doc.inputs;
+      if (inputs && typeof inputs === "object") {
+        for (const key of Object.keys(inputs)) {
+          sources.push({
+            value: `$workflow.inputs.${key}`,
+            label: `workflow input: ${key}`,
+          });
+        }
+      }
+      for (const step of doc.steps || []) {
+        const vars = step.output?.vars;
+        if (!vars || typeof vars !== "object") continue;
+        for (const key of Object.keys(vars)) {
+          sources.push({
+            value: `$steps.${step.id}.vars.${key}`,
+            label: `${step.id} → ${key}`,
+          });
+        }
+      }
+      return sources;
+    });
 
     const getEdgeAttributes = (edge) => {
       const type =
@@ -507,6 +557,16 @@ export default {
         outputFormNode.value = node;
         outputFormUses.value = u;
         outputFormOpen.value = true;
+        return;
+      }
+      if (cat === "input") {
+        inputFormNode.value = node;
+        inputFormOpen.value = true;
+        return;
+      }
+      if (cat === "context") {
+        contextFormNode.value = node;
+        contextFormOpen.value = true;
       }
     };
 
@@ -538,6 +598,11 @@ export default {
       outputFormOpen,
       outputFormNode,
       outputFormUses,
+      inputFormOpen,
+      inputFormNode,
+      inputSources,
+      contextFormOpen,
+      contextFormNode,
       openCategoryForm,
     };
   },
