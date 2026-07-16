@@ -1,0 +1,16 @@
+apiVersion: spiderfeet.workflow/v1
+kind: Workflow
+id: workflow--no-inputs-fixture
+
+info:
+  name: No Inputs Fixture
+  description: Fixture for E2-S2 — target node must be omitted.
+
+steps:
+  - id: sfp_cli_subfinder
+    uses: tool.subfinder
+    needs: []
+    config:
+      argv:
+        - "-d"
+        - "example.com"

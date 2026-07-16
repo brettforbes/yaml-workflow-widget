@@ -41,6 +41,14 @@ export function dumpWorkflowHeaderYaml(doc) {
 export function workflowDocToNiceDagModel(doc) {
   const steps = Array.isArray(doc?.steps) ? doc.steps : [];
   const stepNodes = workflowStepsToNiceDagModel(steps);
+  const hasInputs =
+    doc?.inputs !== undefined &&
+    doc?.inputs !== null &&
+    !(
+      typeof doc.inputs === "object" &&
+      !Array.isArray(doc.inputs) &&
+      Object.keys(doc.inputs).length === 0
+    );
 
   const startNode = {
     id: WORKFLOW_START_ID,
@@ -58,8 +66,27 @@ export function workflowDocToNiceDagModel(doc) {
     },
   };
 
-  // First steps with no needs (or empty needs) hang off start for now.
-  // Target insertion (E2-S2) will rewire this when inputs exist.
+  const nodes = [startNode];
+  let entryParentId = WORKFLOW_START_ID;
+
+  if (hasInputs) {
+    const targetNode = {
+      id: WORKFLOW_TARGET_ID,
+      dependencies: [WORKFLOW_START_ID],
+      data: {
+        kind: NODE_KIND.TARGET,
+        label: "target",
+        yaml: yaml
+          .dump({ inputs: doc.inputs }, { lineWidth: 120, noRefs: true })
+          .trimEnd(),
+        raw: doc.inputs,
+      },
+    };
+    nodes.push(targetNode);
+    entryParentId = WORKFLOW_TARGET_ID;
+  }
+
+  // Entry steps (no needs) hang off start or target.
   const entryIds = new Set(
     stepNodes
       .filter((n) => !n.dependencies || n.dependencies.length === 0)
@@ -67,11 +94,12 @@ export function workflowDocToNiceDagModel(doc) {
   );
   for (const node of stepNodes) {
     if (entryIds.has(node.id)) {
-      node.dependencies = [WORKFLOW_START_ID];
+      node.dependencies = [entryParentId];
     }
   }
 
-  return [startNode, ...stepNodes];
+  nodes.push(...stepNodes);
+  return nodes;
 }
 
 /**
