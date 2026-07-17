@@ -417,6 +417,10 @@ export default {
     const yamlDiagnostics = ref([]);
     let validateSeq = 0;
     let validateTimer = null;
+    let diagramSyncTimer = null;
+    /** Suppress YAML→DAG while writing YAML from diagram (and vice versa). */
+    let syncingFromDiagram = false;
+    let syncingFromYaml = false;
 
     const workflowDoc = yaml.load(sampleYaml);
     const mapped = workflowDocToNiceDagModel(workflowDoc || {});
@@ -499,20 +503,7 @@ export default {
     };
 
     const prettyPrintYaml = () => {
-      const niceDag = niceDagReactive.use();
-      if (!niceDag?.getAllNodes) return;
-      let base = {};
-      try {
-        // Prefer last-good so invalid pane text cannot poison pretty-print.
-        base = yaml.load(lastGoodYaml.value) || {};
-      } catch {
-        try {
-          base = yaml.load(yamlText.value) || {};
-        } catch {
-          base = {};
-        }
-      }
-      yamlText.value = diagramToWorkflowYaml(niceDag.getAllNodes(), base);
+      pushDiagramToYaml();
     };
 
     const toggleEditMode = () => {
@@ -521,6 +512,7 @@ export default {
       if (editMode.value) {
         niceDag.stopEditing();
         editMode.value = false;
+        pushDiagramToYaml();
       } else {
         niceDag.startEditing();
         if ("gridVisible" in niceDag) niceDag.gridVisible = true;
@@ -666,9 +658,11 @@ export default {
     };
 
     const applyYamlToDiagram = (text) => {
+      if (syncingFromDiagram) return;
       if (text === lastAppliedYaml.value) return;
       const niceDag = niceDagReactive.use();
       if (!niceDag) return;
+      syncingFromYaml = true;
       try {
         const applied = applyValidatedYamlToNiceDag(niceDag, text);
         if (!applied) return;
@@ -684,6 +678,8 @@ export default {
         applyCenter();
       } catch (e) {
         console.warn("[workflow-dag] YAML→DAG apply failed", e);
+      } finally {
+        syncingFromYaml = false;
       }
     };
 
@@ -708,8 +704,51 @@ export default {
     };
 
     watch(yamlText, (text) => {
+      if (syncingFromDiagram) return;
       scheduleYamlValidate(text);
     });
+
+    const pushDiagramToYaml = () => {
+      if (syncingFromYaml) return;
+      const niceDag = niceDagReactive.use();
+      if (!niceDag?.getAllNodes) return;
+      let base = {};
+      try {
+        base = yaml.load(lastGoodYaml.value) || {};
+      } catch {
+        base = {};
+      }
+      const next = diagramToWorkflowYaml(niceDag.getAllNodes(), base);
+      if (next === yamlText.value) return;
+      syncingFromDiagram = true;
+      try {
+        yamlText.value = next;
+        lastGoodYaml.value = next;
+        lastAppliedYaml.value = next;
+        yamlValid.value = true;
+        yamlDiagnostics.value = [];
+      } finally {
+        // Allow Vue to flush before clearing; avoid YAML→DAG remount loop.
+        setTimeout(() => {
+          syncingFromDiagram = false;
+        }, 0);
+      }
+    };
+
+    const scheduleDiagramToYaml = () => {
+      if (!editMode.value) return;
+      if (diagramSyncTimer) clearTimeout(diagramSyncTimer);
+      diagramSyncTimer = setTimeout(() => {
+        diagramSyncTimer = null;
+        pushDiagramToYaml();
+      }, 350);
+    };
+
+    const dagChangeListener = {
+      onChange() {
+        scheduleDiagramToYaml();
+      },
+    };
 
     onMounted(() => {
       window.addEventListener("message", onHostMessage);
@@ -719,6 +758,9 @@ export default {
       if (niceDag) {
         niceDag.setScale(DEFAULT_DAG_SCALE);
         applyCenter();
+        if (typeof niceDag.addNiceDagChangeListener === "function") {
+          niceDag.addNiceDagChangeListener(dagChangeListener);
+        }
       }
       runYamlValidate(yamlText.value);
     });
@@ -726,6 +768,11 @@ export default {
     onBeforeUnmount(() => {
       window.removeEventListener("message", onHostMessage);
       if (validateTimer) clearTimeout(validateTimer);
+      if (diagramSyncTimer) clearTimeout(diagramSyncTimer);
+      const niceDag = niceDagReactive.use();
+      if (niceDag?.removeNiceDagChangeListener) {
+        niceDag.removeNiceDagChangeListener(dagChangeListener);
+      }
     });
 
     const highlightYaml = (code) => {
