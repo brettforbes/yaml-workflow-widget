@@ -1,6 +1,6 @@
 /**
  * YAML workflow document → Nice-DAG hierarchical model (SPEC-012 E2+).
- * Spec: .seed/02_Update_Widget_Requirements.md §2
+ * Spec: .governance/specs/SPEC-012-update-widget.md / .seed/02_Update_Widget_Requirements.md §2 (seed is source-of-truth docs only; not a runtime import)
  */
 
 import * as yaml from "js-yaml";
