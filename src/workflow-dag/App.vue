@@ -318,6 +318,12 @@ import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
 import { validateWorkflowYaml } from "./components/yamlValidate";
 import { applyValidatedYamlToNiceDag } from "./components/yamlToDag";
+import {
+  HOST_MSG,
+  normalizeHostMessage,
+  postReady,
+  postToHost,
+} from "./hostProtocol";
 
 const CATEGORY_W = 160;
 const CATEGORY_H = 56;
@@ -536,13 +542,66 @@ export default {
       }
     };
 
-    /** E1 stub / E6 host contract: listen for setTheme from parent */
+    /** E6 host postMessage contract — see HOST_PROTOCOL.md */
+    const replyYaml = (requestId) => {
+      postToHost(HOST_MSG.YAML_RESULT, {
+        yaml: lastGoodYaml.value || yamlText.value,
+        ok: yamlValid.value,
+        requestId,
+      });
+    };
+
+    const selectStepById = (stepId) => {
+      if (!stepId) return;
+      const niceDag = niceDagReactive.use();
+      const node = niceDag?.findNodeById?.(stepId);
+      if (!node) return;
+      selectedNodeIds.value = [stepId];
+      try {
+        node.dom?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+      } catch (_) {
+        /* ignore */
+      }
+    };
+
     const onHostMessage = (event) => {
-      const data = event?.data;
-      if (!data || typeof data !== "object") return;
-      if (data.type === "setTheme" || data.action === "setTheme") {
-        const value = data.payload?.theme ?? data.theme ?? data.payload;
+      const msg = normalizeHostMessage(event?.data);
+      if (!msg) return;
+      const { type, payload, requestId } = msg;
+      if (type === HOST_MSG.SET_THEME) {
+        const value =
+          payload?.theme ??
+          (typeof payload === "string" ? payload : null);
         if (value) setTheme(value);
+        return;
+      }
+      if (type === HOST_MSG.SET_YAML) {
+        const yaml =
+          typeof payload === "string"
+            ? payload
+            : payload?.yaml ?? payload?.text;
+        if (typeof yaml === "string") {
+          yamlText.value = yaml;
+        }
+        return;
+      }
+      if (type === HOST_MSG.GET_YAML) {
+        replyYaml(requestId ?? payload?.requestId);
+        return;
+      }
+      if (type === HOST_MSG.SELECT_STEP) {
+        const stepId =
+          payload?.stepId ?? payload?.id ?? payload?.step ?? payload;
+        if (typeof stepId === "string") selectStepById(stepId);
+        return;
+      }
+      // mcpExplain / mcpProduce handled in E6-S5; acknowledge unknown MCP with stub until then
+      if (type === HOST_MSG.MCP_EXPLAIN || type === HOST_MSG.MCP_PRODUCE) {
+        postToHost(HOST_MSG.MCP_RESULT, {
+          ok: false,
+          error: "MCP bridge not yet enabled (E6-S5)",
+          requestId,
+        });
       }
     };
 
@@ -689,9 +748,14 @@ export default {
       if (my !== validateSeq) return;
       yamlDiagnostics.value = result.diagnostics || [];
       yamlValid.value = !!result.ok;
+      postToHost(HOST_MSG.VALIDATION_RESULT, {
+        ok: !!result.ok,
+        diagnostics: result.diagnostics || [],
+      });
       if (result.ok) {
         lastGoodYaml.value = text;
         applyYamlToDiagram(text);
+        postToHost(HOST_MSG.YAML_CHANGED, { yaml: text });
       }
     };
 
@@ -763,6 +827,7 @@ export default {
         }
       }
       runYamlValidate(yamlText.value);
+      postReady();
     });
 
     onBeforeUnmount(() => {
@@ -784,7 +849,15 @@ export default {
     };
 
     const onNodeSelect = (nodeId, event) => {
-      if (!editMode.value) return;
+      if (!editMode.value) {
+        // Allow host selection sync outside edit mode for stepSelected.
+        const id = typeof nodeId === "string" ? nodeId : nodeId?.id;
+        if (id) {
+          selectedNodeIds.value = [id];
+          postToHost(HOST_MSG.STEP_SELECTED, { stepId: id });
+        }
+        return;
+      }
       edgeMenu.value = { open: false, x: 0, y: 0 };
       const id = typeof nodeId === "string" ? nodeId : nodeId?.id;
       if (!id) return;
@@ -796,6 +869,7 @@ export default {
       } else {
         selectedNodeIds.value = [id];
       }
+      postToHost(HOST_MSG.STEP_SELECTED, { stepId: id });
     };
 
     const onDiagramContextMenu = (event) => {
