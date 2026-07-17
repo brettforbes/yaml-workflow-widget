@@ -40,7 +40,12 @@ Outbound widget → host messages use `target: "parent"`.
 | `mcpResult` | `{ ok: boolean, text?: string, yaml?: string, requestId?: string, error?: string }` | Response to MCP bridge calls |
 | `themeChanged` | `{ theme: "light"\|"dark" }` | After theme applies (host or UI) |
 
-## Host YAML in/out (R12-E6-02)
+## Step selection (R12-E6-04)
+
+- **Host → iframe `selectStep`**: `{ stepId }` selects the Nice-DAG node (scroll into view when possible) and updates `selectedNodeIds`.
+- **Iframe → host `stepSelected`**: emitted when the user clicks a step/start/target/end/collector node (edit mode and read mode).
+- Host tabs can drive the diagram; diagram clicks can drive host tabs.
+
 
 - **`setYaml`**: replaces the code pane and **immediately** validates; valid YAML remounts the diagram; emits `validationResult` and (when ok) `yamlChanged`.
 - **`getYaml`**: replies with `yamlResult` containing **last-good validated** YAML (`ok` mirrors validate state). Invalid edits in the pane do not overwrite last-good until validation succeeds.
