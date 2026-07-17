@@ -37,6 +37,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    # Widget imports packages/workflow-lang/out (gitignored). Build Langium package first.
     - name: Build
       run: |
         npm install
