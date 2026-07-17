@@ -8,7 +8,7 @@ import {
   WORKFLOW_END_ID,
   WORKFLOW_START_ID,
   WORKFLOW_TARGET_ID,
-} from "./mapper";
+} from "./mapper.js";
 
 /**
  * @param {object[]} allNodes - niceDag.getAllNodes()
