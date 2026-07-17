@@ -470,6 +470,8 @@ export default {
       }
       yamlText.value = diagramToWorkflowYaml(niceDag.getAllNodes(), base);
     };
+
+    const toggleEditMode = () => {
       const niceDag = niceDagReactive.use();
       if (!niceDag) return;
       if (editMode.value) {
