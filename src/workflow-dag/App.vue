@@ -324,6 +324,10 @@ import {
   postReady,
   postToHost,
 } from "./hostProtocol";
+import {
+  explainWorkflowYaml,
+  produceWorkflowForHost,
+} from "./components/hostMcp";
 
 const CATEGORY_W = 160;
 const CATEGORY_H = 56;
@@ -599,13 +603,48 @@ export default {
         if (typeof stepId === "string") selectStepById(stepId);
         return;
       }
-      // mcpExplain / mcpProduce handled in E6-S5; acknowledge unknown MCP with stub until then
-      if (type === HOST_MSG.MCP_EXPLAIN || type === HOST_MSG.MCP_PRODUCE) {
-        postToHost(HOST_MSG.MCP_RESULT, {
-          ok: false,
-          error: "MCP bridge not yet enabled (E6-S5)",
-          requestId,
-        });
+      // mcpExplain / mcpProduce — in-iframe bridge (E6-S5); stdio MCP remains in workflow-lang
+      if (type === HOST_MSG.MCP_EXPLAIN) {
+        const code =
+          typeof payload === "string"
+            ? payload
+            : payload?.code ?? payload?.yaml ?? yamlText.value;
+        try {
+          const text = explainWorkflowYaml(String(code || ""));
+          postToHost(HOST_MSG.MCP_RESULT, {
+            ok: true,
+            text,
+            requestId,
+          });
+        } catch (e) {
+          postToHost(HOST_MSG.MCP_RESULT, {
+            ok: false,
+            error: e.message || String(e),
+            requestId,
+          });
+        }
+        return;
+      }
+      if (type === HOST_MSG.MCP_PRODUCE) {
+        const intent =
+          typeof payload === "string"
+            ? payload
+            : payload?.intent ?? payload?.text ?? "";
+        try {
+          const yaml = produceWorkflowForHost(String(intent || ""));
+          postToHost(HOST_MSG.MCP_RESULT, {
+            ok: true,
+            yaml,
+            text: yaml,
+            requestId,
+          });
+        } catch (e) {
+          postToHost(HOST_MSG.MCP_RESULT, {
+            ok: false,
+            error: e.message || String(e),
+            requestId,
+          });
+        }
       }
     };
 
