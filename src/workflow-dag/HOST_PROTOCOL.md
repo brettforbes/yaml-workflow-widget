@@ -40,7 +40,11 @@ Outbound widget → host messages use `target: "parent"`.
 | `mcpResult` | `{ ok: boolean, text?: string, yaml?: string, requestId?: string, error?: string }` | Response to MCP bridge calls |
 | `ready` | `{ version: string }` | Widget mounted |
 
-## Console smoke (parent)
+## Host YAML in/out (R12-E6-02)
+
+- **`setYaml`**: replaces the code pane and **immediately** validates; valid YAML remounts the diagram; emits `validationResult` and (when ok) `yamlChanged`.
+- **`getYaml`**: replies with `yamlResult` containing **last-good validated** YAML (`ok` mirrors validate state). Invalid edits in the pane do not overwrite last-good until validation succeeds.
+
 
 ```js
 const iframe = document.querySelector('iframe');

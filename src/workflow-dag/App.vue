@@ -544,8 +544,9 @@ export default {
 
     /** E6 host postMessage contract — see HOST_PROTOCOL.md */
     const replyYaml = (requestId) => {
+      // Host getYaml returns last validated YAML only (R12-E6-02).
       postToHost(HOST_MSG.YAML_RESULT, {
-        yaml: lastGoodYaml.value || yamlText.value,
+        yaml: lastGoodYaml.value,
         ok: yamlValid.value,
         requestId,
       });
@@ -582,6 +583,8 @@ export default {
             : payload?.yaml ?? payload?.text;
         if (typeof yaml === "string") {
           yamlText.value = yaml;
+          // Immediate validate+render for host push (R12-E6-02); debounce still covers typing.
+          runYamlValidate(yaml);
         }
         return;
       }
