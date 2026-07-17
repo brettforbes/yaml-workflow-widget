@@ -1,9 +1,13 @@
 <template>
   <div
     class="wf-category-node"
-    :class="{ 'wf-category-context': isContext }"
+    :class="{
+      'wf-category-context': isContext,
+      'wf-node-selected': selected,
+    }"
     @mouseenter="onEnter"
     @mouseleave="onLeave"
+    @click="(e) => editable && $emit('select', node.id, e)"
   >
     <!-- Category ports are silent (no tooltips) per E2-S8. -->
     <div class="wf-connector wf-connector-in" />
@@ -51,8 +55,9 @@ export default {
   props: {
     node: { type: Object, required: true },
     editable: { type: Boolean, default: false },
+    selected: { type: Boolean, default: false },
   },
-  emits: ["edit", "form"],
+  emits: ["edit", "form", "select"],
   setup(props, { emit }) {
     const showTooltip = ref(false);
     const keepOpen = ref(false);

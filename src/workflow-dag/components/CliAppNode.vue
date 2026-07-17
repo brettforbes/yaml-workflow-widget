@@ -1,9 +1,14 @@
 <template>
   <div
     class="wf-cli-app-node"
-    :class="{ expanded: isExpanded, collapsed: !isExpanded }"
+    :class="{
+      expanded: isExpanded,
+      collapsed: !isExpanded,
+      'wf-node-selected': selected,
+    }"
     @mouseenter="onChromeEnter"
     @mouseleave="onChromeLeave"
+    @click="onSelectClick"
   >
     <div
       class="wf-connector wf-connector-in"
@@ -86,8 +91,9 @@ export default {
   props: {
     node: { type: Object, required: true },
     editable: { type: Boolean, default: false },
+    selected: { type: Boolean, default: false },
   },
-  emits: ["edit"],
+  emits: ["edit", "select"],
   setup(props, { emit }) {
     const showTooltip = ref(false);
     const keepOpen = ref(false);
@@ -176,6 +182,11 @@ export default {
       });
     };
 
+    const onSelectClick = (e) => {
+      if (!props.editable) return;
+      emit("select", props.node.id, e);
+    };
+
     return {
       isExpanded,
       contextSide,
@@ -190,6 +201,7 @@ export default {
       onPortLeave,
       hideSoon,
       onEdit,
+      onSelectClick,
     };
   },
 };

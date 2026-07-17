@@ -1,8 +1,10 @@
 <template>
   <div
     class="wf-start-node"
+    :class="{ 'wf-node-selected': selected }"
     @mouseenter="onEnter"
     @mouseleave="onLeave"
+    @click="onSelectClick"
   >
     <span class="wf-start-label">start</span>
     <button
@@ -35,8 +37,9 @@ export default {
   props: {
     node: { type: Object, required: true },
     editable: { type: Boolean, default: false },
+    selected: { type: Boolean, default: false },
   },
-  emits: ["edit"],
+  emits: ["edit", "select"],
   setup(props, { emit }) {
     const showTooltip = ref(false);
     const keepOpen = ref(false);
@@ -65,8 +68,20 @@ export default {
         title: props.node.data?.label || "workflow start",
       });
     };
+    const onSelectClick = (e) => {
+      if (!props.editable) return;
+      emit("select", props.node.id, e);
+    };
 
-    return { showTooltip, keepOpen, onEnter, onLeave, hideSoon, onEdit };
+    return {
+      showTooltip,
+      keepOpen,
+      onEnter,
+      onLeave,
+      hideSoon,
+      onEdit,
+      onSelectClick,
+    };
   },
 };
 </script>
