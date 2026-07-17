@@ -10,6 +10,7 @@ export const HOST_MSG = {
   YAML_RESULT: "yamlResult",
   VALIDATION_RESULT: "validationResult",
   SET_THEME: "setTheme",
+  THEME_CHANGED: "themeChanged",
   SELECT_STEP: "selectStep",
   STEP_SELECTED: "stepSelected",
   MCP_EXPLAIN: "mcpExplain",
