@@ -1,9 +1,12 @@
-# SfWorkflow MCP validate tool (SPEC-008 / R8-05)
+# SfWorkflow MCP tools (SPEC-008 / SPEC-012 E5-S5)
 
-## Tool
+## Tools
 
-`sf-workflow-syntax-checker` — accepts `{ code: string }`, returns diagnostics text
-or “no issues”.
+| Tool | Input | Output |
+|------|--------|--------|
+| `sf-workflow-syntax-checker` | `{ code }` | diagnostics or “no issues” |
+| `explain_workflow` | `{ code }` | YAML/.sfw explanation (inputs, steps, diagnostics) |
+| `produce_workflow` | `{ intent }` | valid workflow YAML |
 
 ## Smoke
 
