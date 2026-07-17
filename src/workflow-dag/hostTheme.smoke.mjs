@@ -18,8 +18,13 @@ if (msg?.type !== "setTheme" || msg.payload?.theme !== "dark") {
   console.error("HOST_THEME_SMOKE_FAIL msg", msg);
   process.exit(1);
 }
-if (normalizeTheme("DARK") !== "dark" || normalizeTheme("light") !== "light") {
+if (normalizeTheme("dark") !== "dark" || normalizeTheme("light") !== "light") {
   console.error("HOST_THEME_SMOKE_FAIL normalizeTheme");
+  process.exit(1);
+}
+if (normalizeTheme("DARK") !== "light") {
+  // Only exact "dark" is dark mode; anything else is light (E1 contract).
+  console.error("HOST_THEME_SMOKE_FAIL unexpected DARK handling");
   process.exit(1);
 }
 console.log("HOST_THEME_SMOKE_OK");
