@@ -317,6 +317,7 @@ import "./components/CliWorkflowView.css";
 import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
 import { validateWorkflowYaml } from "./components/yamlValidate";
+import { applyValidatedYamlToNiceDag } from "./components/yamlToDag";
 
 const CATEGORY_W = 160;
 const CATEGORY_H = 56;
@@ -410,6 +411,8 @@ export default {
     const yamlText = ref(sampleYaml);
     /** Last YAML that successfully validated — diagram must not use invalid edits (R12-E5-02). */
     const lastGoodYaml = ref(sampleYaml);
+    /** Last YAML successfully applied to the diagram (R12-E5-03). */
+    const lastAppliedYaml = ref(sampleYaml);
     const yamlValid = ref(true);
     const yamlDiagnostics = ref([]);
     let validateSeq = 0;
@@ -419,30 +422,6 @@ export default {
     const mapped = workflowDocToNiceDagModel(workflowDoc || {});
     const initNodes = mapped.nodes;
     const edgeMeta = ref(mapped.edgeMeta);
-
-    const runYamlValidate = async (text) => {
-      const my = ++validateSeq;
-      const result = await validateWorkflowYaml(text);
-      if (my !== validateSeq) return;
-      yamlDiagnostics.value = result.diagnostics || [];
-      yamlValid.value = !!result.ok;
-      if (result.ok) {
-        lastGoodYaml.value = text;
-        // Diagram remount from YAML is E5-S3; keep last-good only here so invalid never clobbers.
-      }
-    };
-
-    const scheduleYamlValidate = (text) => {
-      if (validateTimer) clearTimeout(validateTimer);
-      validateTimer = setTimeout(() => {
-        validateTimer = null;
-        runYamlValidate(text);
-      }, 400);
-    };
-
-    watch(yamlText, (text) => {
-      scheduleYamlValidate(text);
-    });
 
     const modalOpen = ref(false);
     const modalTitle = ref("");
@@ -685,6 +664,52 @@ export default {
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
     };
+
+    const applyYamlToDiagram = (text) => {
+      if (text === lastAppliedYaml.value) return;
+      const niceDag = niceDagReactive.use();
+      if (!niceDag) return;
+      try {
+        const applied = applyValidatedYamlToNiceDag(niceDag, text);
+        if (!applied) return;
+        edgeMeta.value = applied.edgeMeta;
+        lastAppliedYaml.value = text;
+        selectedNodeIds.value = [];
+        edgeMenu.value = { open: false, x: 0, y: 0 };
+        if (editMode.value) {
+          niceDag.startEditing();
+          if ("gridVisible" in niceDag) niceDag.gridVisible = true;
+        }
+        refreshEdgeStrokes();
+        applyCenter();
+      } catch (e) {
+        console.warn("[workflow-dag] YAML→DAG apply failed", e);
+      }
+    };
+
+    const runYamlValidate = async (text) => {
+      const my = ++validateSeq;
+      const result = await validateWorkflowYaml(text);
+      if (my !== validateSeq) return;
+      yamlDiagnostics.value = result.diagnostics || [];
+      yamlValid.value = !!result.ok;
+      if (result.ok) {
+        lastGoodYaml.value = text;
+        applyYamlToDiagram(text);
+      }
+    };
+
+    const scheduleYamlValidate = (text) => {
+      if (validateTimer) clearTimeout(validateTimer);
+      validateTimer = setTimeout(() => {
+        validateTimer = null;
+        runYamlValidate(text);
+      }, 400);
+    };
+
+    watch(yamlText, (text) => {
+      scheduleYamlValidate(text);
+    });
 
     onMounted(() => {
       window.addEventListener("message", onHostMessage);
