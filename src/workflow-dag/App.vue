@@ -506,6 +506,7 @@ export default {
 
     const setTheme = (next) => {
       theme.value = normalizeTheme(next);
+      postToHost(HOST_MSG.THEME_CHANGED, { theme: theme.value });
     };
 
     const prettyPrintYaml = () => {

@@ -24,7 +24,7 @@ Outbound widget → host messages use `target: "parent"`.
 |---------------|---------|--------|
 | `setYaml` | `{ yaml: string }` or string | Replace code-pane YAML; validate; update diagram when valid |
 | `getYaml` | `{ requestId?: string }` | Reply with `yamlResult` |
-| `setTheme` | `{ theme: "light"\|"dark" }` or `"light"\|"dark"` | Apply E1 theme |
+| `setTheme` | `{ theme: "light"\|"dark" }` or `"light"\|"dark"` | Apply E1 theme; emit `themeChanged` |
 | `selectStep` | `{ stepId: string }` | Select / scroll to step node when present |
 | `mcpExplain` | `{ code?: string }` | Reply `mcpResult` with explain text (E6-S5) |
 | `mcpProduce` | `{ intent: string }` | Reply `mcpResult` with produced YAML (E6-S5) |
@@ -38,7 +38,7 @@ Outbound widget → host messages use `target: "parent"`.
 | `yamlResult` | `{ yaml: string, ok: boolean, requestId?: string }` | Response to `getYaml` |
 | `stepSelected` | `{ stepId: string }` | User selects a step node |
 | `mcpResult` | `{ ok: boolean, text?: string, yaml?: string, requestId?: string, error?: string }` | Response to MCP bridge calls |
-| `ready` | `{ version: string }` | Widget mounted |
+| `themeChanged` | `{ theme: "light"\|"dark" }` | After theme applies (host or UI) |
 
 ## Host YAML in/out (R12-E6-02)
 
