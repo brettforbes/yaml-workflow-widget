@@ -1,0 +1,144 @@
+{
+  "description": "Nmap V2 ontology extensions staged for operator review (not yet in nuggets.json)",
+  "source": ".seed/05_Onotology_for_Nuggets.md §2.6–2.7",
+  "proposed_nuggets": [
+    {
+      "nugget_id": "HOST",
+      "nugget_type": "entity",
+      "nugget_description": "Networked system endpoint (host, router, or device) at a scan or trace hop",
+      "parent": "SCAN_RECORD"
+    },
+    {
+      "nugget_id": "HOST_STATUS",
+      "nugget_type": "descriptor",
+      "nugget_description": "Reachability state reported for a host (up, down, unknown, skipped)",
+      "parent": "HOST"
+    },
+    {
+      "nugget_id": "HOST_STATUS_REASON",
+      "nugget_type": "descriptor",
+      "nugget_description": "Scanner reason string for host status (echo-reply, syn-ack, etc.)",
+      "parent": "HOST"
+    },
+    {
+      "nugget_id": "TRACE",
+      "nugget_type": "entity",
+      "nugget_description": "Traceroute path between scanner and target; contains ordered hop entities",
+      "parent": "SCAN_RECORD"
+    },
+    {
+      "nugget_id": "TRACE_PROTOCOL",
+      "nugget_type": "descriptor",
+      "nugget_description": "Probe protocol used for trace (icmp, tcp, udp)",
+      "parent": "TRACE"
+    },
+    {
+      "nugget_id": "TRACE_HOP",
+      "nugget_type": "entity",
+      "nugget_description": "One ordered hop in a trace; contains the semantic HOST at that hop",
+      "parent": "TRACE"
+    },
+    {
+      "nugget_id": "HOP_ORDER",
+      "nugget_type": "descriptor",
+      "nugget_description": "1-based sequence index of hop within trace",
+      "parent": "TRACE_HOP"
+    },
+    {
+      "nugget_id": "HOP_TTL",
+      "nugget_type": "descriptor",
+      "nugget_description": "TTL reported for trace hop",
+      "parent": "TRACE_HOP"
+    },
+    {
+      "nugget_id": "HOP_RTT",
+      "nugget_type": "descriptor",
+      "nugget_description": "Round-trip time for trace hop when present",
+      "parent": "TRACE_HOP"
+    },
+    {
+      "nugget_id": "NETWORKS",
+      "nugget_type": "category",
+      "nugget_description": "Networking facts container under HOST",
+      "parent": "HOST"
+    },
+    {
+      "nugget_id": "APPLICATIONS",
+      "nugget_type": "category",
+      "nugget_description": "Application/service facts container under HOST",
+      "parent": "HOST"
+    },
+    {
+      "nugget_id": "ENVIRONMENT",
+      "nugget_type": "category",
+      "nugget_description": "OS and environment facts container under HOST",
+      "parent": "HOST"
+    },
+    {
+      "nugget_id": "PORT",
+      "nugget_type": "entity",
+      "nugget_description": "Transport port with state descriptors",
+      "parent": "TRANSPORT"
+    },
+    {
+      "nugget_id": "PORT_STATE",
+      "nugget_type": "descriptor",
+      "nugget_description": "Port state (open, filtered, closed, open|filtered)",
+      "parent": "PORT"
+    },
+    {
+      "nugget_id": "PORT_STATE_REASON",
+      "nugget_type": "descriptor",
+      "nugget_description": "Scanner reason for port state",
+      "parent": "PORT"
+    },
+    {
+      "nugget_id": "PORT_PROTOCOL",
+      "nugget_type": "descriptor",
+      "nugget_description": "Transport protocol name (tcp, udp)",
+      "parent": "PORT"
+    },
+    {
+      "nugget_id": "TRANSPORT",
+      "nugget_type": "entity",
+      "nugget_description": "Transport layer (TCP/UDP) under IP",
+      "parent": "IP_ADDRESS"
+    },
+    {
+      "nugget_id": "SERVICE",
+      "nugget_type": "entity",
+      "nugget_description": "Application service listening on an open port",
+      "parent": "APPLICATIONS"
+    },
+    {
+      "nugget_id": "SERVICE_EXTRAINFO",
+      "nugget_type": "descriptor",
+      "nugget_description": "Supplementary service detail from Nmap extrainfo",
+      "parent": "SERVICE"
+    },
+    {
+      "nugget_id": "SERVICE_VERSION",
+      "nugget_type": "descriptor",
+      "nugget_description": "Product and version string from Nmap service detection",
+      "parent": "SERVICE"
+    },
+    {
+      "nugget_id": "SERVICE_FINGERPRINT",
+      "nugget_type": "descriptor",
+      "nugget_description": "Nmap servicefp probe fingerprint string",
+      "parent": "SERVICE"
+    },
+    {
+      "nugget_id": "OS_MATCH_ACCURACY",
+      "nugget_type": "descriptor",
+      "nugget_description": "Nmap OS match accuracy percentage",
+      "parent": "OPERATING_SYSTEM"
+    },
+    {
+      "nugget_id": "SCAN_RECORD",
+      "nugget_type": "entity",
+      "nugget_description": "Scan head for one CLI examination run",
+      "parent": null
+    }
+  ]
+}

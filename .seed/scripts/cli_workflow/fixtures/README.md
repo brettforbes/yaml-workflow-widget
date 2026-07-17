@@ -4,7 +4,7 @@
 
 Real corpus `*_proposed_nuggets_edges.json` files (SPEC-006 structure docs) are
 not vendored into this workspace (Assumption A4 in
-`.seed/SPEC-007-AGENT-PLAN.md`). These fixtures are **synthetic**, hand-built
+`.governance/specs/SPEC-007-AGENT-PLAN.md`). These fixtures are **synthetic**, hand-built
 to mirror the corpus graph shape documented in `.seed/12C_Graph_Select_Language.md`
 §1 and the tool-specific topology notes in §10:
 

@@ -7,7 +7,7 @@ Example: `packages/workflow-lang/examples/minimal.sfw`
 ## Decision
 
 No automatic mapper in this SPEC. YAML remains interchange; `.sfw` is tooling surface.
-See `.seed/SPEC-009-post-foundation.md`.
+See `.governance/specs/SPEC-009-post-foundation.md`.
 
 ## Concept map
 

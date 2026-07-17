@@ -1,6 +1,6 @@
 """E3-S2: workflow step DAG build / cycle detection (R7-03-02, R7-05-03).
 
-Normative reference: `.seed/SPEC-007-AGENT-PLAN.md` Epic E3-S2.
+Normative reference: `.governance/specs/SPEC-007-AGENT-PLAN.md` Epic E3-S2.
 """
 
 from __future__ import annotations

@@ -1,0 +1,27 @@
+/* SPEC-012 E1-S1 — shared light/dark tokens for code pane + DAG */
+:root,
+[data-theme="light"] {
+  --wd-bg: #f7f7f7;
+  --wd-surface: #ffffff;
+  --wd-surface-muted: #fafafa;
+  --wd-border: #dee2e6;
+  --wd-text: #212529;
+  --wd-text-muted: #6c757d;
+  --wd-code-bg: #f8f9fa;
+  --wd-code-fg: #212529;
+  --wd-toolbar-bg: #ffffff;
+  --wd-accent: #0d6efd;
+}
+
+[data-theme="dark"] {
+  --wd-bg: #1a1a1a;
+  --wd-surface: #242424;
+  --wd-surface-muted: #2a2a2a;
+  --wd-border: #444;
+  --wd-text: #e9ecef;
+  --wd-text-muted: #adb5bd;
+  --wd-code-bg: #1e1e1e;
+  --wd-code-fg: #d4d4d4;
+  --wd-toolbar-bg: #1f1f1f;
+  --wd-accent: #6ea8fe;
+}

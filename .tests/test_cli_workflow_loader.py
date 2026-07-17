@@ -1,6 +1,6 @@
 """E3-S1: YAML load + schema validate + model objects (R7-03-02).
 
-Normative reference: `.seed/SPEC-007-AGENT-PLAN.md` Epic E3-S1.
+Normative reference: `.governance/specs/SPEC-007-AGENT-PLAN.md` Epic E3-S1.
 """
 
 from __future__ import annotations

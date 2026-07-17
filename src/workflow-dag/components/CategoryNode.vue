@@ -1,0 +1,151 @@
+<template>
+  <div
+    class="wf-category-node"
+    :class="{
+      'wf-category-context': isContext,
+      'wf-node-selected': selected,
+    }"
+    @mouseenter="onEnter"
+    @mouseleave="onLeave"
+    @click="(e) => editable && $emit('select', node.id, e)"
+  >
+    <!-- Category ports are silent (no tooltips) per E2-S8. -->
+    <div class="wf-connector wf-connector-in" />
+    <span class="wf-category-label">{{ node.data?.label || node.data?.category }}</span>
+    <button
+      v-if="editable"
+      type="button"
+      class="wf-node-delete"
+      title="Delete"
+      @click.stop="node.remove()"
+    >
+      ×
+    </button>
+    <div class="wf-connector wf-connector-out" />
+    <div
+      v-if="isContext"
+      class="wf-connector wf-connector-context"
+      :class="
+        contextSide === 'left'
+          ? 'wf-connector-context-left'
+          : 'wf-connector-context-right'
+      "
+      title="context export"
+    />
+    <YamlTooltip
+      v-if="showTooltip"
+      :yaml="node.data?.yaml || ''"
+      :title="node.data?.category || 'category'"
+      :show-form="showForm"
+      @edit="onEdit"
+      @form="onForm"
+      @mouseenter="keepOpen = true"
+      @mouseleave="hideSoon"
+    />
+  </div>
+</template>
+
+<script>
+import { computed, ref } from "vue";
+import YamlTooltip from "./YamlTooltip.vue";
+
+export default {
+  name: "CategoryNode",
+  components: { YamlTooltip },
+  props: {
+    node: { type: Object, required: true },
+    editable: { type: Boolean, default: false },
+    selected: { type: Boolean, default: false },
+  },
+  emits: ["edit", "form", "select"],
+  setup(props, { emit }) {
+    const showTooltip = ref(false);
+    const keepOpen = ref(false);
+    let hideTimer = null;
+
+    const isContext = computed(() => props.node.data?.category === "context");
+    const isConfig = computed(() => props.node.data?.category === "config");
+    const isOutput = computed(() => props.node.data?.category === "output");
+    const isInput = computed(() => props.node.data?.category === "input");
+    const showForm = computed(
+      () =>
+        isConfig.value ||
+        isOutput.value ||
+        isInput.value ||
+        isContext.value
+    );
+    const contextSide = computed(() => {
+      return props.node.data?.contextSide || "right";
+    });
+
+    const onEnter = () => {
+      clearTimeout(hideTimer);
+      showTooltip.value = true;
+    };
+    const onLeave = () => {
+      hideTimer = setTimeout(() => {
+        if (!keepOpen.value) showTooltip.value = false;
+      }, 150);
+    };
+    const hideSoon = () => {
+      keepOpen.value = false;
+      hideTimer = setTimeout(() => {
+        showTooltip.value = false;
+      }, 150);
+    };
+    const onEdit = () => {
+      showTooltip.value = false;
+      emit("edit", {
+        node: props.node,
+        yaml: props.node.data?.yaml || "",
+        title: props.node.data?.category || "category",
+      });
+    };
+    const onForm = () => {
+      showTooltip.value = false;
+      emit("form", {
+        node: props.node,
+        uses: props.node.data?.uses || "",
+        category: props.node.data?.category,
+      });
+    };
+
+    return {
+      showTooltip,
+      keepOpen,
+      isContext,
+      isConfig,
+      showForm,
+      contextSide,
+      onEnter,
+      onLeave,
+      hideSoon,
+      onEdit,
+      onForm,
+    };
+  },
+};
+</script>
+
+<style scoped>
+.wf-category-node {
+  position: relative;
+  width: 160px;
+  height: 56px;
+  border: 1px solid #999999;
+  border-radius: 10px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.wf-category-context {
+  border-color: #009e73;
+}
+.wf-category-label {
+  font-size: 13px;
+  color: #333;
+  text-transform: lowercase;
+}
+</style>

@@ -52,15 +52,18 @@ window.Widgets.Events = {};
         console.groupEnd();
     };
 
-    /**
-     * Compile event data
-     * @param {Object} payload data to be sent
-     * @param {String} eventName name of the event / type / topicName
-     * @param {String} action action to be taken by the event, this is undestood by the component
-     * @param {String} componentId id of the component, relevant for the component
-     * @param {Object} config additional config for the event
-     * @param {String} target possible target for the event, default is "parent", parent will be ignored by windowListener
-     */
+/**
+ * Compile event data for host ↔ widget messaging (SPEC-012 E6).
+ * See src/workflow-dag/HOST_PROTOCOL.md for the workflow message contract
+ * (setYaml, getYaml, yamlChanged, validationResult, setTheme, selectStep, stepSelected).
+ *
+ * @param {Object} payload data to be sent
+ * @param {String} eventName name of the event / type / topicName
+ * @param {String} action action to be taken by the event, this is undestood by the component
+ * @param {String} componentId id of the component, relevant for the component
+ * @param {Object} config additional config for the event
+ * @param {String} target possible target for the event, default is "parent", parent will be ignored by windowListener
+ */
     ns.compileEventData = (payload, eventName, action, componentId, config, target) => ({ 
         type: eventName, 
         payload: payload, 

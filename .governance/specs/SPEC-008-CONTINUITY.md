@@ -4,7 +4,7 @@
 |-------|-------|
 | Status | Langium Phase 2 complete on `develop` |
 | Date | 2026-07-14 |
-| Spec | [.seed/SPEC-008-langium-workflow-gse.md](SPEC-008-langium-workflow-gse.md) |
+| Spec | [SPEC-008-langium-workflow-gse.md](SPEC-008-langium-workflow-gse.md) |
 | Epic | [#11](https://github.com/brettforbes/yaml-workflow-widget/issues/11) |
 
 ## What landed

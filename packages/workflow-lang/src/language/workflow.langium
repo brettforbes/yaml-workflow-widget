@@ -158,15 +158,13 @@ ForEach:
 Collect:
     'collect' '{'
         'as' as=ID
-        (
-            ('reachable_from' reachableFrom=ID
-             'along' '{'
-                 'relation' relation=STRING
-                 ('direction' direction=STRING)?
-                 ('transitive' transitive=BOOLEAN)?
-             '}')?
-          | nodes=NodeMatch
-        )
+        ('reachable_from' reachableFrom=ID
+         'along' '{'
+             'relation' relation=STRING
+             ('direction' direction=STRING)?
+             ('transitive' transitive=BOOLEAN)?
+         '}')?
+        (nodes=NodeMatch)?
         ('project' project=STRING)?
     '}';
 

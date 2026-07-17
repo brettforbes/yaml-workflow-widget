@@ -2,7 +2,9 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MergeIntoSingleFilePlugin = require('webpack-merge-and-include-globally');
+const { VueLoaderPlugin } = require('vue-loader')
 const fs = require('fs');
+const path = require('path');
 
 const paths = require('./webpack._paths')
 
@@ -36,13 +38,9 @@ module.exports = {
   entry: {
     index: [
         paths.src + '/_index.js',
-        // paths.src + '/sass/custom.scss',
     ],
-    // ...Object.assign({}, ...scssEntries),
-    // indexCss: {
-    //     import: paths.src + '/sass/custom.scss',
-    //     filename: 'widget.css',
-    // },
+    // SPEC-012 F0-S2: Vue3 workflow DAG app (normal bundled entry)
+    'workflow-dag': paths.src + '/workflow-dag/main.js',
   },
 
   watchOptions: {
@@ -119,6 +117,8 @@ module.exports = {
       inject: false, //dont inject anything
     }),
 
+    new VueLoaderPlugin(),
+
     //TODO: update this to include only the vendor files that are needed for the widget
     new MergeIntoSingleFilePlugin({
         files: {
@@ -170,16 +170,71 @@ module.exports = {
   // Determine how modules within the project are treated
   module: {
     rules: [
-      // JavaScript: Just load JavaScript files as is
-      //   { test: /\.js$/, use: ['babel-loader'] },
-      { test: /\.js$/, 
+      // SPEC-012: Vue SFCs for workflow-dag entry
+      {
+        test: /\.vue$/,
+        include: path.resolve(__dirname, 'src/workflow-dag'),
+        loader: 'vue-loader',
+      },
+      {
+        test: /\.css$/,
+        include: [
+          path.resolve(__dirname, 'src/workflow-dag'),
+          path.resolve(__dirname, 'apps/nice-dag'),
+          path.resolve(__dirname, 'node_modules'),
+        ],
+        use: ['style-loader', 'css-loader'],
+      },
+      // YAML as source string for workflow-dag assets
+      {
+        test: /\.ya?ml$/,
+        include: path.resolve(__dirname, 'src/workflow-dag'),
+        type: 'asset/source',
+      },
+      // CLI / nugget content as source strings
+      {
+        test: /\.(md|json)$/,
+        include: path.resolve(__dirname, 'src/content'),
+        type: 'asset/source',
+      },
+      // Workflow-dag JS: real ES modules (exclude from raw-loader)
+      {
+        test: /\.js$/,
+        include: [
+          path.resolve(__dirname, 'src/workflow-dag'),
+          path.resolve(__dirname, 'apps/nice-dag'),
+        ],
+        use: ['babel-loader'],
+      },
+      // E5 YAML→.sfw bridge (compiled ESM) — do not Babel-transform modules
+      {
+        test: /\.js$/,
+        include: path.resolve(__dirname, 'packages/workflow-lang/out'),
+        type: 'javascript/auto',
+        resolve: { fullySpecified: false },
+      },
+      // Transpile selected node_modules used by the Vue app
+      {
+        test: /\.m?js$/,
+        include: /node_modules[\\/](vue-prism-editor|prismjs|js-yaml)/,
+        use: ['babel-loader'],
+        resolve: { fullySpecified: false },
+      },
+      // Legacy widget JS: loaded as raw text for MergeIntoSingleFilePlugin
+      {
+        test: /\.js$/,
+        exclude: [
+          path.resolve(__dirname, 'src/workflow-dag'),
+          path.resolve(__dirname, 'apps/nice-dag'),
+          /node_modules/,
+        ],
         use: [
-            {
-                loader: 'raw-loader',
-                options: {
-                    esModule: false,
-                },
+          {
+            loader: 'raw-loader',
+            options: {
+              esModule: false,
             },
+          },
         ],
       },
 
@@ -188,30 +243,6 @@ module.exports = {
 
       // Fonts and SVGs: Inline files
       { test: /\.(woff(2)?|eot|ttf|otf|svg|)$/, type: 'asset/inline' },
-
-    //   {
-    //     test: /\.(sass|scss|css)$/,
-    //     include: paths.src,
-    //     // exclude: /node_modules/,
-    //     // type: "asset/resource",
-    //     // generator: {
-    //     //   filename: "bundle.css",
-    //     // },
-    //     use: [
-    //       MiniCssExtractPlugin.loader,
-    //       {
-    //         loader: 'css-loader',
-    //         options: { sourceMap: false, importLoaders: 2, modules: false}, 
-    //       },
-    //       { loader: 'postcss-loader', options: { sourceMap: false } },
-    //       { loader: 'sass-loader', 
-    //         options: { 
-    //             sourceMap: false,
-    //         } 
-    //       },
-    //     ],
-    //   },
-
     ],
   },
 
@@ -235,11 +266,19 @@ module.exports = {
   },
 
   resolve: {
-    modules: [paths.src, 'node_modules'],
-    extensions: ['.js', '.jsx', '.json'],
+    modules: [
+      paths.src,
+      'node_modules',
+      path.resolve(__dirname, 'packages/workflow-lang/node_modules'),
+    ],
+    extensions: ['.js', '.jsx', '.json', '.vue'],
     alias: {
       '@': paths.src,
       assets: paths.public,
+      // SPEC-012 F0-S1: Nice-DAG library lives only under apps/nice-dag/
+      '@ebay/nice-dag-core': path.resolve(__dirname, 'apps/nice-dag/nice-dag-core'),
+      '@ebay/nice-dag-vue3': path.resolve(__dirname, 'apps/nice-dag/nice-dag-vue3'),
+      vue: 'vue/dist/vue.esm-bundler.js',
     },
   },
 
