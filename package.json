@@ -5,7 +5,7 @@
     "description": "Iframe widget: YAML workflow code window + Nice-DAG diagram (SPEC-012).",
     "main": "src/js/_index.js",
     "scripts": {
-        "build:lang": "npm install --prefix packages/workflow-lang && npm run build --prefix packages/workflow-lang",
+        "build:lang": "npm --prefix packages/workflow-lang ci && npm --prefix packages/workflow-lang run build",
         "start": "npm run build:lang && cross-env NODE_ENV=development webpack serve --progress --live-reload --config webpack.dev.js",
         "build:dev": "npm run build:lang && cross-env NODE_ENV=development webpack --config webpack.dev.js",
         "build": "npm run build:lang && cross-env NODE_ENV=production webpack --config webpack.prod.js",
