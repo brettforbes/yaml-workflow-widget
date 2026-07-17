@@ -206,6 +206,13 @@ module.exports = {
         ],
         use: ['babel-loader'],
       },
+      // E5 YAML→.sfw bridge (compiled ESM) — do not Babel-transform modules
+      {
+        test: /\.js$/,
+        include: path.resolve(__dirname, 'packages/workflow-lang/out'),
+        type: 'javascript/auto',
+        resolve: { fullySpecified: false },
+      },
       // Transpile selected node_modules used by the Vue app
       {
         test: /\.m?js$/,
@@ -259,7 +266,11 @@ module.exports = {
   },
 
   resolve: {
-    modules: [paths.src, 'node_modules'],
+    modules: [
+      paths.src,
+      'node_modules',
+      path.resolve(__dirname, 'packages/workflow-lang/node_modules'),
+    ],
     extensions: ['.js', '.jsx', '.json', '.vue'],
     alias: {
       '@': paths.src,

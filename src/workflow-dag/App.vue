@@ -76,8 +76,14 @@
         class="code-pane d-flex flex-column"
         :style="{ width: codePaneWidth + 'px' }"
       >
-        <div class="px-2 py-1 small code-pane-label border-bottom">
-          12A_Workflow_YAML_Example.yaml
+        <div class="px-2 py-1 small code-pane-label border-bottom d-flex align-items-center gap-2">
+          <span class="me-auto">12A_Workflow_YAML_Example.yaml</span>
+          <span
+            class="validate-badge"
+            :class="yamlValid ? 'is-ok' : 'is-err'"
+            :title="yamlValid ? 'YAML valid' : 'YAML has errors'"
+            aria-live="polite"
+          >{{ yamlValid ? '✓' : '!' }}</span>
         </div>
         <prism-editor
           class="yaml-editor flex-grow-1"
@@ -85,7 +91,24 @@
           :highlight="highlightYaml"
           line-numbers
         />
-        <!-- E1-S2: editable in-memory YAML. Diagram refresh from code is E5 (Langium sync). -->
+        <div
+          v-if="yamlDiagnostics.length"
+          class="yaml-diagnostics"
+          role="status"
+          aria-label="YAML diagnostics"
+        >
+          <div
+            v-for="(d, i) in yamlDiagnostics.slice(0, 8)"
+            :key="i"
+            class="yaml-diag-row"
+            :class="d.severity === 1 ? 'is-error' : 'is-warn'"
+          >
+            <span class="yaml-diag-loc" v-if="d.line != null"
+              >L{{ (d.line || 0) + 1 }}</span
+            >
+            <span class="yaml-diag-msg">{{ d.message }}</span>
+          </div>
+        </div>
       </aside>
       <div
         v-if="!isEmbed && !codeCollapsed"
@@ -289,9 +312,11 @@ import {
 import OutputFormModal from "./components/OutputFormModal.vue";
 import InputFormModal from "./components/InputFormModal.vue";
 import ContextFormModal from "./components/ContextFormModal.vue";
+import ConfigFormModal from "./components/ConfigFormModal.vue";
 import "./components/CliWorkflowView.css";
 import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
+import { validateWorkflowYaml } from "./components/yamlValidate";
 
 const CATEGORY_W = 160;
 const CATEGORY_H = 56;
@@ -383,10 +408,41 @@ export default {
     const selectedNodeIds = ref([]);
     const edgeMenu = ref({ open: false, x: 0, y: 0 });
     const yamlText = ref(sampleYaml);
+    /** Last YAML that successfully validated — diagram must not use invalid edits (R12-E5-02). */
+    const lastGoodYaml = ref(sampleYaml);
+    const yamlValid = ref(true);
+    const yamlDiagnostics = ref([]);
+    let validateSeq = 0;
+    let validateTimer = null;
+
     const workflowDoc = yaml.load(sampleYaml);
     const mapped = workflowDocToNiceDagModel(workflowDoc || {});
     const initNodes = mapped.nodes;
     const edgeMeta = ref(mapped.edgeMeta);
+
+    const runYamlValidate = async (text) => {
+      const my = ++validateSeq;
+      const result = await validateWorkflowYaml(text);
+      if (my !== validateSeq) return;
+      yamlDiagnostics.value = result.diagnostics || [];
+      yamlValid.value = !!result.ok;
+      if (result.ok) {
+        lastGoodYaml.value = text;
+        // Diagram remount from YAML is E5-S3; keep last-good only here so invalid never clobbers.
+      }
+    };
+
+    const scheduleYamlValidate = (text) => {
+      if (validateTimer) clearTimeout(validateTimer);
+      validateTimer = setTimeout(() => {
+        validateTimer = null;
+        runYamlValidate(text);
+      }, 400);
+    };
+
+    watch(yamlText, (text) => {
+      scheduleYamlValidate(text);
+    });
 
     const modalOpen = ref(false);
     const modalTitle = ref("");
@@ -406,9 +462,13 @@ export default {
     const inputSources = computed(() => {
       const doc = (() => {
         try {
-          return yaml.load(yamlText.value) || {};
+          return yaml.load(lastGoodYaml.value) || {};
         } catch {
-          return workflowDoc || {};
+          try {
+            return yaml.load(yamlText.value) || {};
+          } catch {
+            return workflowDoc || {};
+          }
         }
       })();
       const sources = [];
@@ -464,9 +524,14 @@ export default {
       if (!niceDag?.getAllNodes) return;
       let base = {};
       try {
-        base = yaml.load(yamlText.value) || {};
+        // Prefer last-good so invalid pane text cannot poison pretty-print.
+        base = yaml.load(lastGoodYaml.value) || {};
       } catch {
-        base = {};
+        try {
+          base = yaml.load(yamlText.value) || {};
+        } catch {
+          base = {};
+        }
       }
       yamlText.value = diagramToWorkflowYaml(niceDag.getAllNodes(), base);
     };
@@ -630,10 +695,12 @@ export default {
         niceDag.setScale(DEFAULT_DAG_SCALE);
         applyCenter();
       }
+      runYamlValidate(yamlText.value);
     });
 
     onBeforeUnmount(() => {
       window.removeEventListener("message", onHostMessage);
+      if (validateTimer) clearTimeout(validateTimer);
     });
 
     const highlightYaml = (code) => {
@@ -756,6 +823,9 @@ export default {
       onDiagramWheel,
       onDiagramPanStart,
       yamlText,
+      yamlValid,
+      yamlDiagnostics,
+      lastGoodYaml,
       niceDagEl,
       niceDagReactive,
       highlightYaml,
@@ -1002,6 +1072,62 @@ body.wd-divider-dragging {
 .code-pane-label {
   color: var(--wd-text-muted);
   border-color: var(--wd-border) !important;
+}
+.validate-badge {
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  user-select: none;
+}
+.validate-badge.is-ok {
+  color: var(--wd-text-muted);
+  opacity: 0.85;
+}
+.validate-badge.is-err {
+  color: #b42318;
+  background: rgba(180, 35, 24, 0.12);
+}
+[data-theme="dark"] .validate-badge.is-err {
+  color: #f97066;
+  background: rgba(249, 112, 102, 0.15);
+}
+.yaml-diagnostics {
+  flex: 0 0 auto;
+  max-height: 7.5rem;
+  overflow: auto;
+  border-top: 1px solid var(--wd-border);
+  background: var(--wd-toolbar-bg);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  padding: 0.35rem 0.5rem;
+}
+.yaml-diag-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+.yaml-diag-row.is-error {
+  color: #b42318;
+}
+.yaml-diag-row.is-warn {
+  color: #b54708;
+}
+[data-theme="dark"] .yaml-diag-row.is-error {
+  color: #f97066;
+}
+[data-theme="dark"] .yaml-diag-row.is-warn {
+  color: #fdb022;
+}
+.yaml-diag-loc {
+  flex: 0 0 auto;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+.yaml-diag-msg {
+  min-width: 0;
+  word-break: break-word;
 }
 .prism-editor__textarea:focus {
   outline: none;
