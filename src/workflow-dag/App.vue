@@ -117,43 +117,72 @@
           ref="niceDagEl"
           @wheel="onDiagramWheel"
           @mousedown="onDiagramPanStart"
+          @contextmenu.prevent="onDiagramContextMenu"
         />
+        <div
+          v-if="edgeMenu.open"
+          class="edge-context-menu"
+          :style="{ left: edgeMenu.x + 'px', top: edgeMenu.y + 'px' }"
+          @click.stop
+        >
+          <button type="button" @click="connectSelected('follows')">
+            follows
+          </button>
+          <button type="button" @click="connectSelected('used-by')">
+            used-by
+          </button>
+          <button type="button" @click="connectSelected('semantic-subgraph')">
+            semantic-subgraph
+          </button>
+        </div>
         <NiceDagNodes v-slot="slotProps" :niceDagReactive="niceDagReactive">
           <StartNode
             v-if="slotProps.node.data?.kind === 'workflow-start'"
             :node="slotProps.node"
             :editable="editMode"
+            :selected="selectedNodeIds.includes(slotProps.node.id)"
             @edit="openEdit"
+            @select="onNodeSelect"
           />
           <TargetNode
             v-else-if="slotProps.node.data?.kind === 'workflow-target'"
             :node="slotProps.node"
             :editable="editMode"
+            :selected="selectedNodeIds.includes(slotProps.node.id)"
             @edit="openEdit"
+            @select="onNodeSelect"
           />
           <EndContextNode
             v-else-if="slotProps.node.data?.kind === 'workflow-end'"
             :node="slotProps.node"
             :editable="editMode"
+            :selected="selectedNodeIds.includes(slotProps.node.id)"
             @edit="openEdit"
+            @select="onNodeSelect"
           />
           <ContextCollectorNode
             v-else-if="slotProps.node.data?.kind === 'context-collector'"
             :node="slotProps.node"
             :editable="editMode"
+            :selected="selectedNodeIds.includes(slotProps.node.id)"
+            @select="onNodeSelect"
           />
           <CategoryNode
             v-else-if="slotProps.node.data?.category"
             :node="slotProps.node"
             :editable="editMode"
+            :selected="selectedNodeIds.includes(slotProps.node.id)"
             @edit="openEdit"
             @form="openCategoryForm"
+            @select="onNodeSelect"
           />
           <CliAppNode
             v-else
             :node="slotProps.node"
             :editable="editMode"
+            :selected="selectedNodeIds.includes(slotProps.node.id)"
             @edit="openEdit"
+            @select="onNodeSelect"
           />
         </NiceDagNodes>
         <NiceDagEdges v-slot="slotProps" :niceDagReactive="niceDagReactive">
@@ -230,11 +259,8 @@ import "prismjs/components/prism-yaml";
 import "bootstrap/dist/css/bootstrap.min.css";
 import sampleYaml from "./assets/12A_Workflow_YAML_Example.yaml";
 import { workflowDocToNiceDagModel, NODE_KIND } from "./components/mapper";
-import {
-  EDGE_TYPE,
-  edgeKey,
-  resolveEdgeColor,
-} from "./components/edgeMeta";
+import { EDGE_TYPE, edgeKey, resolveEdgeColor } from "./components/edgeMeta";
+import { diagramToWorkflowYaml } from "./components/diagramYaml";
 import CategoryNode from "./components/CategoryNode.vue";
 import CliAppNode from "./components/CliAppNode.vue";
 import StartNode from "./components/StartNode.vue";
@@ -345,6 +371,8 @@ export default {
     const settingsOpen = ref(false);
     const edgeColored = ref(true);
     const editMode = ref(false);
+    const selectedNodeIds = ref([]);
+    const edgeMenu = ref({ open: false, x: 0, y: 0 });
     const yamlText = ref(sampleYaml);
     const workflowDoc = yaml.load(sampleYaml);
     const mapped = workflowDocToNiceDagModel(workflowDoc || {});
@@ -595,6 +623,50 @@ export default {
       }
     };
 
+    const onNodeSelect = (nodeId, event) => {
+      if (!editMode.value) return;
+      edgeMenu.value = { open: false, x: 0, y: 0 };
+      const id = typeof nodeId === "string" ? nodeId : nodeId?.id;
+      if (!id) return;
+      if (event?.shiftKey) {
+        const set = new Set(selectedNodeIds.value);
+        if (set.has(id)) set.delete(id);
+        else set.add(id);
+        selectedNodeIds.value = [...set].slice(-2);
+      } else {
+        selectedNodeIds.value = [id];
+      }
+    };
+
+    const onDiagramContextMenu = (event) => {
+      if (!editMode.value || selectedNodeIds.value.length !== 2) return;
+      const col = event.currentTarget?.closest(".diagram-column");
+      const bounds = col?.getBoundingClientRect() || { left: 0, top: 0 };
+      edgeMenu.value = {
+        open: true,
+        x: event.clientX - bounds.left,
+        y: event.clientY - bounds.top,
+      };
+    };
+
+    const connectSelected = (edgeType) => {
+      const niceDag = niceDagReactive.use();
+      const [srcId, tgtId] = selectedNodeIds.value;
+      edgeMenu.value = { open: false, x: 0, y: 0 };
+      if (!niceDag || !srcId || !tgtId) return;
+      const source = niceDag.findNodeById(srcId);
+      const target = niceDag.findNodeById(tgtId);
+      if (!source || !target || typeof source.connect !== "function") return;
+      const prior = [...(target.dependencies || [])];
+      for (const depId of prior) {
+        const dep = niceDag.findNodeById(depId);
+        if (dep) target.removeDependency(dep);
+      }
+      source.connect(target);
+      edgeMeta.value.set(edgeKey(srcId, tgtId), edgeType);
+      refreshEdgeStrokes();
+    };
+
     const addNodeKind = (kind) => {
       const niceDag = niceDagReactive.use();
       if (!niceDag || !editMode.value) return;
@@ -682,6 +754,11 @@ export default {
       contextFormOpen,
       contextFormNode,
       openCategoryForm,
+      selectedNodeIds,
+      edgeMenu,
+      onNodeSelect,
+      onDiagramContextMenu,
+      connectSelected,
       addNodeKind,
     };
   },
@@ -857,6 +934,35 @@ body.wd-divider-dragging {
 }
 .edit-palette button:hover {
   color: var(--wd-text);
+}
+.edge-context-menu {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--wd-surface);
+  border: 1px solid var(--wd-border);
+  border-radius: 4px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.edge-context-menu button {
+  border: none;
+  background: transparent;
+  color: var(--wd-text);
+  font-size: 11px;
+  font-family: Consolas, Menlo, monospace;
+  text-align: left;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.edge-context-menu button:hover {
+  background: var(--wd-surface-muted);
+}
+.wf-node-selected {
+  outline: 2px solid var(--wd-accent);
+  outline-offset: 2px;
 }
 .dag-host.embed .embed-diagram {
   max-width: 33.333%;

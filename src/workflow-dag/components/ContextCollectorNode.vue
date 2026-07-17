@@ -1,5 +1,10 @@
 <template>
-  <div class="wf-context-collector" :title="node.data?.label || 'context'">
+  <div
+    class="wf-context-collector"
+    :class="{ 'wf-node-selected': selected }"
+    :title="node.data?.label || 'context'"
+    @click="(e) => editable && $emit('select', node.id, e)"
+  >
     <span class="wf-context-collector-dot" />
     <button
       v-if="editable"
@@ -19,7 +24,9 @@ export default {
   props: {
     node: { type: Object, required: true },
     editable: { type: Boolean, default: false },
+    selected: { type: Boolean, default: false },
   },
+  emits: ["select"],
 };
 </script>
 

@@ -1,8 +1,10 @@
 <template>
   <div
     class="wf-end-node"
+    :class="{ 'wf-node-selected': selected }"
     @mouseenter="onEnter"
     @mouseleave="onLeave"
+    @click="(e) => editable && $emit('select', node.id, e)"
   >
     <span class="wf-end-label">context</span>
     <button
@@ -35,8 +37,9 @@ export default {
   props: {
     node: { type: Object, required: true },
     editable: { type: Boolean, default: false },
+    selected: { type: Boolean, default: false },
   },
-  emits: ["edit"],
+  emits: ["edit", "select"],
   setup(props, { emit }) {
     const showTooltip = ref(false);
     const keepOpen = ref(false);
