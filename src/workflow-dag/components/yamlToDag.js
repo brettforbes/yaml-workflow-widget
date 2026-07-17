@@ -3,7 +3,7 @@
  * Gated by E5-S2 validate; callers must not invoke on invalid YAML.
  */
 import * as yaml from "js-yaml";
-import { workflowDocToNiceDagModel } from "./mapper";
+import { workflowDocToNiceDagModel } from "./mapper.js";
 import { yamlTextToSfw } from "../../../packages/workflow-lang/out/language/yaml-bridge.js";
 
 /**
