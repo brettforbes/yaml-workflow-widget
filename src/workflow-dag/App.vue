@@ -37,6 +37,15 @@
       <button
         type="button"
         class="icon-btn"
+        title="Pretty-print YAML from diagram"
+        aria-label="Pretty-print YAML from diagram"
+        @click="prettyPrintYaml"
+      >
+        ☰
+      </button>
+      <button
+        type="button"
+        class="icon-btn"
         :title="editMode ? 'Exit edit mode' : 'Enter edit mode'"
         :aria-pressed="editMode ? 'true' : 'false'"
         aria-label="Toggle diagram edit mode"
@@ -450,7 +459,17 @@ export default {
       theme.value = normalizeTheme(next);
     };
 
-    const toggleEditMode = () => {
+    const prettyPrintYaml = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag?.getAllNodes) return;
+      let base = {};
+      try {
+        base = yaml.load(yamlText.value) || {};
+      } catch {
+        base = {};
+      }
+      yamlText.value = diagramToWorkflowYaml(niceDag.getAllNodes(), base);
+    };
       const niceDag = niceDagReactive.use();
       if (!niceDag) return;
       if (editMode.value) {
@@ -729,6 +748,7 @@ export default {
       edgeColored,
       editMode,
       toggleEditMode,
+      prettyPrintYaml,
       edgeMeta,
       resetView,
       onDiagramWheel,
