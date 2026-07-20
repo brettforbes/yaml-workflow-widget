@@ -43,14 +43,18 @@ export default {
 </script>
 
 <style scoped>
+/*
+ * Parent Nice-DAG edge host is already rotated to match the edge angle.
+ * translateY offsets the label perpendicular to the line (parallel text, offset).
+ */
 .wf-edge-label {
   text-align: center;
-  margin-top: -14px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
   pointer-events: none;
+  transform: translateY(-12px);
   text-shadow: 0 0 3px var(--wd-surface-muted, #fff);
 }
 .wf-edge-label.mono {

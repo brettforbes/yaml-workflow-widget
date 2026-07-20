@@ -87,6 +87,21 @@ if (edgeMeta.get(semantic) !== EDGE_TYPE.SEMANTIC_EXPORT) {
   process.exit(1);
 }
 
+const sharedCol = sampleModel.find((n) => n.id === "__ctxcol_rank_3__");
+if (!sharedCol?.data?.shared) {
+  console.error("FAIL: split row must share one collector on CX spine");
+  process.exit(1);
+}
+if (
+  edgeMeta.get(edgeKey("sfp_cli_httpx", "__ctxcol_rank_3__")) !==
+    EDGE_TYPE.SEMANTIC_EXPORT ||
+  edgeMeta.get(edgeKey("sfp_cli_nmap", "__ctxcol_rank_3__")) !==
+    EDGE_TYPE.SEMANTIC_EXPORT
+) {
+  console.error("FAIL: both split steps must semantic-export to shared collector");
+  process.exit(1);
+}
+
 const httpx = sampleModel.find((n) => n.id === "sfp_cli_httpx");
 if (!httpx || httpx.data?.layoutChain !== "left") {
   console.error("FAIL: httpx should be left chain", httpx?.data);
