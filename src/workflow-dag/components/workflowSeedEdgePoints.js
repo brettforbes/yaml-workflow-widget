@@ -1,73 +1,96 @@
 /**
- * Seed §2.5 edge attachment + orthogonal routing.
- * Edges attach to port / collector / transition *perimeters* (ray through centre).
+ * Seed §2.5: straight edges between port / collector / transition perimeters.
+ * If extended, H/V edges pass through the shape centreline (same cx or cy).
  */
 
 const PORT_R = 6;
-const COLLECTOR_R = 16;
-const TRANSITION_R = 36;
 
 function nodeCentre(node) {
   return {
-    x: node.x + (node.width || 0) / 2,
-    y: node.y + (node.height || 0) / 2,
+    x: node.data?.layoutCx ?? node.x + (node.width || 0) / 2,
+    y: node.data?.layoutCy ?? node.y + (node.height || 0) / 2,
   };
 }
 
-/** Point on circle perimeter of `node` toward `other`. */
-function perimeterToward(node, other, radius) {
-  const a = nodeCentre(node);
-  const b = nodeCentre(other);
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len = Math.hypot(dx, dy) || 1;
-  const r = radius ?? Math.min(node.width || 0, node.height || 0) / 2;
-  return { x: a.x + (dx / len) * r, y: a.y + (dy / len) * r };
+function circleRadius(node) {
+  return Math.min(node.width || 0, node.height || 0) / 2;
 }
 
-/**
- * Port centre in diagram coords (seed §2.2–2.3 relative to shape top-left).
- * @param {object} node
- * @param {'in'|'out'|'ctx'} which
- */
+/** Port centre (seed §2.2–2.3) in diagram coords. */
 export function portCentre(node, which) {
+  const c = nodeCentre(node);
   const w = node.width || 180;
   const h = node.height || 64;
-  const role = node.data?.layoutRole;
   const side = node.data?.contextSide === "left" ? "left" : "right";
 
-  if (which === "in") {
-    return { x: node.x + w / 2, y: node.y };
-  }
-  if (which === "out") {
-    return { x: node.x + w / 2, y: node.y + h };
-  }
-  // context port: centre of 12px circle on left/right edge mid
-  if (role === "mirror_step" || side === "left") {
-    return { x: node.x, y: node.y + h / 2 };
-  }
-  return { x: node.x + w, y: node.y + h / 2 };
+  if (which === "in") return { x: c.x, y: node.y };
+  if (which === "out") return { x: c.x, y: node.y + h };
+  if (side === "left") return { x: node.x, y: c.y };
+  return { x: node.x + w, y: c.y };
 }
 
-function portPerimeter(node, which, towardNode) {
+/** Move from port centre to port perimeter toward `toward`. */
+function portPerimeter(node, which, toward) {
   const c = portCentre(node, which);
-  const t = nodeCentre(towardNode);
+  const t = nodeCentre(toward);
   const dx = t.x - c.x;
   const dy = t.y - c.y;
   const len = Math.hypot(dx, dy) || 1;
   return { x: c.x + (dx / len) * PORT_R, y: c.y + (dy / len) * PORT_R };
 }
 
-/** Orthogonal SVG path (H/V only). Prefer vertical-then-horizontal elbow. */
-export function orthogonalSvgPath(from, to) {
-  if (Math.abs(from.x - to.x) < 0.5) {
-    return `M${from.x},${from.y} L${to.x},${to.y}`;
+/** Circle perimeter point toward other; keeps shared centreline exact. */
+function circlePerimeter(node, other) {
+  const a = nodeCentre(node);
+  const b = nodeCentre(other);
+  const r = circleRadius(node);
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  // Shared vertical spine — attach on exact cx
+  if (Math.abs(dx) < 0.5) {
+    return { x: a.x, y: a.y + (dy >= 0 ? r : -r) };
   }
-  if (Math.abs(from.y - to.y) < 0.5) {
-    return `M${from.x},${from.y} L${to.x},${to.y}`;
+  // Shared horizontal row — attach on exact cy
+  if (Math.abs(dy) < 0.5) {
+    return { x: a.x + (dx >= 0 ? r : -r), y: a.y };
   }
-  const midY = (from.y + to.y) / 2;
-  return `M${from.x},${from.y} L${from.x},${midY} L${to.x},${midY} L${to.x},${to.y}`;
+  const len = Math.hypot(dx, dy) || 1;
+  return { x: a.x + (dx / len) * r, y: a.y + (dy / len) * r };
+}
+
+/**
+ * When both shapes share layoutCx (or layoutCy), force endpoints onto that axis
+ * so the straight edge is a true centreline segment.
+ */
+function snapToSharedAxis(from, to, source, target) {
+  const scx = source.data?.layoutCx;
+  const tcx = target.data?.layoutCx;
+  if (scx != null && tcx != null && Math.abs(scx - tcx) < 0.5) {
+    const x = scx;
+    return { source: { x, y: from.y }, target: { x, y: to.y } };
+  }
+  const scy = source.data?.layoutCy;
+  const tcy = target.data?.layoutCy;
+  if (scy != null && tcy != null && Math.abs(scy - tcy) < 0.5) {
+    const y = scy;
+    return { source: { x: from.x, y }, target: { x: to.x, y } };
+  }
+  // Fallback: geometric centres aligned within 0.5px
+  const a = nodeCentre(source);
+  const b = nodeCentre(target);
+  if (Math.abs(a.x - b.x) < 0.5) {
+    const x = a.x;
+    return { source: { x, y: from.y }, target: { x, y: to.y } };
+  }
+  if (Math.abs(a.y - b.y) < 0.5) {
+    const y = a.y;
+    return { source: { x: from.x, y }, target: { x: to.x, y } };
+  }
+  return { source: from, target: to };
+}
+
+export function straightSvgPath(from, to) {
+  return `M${from.x},${from.y} L${to.x},${to.y}`;
 }
 
 function isStep(node) {
@@ -120,18 +143,18 @@ export function mapWorkflowSeedEdgeToPoints({ source, target }) {
     to = portPerimeter(target, "in", source);
   } else if (isStep(source) && isCollector(target)) {
     from = portPerimeter(source, "ctx", target);
-    to = perimeterToward(target, source, COLLECTOR_R);
+    to = circlePerimeter(target, source);
   } else if (isCollector(source) && isCollector(target)) {
-    from = perimeterToward(source, target, COLLECTOR_R);
-    to = perimeterToward(target, source, COLLECTOR_R);
+    from = circlePerimeter(source, target);
+    to = circlePerimeter(target, source);
   } else if (isCollector(source) && isTransition(target)) {
-    from = perimeterToward(source, target, COLLECTOR_R);
-    to = perimeterToward(target, source, TRANSITION_R);
+    from = circlePerimeter(source, target);
+    to = circlePerimeter(target, source);
   } else if (isTransition(source) && isTarget(target)) {
-    from = perimeterToward(source, target, TRANSITION_R);
+    from = circlePerimeter(source, target);
     to = portPerimeter(target, "in", source);
   } else if (isTransition(source) && isStep(target)) {
-    from = perimeterToward(source, target, TRANSITION_R);
+    from = circlePerimeter(source, target);
     to = portPerimeter(target, "in", source);
   } else if (isTarget(source) && isStep(target)) {
     from = portPerimeter(source, "out", target);
@@ -144,20 +167,21 @@ export function mapWorkflowSeedEdgeToPoints({ source, target }) {
     to = portPerimeter(target, "in", source);
   } else if (isTransition(source) || isTransition(target)) {
     from = isTransition(source)
-      ? perimeterToward(source, target, TRANSITION_R)
+      ? circlePerimeter(source, target)
       : portPerimeter(source, "out", target);
     to = isTransition(target)
-      ? perimeterToward(target, source, TRANSITION_R)
+      ? circlePerimeter(target, source)
       : portPerimeter(target, "in", source);
   } else {
     from = nodeCentre(source);
     to = nodeCentre(target);
   }
 
+  const snapped = snapToSharedAxis(from, to, source, target);
   return {
-    source: from,
-    target: to,
-    path: orthogonalSvgPath(from, to),
+    source: snapped.source,
+    target: snapped.target,
+    path: straightSvgPath(snapped.source, snapped.target),
   };
 }
 

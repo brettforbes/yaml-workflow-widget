@@ -115,14 +115,39 @@ layoutDoc("../assets/12A_Workflow_YAML_Example.yaml", [
   { id: "sfp_cli_subfinder", x: 201, y: 304, cx: 291, cy: 336 },
   { id: "__ctxcol_sfp_cli_subfinder__", x: 455, y: 320, cx: 471, cy: 336 },
   { id: "sfp_cli_httpx", x: 21, y: 484, cx: 111, cy: 516 },
-  { id: "__ctxcol_sfp_cli_httpx__", x: 275, y: 500, cx: 291, cy: 516 },
+  { id: "__ctxcol_rank_3__", x: 275, y: 500, cx: 291, cy: 516 },
   { id: "sfp_cli_nmap", x: 381, y: 484, cx: 471, cy: 516 },
   { id: "sfp_cli_katana", x: 21, y: 634, cx: 111, cy: 666 },
-  { id: "__ctxcol_sfp_cli_katana__", x: 275, y: 650, cx: 291, cy: 666 },
+  { id: "__ctxcol_rank_4__", x: 275, y: 650, cx: 291, cy: 666 },
   { id: "sfp_cli_nerva", x: 381, y: 634, cx: 471, cy: 666 },
   { id: "sfp_cli_nuclei", x: 21, y: 784, cx: 111, cy: 816 },
   { id: "__ctxcol_sfp_cli_nuclei__", x: 275, y: 800, cx: 291, cy: 816 },
   { id: WORKFLOW_END_ID, x: 255, y: 930, cx: 291, cy: 966 },
 ]);
 
-console.log("OK: WorkflowSeed golden layouts (12A2 + 12A)");
+// Strong CX spine: start, target, subfinder, collectors 2–4, context end.
+{
+  const doc = loadYaml("../assets/12A_Workflow_YAML_Example.yaml");
+  const { nodes } = workflowDocToNiceDagModel(doc);
+  const vNodes = toViewNodes(nodes);
+  applySeedLikeCore(vNodes);
+  const spineIds = [
+    WORKFLOW_START_ID,
+    "__workflow_target__",
+    "sfp_cli_subfinder",
+    "__ctxcol_rank_3__",
+    "__ctxcol_rank_4__",
+    "__ctxcol_sfp_cli_nuclei__",
+    WORKFLOW_END_ID,
+  ];
+  for (const id of spineIds) {
+    const n = vNodes.find((v) => v.id === id);
+    const cx = n.x + n.width / 2;
+    if (Math.abs(cx - 291) > 0.5) {
+      console.error(`FAIL: spine ${id} cx=${cx}, expected 291`);
+      process.exit(1);
+    }
+  }
+}
+
+console.log("OK: WorkflowSeed golden layouts (12A2 + 12A) + CX spine");

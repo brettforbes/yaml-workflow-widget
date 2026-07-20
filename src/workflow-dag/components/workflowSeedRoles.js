@@ -229,24 +229,30 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
     if (stepsAtRank.length >= 2) sharedCollectorCxByRank.set(rank, CX);
   }
 
-  const order = topoStepIds(stepNodes);
-  for (const stepId of order) {
-    const step = stepNodes.find((s) => s.id === stepId);
-    if (!step) continue;
-    const rank = ranks.get(stepId) || 0;
-    const { chain, role } = chains.get(stepId) || {
+  // One layout pass per collector node (shared split rows already merged in mapper).
+  const placedCollectors = new Set();
+  for (const step of stepNodes) {
+    const rank = ranks.get(step.id) || 0;
+    const { chain, role } = chains.get(step.id) || {
       chain: "centre",
       role: "default_step",
     };
     const cy = rankCy.get(rank) ?? 36 + rank * ROW_PITCH;
     const cx = stepCenterX(chain);
-    const colNode = nodes.find((n) => n.id === collectorId(stepId));
-    if (!colNode) continue;
+    const colNode = nodes.find(
+      (n) =>
+        n.data?.kind === NODE_KIND.CONTEXT_COLLECTOR &&
+        (n.id === collectorId(step.id) ||
+          (Array.isArray(n.data?.forSteps) &&
+            n.data.forSteps.includes(step.id)))
+    );
+    if (!colNode || placedCollectors.has(colNode.id)) continue;
+    placedCollectors.add(colNode.id);
     const shared = sharedCollectorCxByRank.get(rank);
     const ccx = collectorCenter(cx, chain, role, shared);
     colNode.data.layoutRole = "collector";
     colNode.data.layoutRank = rank;
-    colNode.data.layoutChain = chain;
+    colNode.data.layoutChain = shared ? "centre" : chain;
     colNode.data.layoutCx = ccx;
     colNode.data.layoutCy = cy;
   }

@@ -9,9 +9,12 @@ import {
   assignLanes,
   collectorId,
   contextSideForLane,
-  topoStepIds,
 } from "./contextRail.js";
-import { annotateWorkflowSeedLayout } from "./workflowSeedRoles.js";
+import {
+  annotateWorkflowSeedLayout,
+  assignLayoutChains,
+  assignLayoutRanks,
+} from "./workflowSeedRoles.js";
 
 const CATEGORIES = ["input", "config", "context", "output"];
 
@@ -176,13 +179,29 @@ export function workflowDocToNiceDagModel(doc) {
 
   nodes.push(...stepNodes);
 
-  // Context collectors + semantic-export rail (E2-S6 / L0).
-  const order = topoStepIds(stepNodes);
+  // Context collectors + semantic-export rail.
+  // Split ranks share one collector on the CX spine (seed §2.7 / centreline).
+  const ranks = assignLayoutRanks(stepNodes, entryParentId);
+  const chains = assignLayoutChains(stepNodes);
+  const byRank = new Map();
+  for (const n of stepNodes) {
+    const r = ranks.get(n.id) || 0;
+    if (!byRank.has(r)) byRank.set(r, []);
+    byRank.get(r).push(n);
+  }
   const collectors = [];
   let prevCollectorId = null;
-  for (const stepId of order) {
-    const cid = collectorId(stepId);
-    const deps = [stepId];
+  for (const rank of [...byRank.keys()].sort((a, b) => a - b)) {
+    const atRank = byRank.get(rank);
+    const shared = atRank.length >= 2;
+    const primary =
+      (shared &&
+        atRank.find((s) => (chains.get(s.id)?.chain || "") === "left")) ||
+      atRank[0];
+    const cid = shared
+      ? `__ctxcol_rank_${rank}__`
+      : collectorId(primary.id);
+    const deps = atRank.map((s) => s.id);
     if (prevCollectorId) deps.push(prevCollectorId);
     const col = {
       id: cid,
@@ -190,12 +209,17 @@ export function workflowDocToNiceDagModel(doc) {
       data: {
         kind: NODE_KIND.CONTEXT_COLLECTOR,
         label: "ctx",
-        forStep: stepId,
-        lane: lanes.get(stepId) || 0,
+        forStep: primary.id,
+        forSteps: atRank.map((s) => s.id),
+        shared,
+        layoutRank: rank,
+        lane: lanes.get(primary.id) || 0,
       },
     };
     collectors.push(col);
-    edgeMeta.set(edgeKey(stepId, cid), EDGE_TYPE.SEMANTIC_EXPORT);
+    for (const s of atRank) {
+      edgeMeta.set(edgeKey(s.id, cid), EDGE_TYPE.SEMANTIC_EXPORT);
+    }
     if (prevCollectorId) {
       edgeMeta.set(edgeKey(prevCollectorId, cid), EDGE_TYPE.SEMANTIC_EXPORT);
     }
