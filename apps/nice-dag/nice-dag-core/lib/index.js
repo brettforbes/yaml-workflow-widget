@@ -475,6 +475,9 @@ class H {
       const layoutConfig = y(this.dagId).config;
       if (layoutConfig.layout === "WORKFLOW_SEED") {
         applyWorkflowSeedLayout(this.vNodes, layoutConfig);
+        this.vNodes.forEach((h) => {
+          if (!h.editing) h.doLayout();
+        });
       } else {
       const i = Nt(this.vNodes, layoutConfig.graphLabel);
       let s = 0;
@@ -1855,7 +1858,10 @@ class Ht extends st {
     return this.adaptOverflow(), l;
   }
   drawGrid() {
-    this._gridVisible && this._grid.redraw();
+    if (!this._gridVisible || !this._grid) return;
+    const hasLines = (this._grid.xLines?.length || 0) > 0 || (this._grid.yLines?.length || 0) > 0;
+    if (hasLines) this._grid.redraw();
+    else this._grid.render();
   }
   render() {
     var e;
