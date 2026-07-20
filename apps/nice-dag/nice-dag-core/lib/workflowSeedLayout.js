@@ -11,11 +11,16 @@ export const EXPAND_DELTA = 464;
 export const EXPANDED_MIN_W = 214;
 export const EXPANDED_MIN_H = 528;
 
-const SUB_STEP_OFFSETS = {
-  input: { x: 36, y: 56 },
-  config: { x: 36, y: 168 },
-  context: { x: 36, y: 280 },
-  output: { x: 36, y: 392 },
+/**
+ * Sub-step positions relative to Nice-DAG *content* origin (inside subViewPadding).
+ * With padding { top:56, left:36, right:18, bottom:80 } these match seed §2.4
+ * visual offsets (36,56)/(36,168)/(36,280)/(36,392) inside a 214×528 host.
+ */
+const SUB_STEP_CONTENT_OFFSETS = {
+  input: { x: 0, y: 0 },
+  config: { x: 0, y: 112 },
+  context: { x: 0, y: 224 },
+  output: { x: 0, y: 336 },
 };
 
 function shapeSize(node, getNodeSize) {
@@ -45,22 +50,9 @@ function isExpandedStep(node) {
   ) && node.children?.length && node.collapse === false;
 }
 
-function layoutExpandedChildren(stepNode) {
-  for (const child of stepNode.children || []) {
-    const cat = child.data?.category;
-    const off = SUB_STEP_OFFSETS[cat];
-    if (off) {
-      child.x = off.x;
-      child.y = off.y;
-      const sz = { width: 160, height: 56 };
-      child.width = sz.width;
-      child.height = sz.height;
-    }
-  }
-}
-
 /**
- * Push nodes whose top is below expanded step top down by EXPAND_DELTA.
+ * Push nodes whose top is below the collapsed step bottom down by EXPAND_DELTA.
+ * Expanded host grows downward from the collapsed top edge.
  * @param {object[]} vNodes
  */
 function applyExpandPushDown(vNodes) {
@@ -68,8 +60,9 @@ function applyExpandPushDown(vNodes) {
   if (!expanded.length) return;
 
   for (const exp of expanded) {
-    const expBottom = exp.y + (exp.height || EXPANDED_MIN_H);
-    const pushFromY = exp.y + 64;
+    const collapsedTop =
+      (exp.data?.layoutCy != null ? exp.data.layoutCy - 32 : exp.y) ;
+    const pushFromY = collapsedTop + 64;
     for (const node of vNodes) {
       if (node.id === exp.id) continue;
       if (node.y >= pushFromY - 0.5) {
@@ -94,12 +87,12 @@ export function applyWorkflowSeedLayout(vNodes, config = {}) {
 
     if (role === "sub_step") {
       const cat = node.data?.category;
-      const off = SUB_STEP_OFFSETS[cat];
+      const off = SUB_STEP_CONTENT_OFFSETS[cat];
       if (off) {
         node.x = off.x;
         node.y = off.y;
-        node.width = size.width;
-        node.height = size.height;
+        node.width = size.width || 160;
+        node.height = size.height || 56;
       }
       continue;
     }
@@ -110,10 +103,15 @@ export function applyWorkflowSeedLayout(vNodes, config = {}) {
       36 + (node.data.layoutRank ?? 0) * ROW_PITCH;
 
     if (isExpandedStep(node)) {
-      size.width = Math.max(size.width, EXPANDED_MIN_W);
-      size.height = Math.max(size.height, EXPANDED_MIN_H);
-      placeFromCenter(node, cx, cy, size);
-      layoutExpandedChildren(node);
+      // Subview size comes from child VM + padding; never shrink below seed min.
+      // Grow downward from collapsed top (do not re-centre on layoutCy).
+      const w = Math.max(node.width || 0, EXPANDED_MIN_W, size.width);
+      const h = Math.max(node.height || 0, EXPANDED_MIN_H, size.height);
+      const collapsedTop = cy - 32;
+      node.width = w;
+      node.height = h;
+      node.x = cx - w / 2;
+      node.y = collapsedTop;
       continue;
     }
 

@@ -93,4 +93,17 @@ if (!httpx || httpx.data?.layoutChain !== "left") {
   process.exit(1);
 }
 
-console.log("OK: target/end + used-by + context rail semantic");
+const subfinder = sampleModel.find((n) => n.id === "sfp_cli_subfinder");
+if (!subfinder?.children?.length || subfinder.collapse !== true) {
+  console.error("FAIL: steps must be collapsed HIERARCHY groups with children");
+  process.exit(1);
+}
+for (const cat of ["input", "config", "context", "output"]) {
+  const child = subfinder.children.find((c) => c.data?.category === cat);
+  if (!child || child.data?.layoutRole !== "sub_step") {
+    console.error(`FAIL: ${cat} child must have layoutRole sub_step`);
+    process.exit(1);
+  }
+}
+
+console.log("OK: target/end + used-by + context rail semantic + subview children");

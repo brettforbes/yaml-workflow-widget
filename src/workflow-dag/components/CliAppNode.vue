@@ -242,16 +242,17 @@ export default {
 .wf-chrome-mirrored {
   flex-direction: row-reverse;
 }
+/* Header sits in subViewPadding.top (56px) band above content children. */
 .wf-cli-app-node.expanded .wf-cli-app-header {
-  height: auto;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 40px;
+  height: 48px;
   border-bottom: 1px solid #eee;
   background: #f0f0f0;
   border-radius: 10px 10px 0 0;
+  z-index: 2;
 }
 .wf-cli-app-label {
   font-size: 13px;
