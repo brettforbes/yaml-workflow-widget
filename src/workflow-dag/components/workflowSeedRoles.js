@@ -11,14 +11,16 @@ import {
 } from "./mapper.js";
 import { collectorId, topoStepIds } from "./contextRail.js";
 
-export const CX = 291;
+/** Horizontal inset from canvas left so the spine clears chrome (was 291). */
+export const DIAGRAM_X_OFFSET = 100;
+export const CX = 291 + DIAGRAM_X_OFFSET;
 /** Default Δcy between successive rows. */
 export const ROW_PITCH = 150;
 /** Δcy from a centre default_step into the first fan-out (split) row — looser diagonals. */
 export const FIRST_SPLIT_PITCH = 180;
 export const COLLECTOR_GAP = 90;
-export const LEFT_CHAIN_CX = 111;
-export const RIGHT_CHAIN_CX = 471;
+export const LEFT_CHAIN_CX = 111 + DIAGRAM_X_OFFSET;
+export const RIGHT_CHAIN_CX = 471 + DIAGRAM_X_OFFSET;
 
 const STEP_W = 180;
 

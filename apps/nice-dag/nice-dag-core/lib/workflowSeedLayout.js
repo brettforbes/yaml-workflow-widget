@@ -3,7 +3,7 @@
  * Applies seed positions when init config layout === "WORKFLOW_SEED".
  */
 
-export const CX = 291;
+export const CX = 391;
 export const ROW_PITCH = 150;
 export const FIRST_SPLIT_PITCH = 180;
 export const COLLECTOR_GAP = 90;

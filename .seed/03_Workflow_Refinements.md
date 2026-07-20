@@ -69,19 +69,19 @@ There can only be a single edge coming into the input port of any step. There ar
 
 - `followed-by` -> identifies a flow of sequence, the output port of one step to input port of another step. It can only be used if there is no input to a step
 - `used-by` -> identifies a flow of output port of one step to input port of another step, and it overwrites any potential `followed-by` edge that may come to that input port.
-- `semantic-export` -> identifies a flow from the context port of one step to the context collector for that step, or from one context collector to the next context collector, or from the last context collector to the context transition.
+- `semantic` -> identifies a flow from the context port of one step to the context collector for that step, or from one context collector to the next context collector, or from the last context collector to the context transition.
 
 Use straight vertical or horizontal edges where you can but prefer orthogonal edges over diagonal edges.
 
 ### 2.7 Context Collectors
 
-Every time a default step is created, it must have a context collector to its right, so the the horizontal centre line of the step and the collector are the same, and a `semantic-export` edge must be drawn from the context port of the step to the context collector. If it is a split, then the `collector` may be in the middle, and hence the `default_step` and the `mirror_step` can both share it.
-Every time a mirror step is created, it must have a context collector to its left, so the the horizontal centre line of the step and the collector are the same, and a `semantic-export` edge must be drawn from the context port of the step to the context collector, so it is a mirror edge pointing left. If it is a split, then the `collector` may be in the middle, and hence the `default_step` and the `mirror_step` can both share it.
+Every time a default step is created, it must have a context collector to its right, so the the horizontal centre line of the step and the collector are the same, and a `semantic` edge must be drawn from the context port of the step to the context collector. If it is a split, then the `collector` may be in the middle, and hence the `default_step` and the `mirror_step` can both share it.
+Every time a mirror step is created, it must have a context collector to its left, so the the horizontal centre line of the step and the collector are the same, and a `semantic` edge must be drawn from the context port of the step to the context collector, so it is a mirror edge pointing left. If it is a split, then the `collector` may be in the middle, and hence the `default_step` and the `mirror_step` can both share it.
 
 
 ### 2.8 Connecting Context Collectors to the context transition
 
-An edge must always be drawn from the first context collector to the second context collector, and so on, until all context collectors are connected by a `semantic-export` edge. A `semantic-export` edge must connect the last context collector to the context transition.
+An edge must always be drawn from the first context collector to the second context collector, and so on, until all context collectors are connected by a `semantic` edge. A `semantic` edge must connect the last context collector to the context transition.
 
 
 ## 3. Rules for Layout
@@ -105,18 +105,18 @@ Following the `start` there are two options, either there is an immediate `targe
 
 In the scenario below, you can see that there is no `target` step, and so you know that the first edge must be a `followed-by` edge from the `start` transition to the input port of the `default_step`. The default step is laid out on the same vertical centre line as the `start` transition.
 
-As discussed above, a `context collector` is always laid out to the right of the `default_step`, and a `semantic-export` edge is always drawn from the `context port` of the `default_step` to the `context collector`. The context collector is laid out on the same horizontal centre line as the `default_step`.
+As discussed above, a `context collector` is always laid out to the right of the `default_step`, and a `semantic` edge is always drawn from the `context port` of the `default_step` to the `context collector`. The context collector is laid out on the same horizontal centre line as the `default_step`.
 
-Then, the last item in the sequence is the `context` transition. This is always laid out at the bottom of the workflow diagram, and is always laid out on the same vertical centre line as the `start` transition. Finally, a `semantic-export` edge is drawn from the `context collector` to the `context` transition.
+Then, the last item in the sequence is the `context` transition. This is always laid out at the bottom of the workflow diagram, and is always laid out on the same vertical centre line as the `start` transition. Finally, a `semantic` edge is drawn from the `context collector` to the `context` transition.
 
 These rules then lead to the following layout (all numbers are in pixels):
 
 | workflow-icon | type | x | y | cx | cy |
 | --- | --- | ---: | ---: | ---: | ---: |
-| start | transition | 255 | 0 | 291 | 36 |
-| sfp_cli_netdiscover | default_step | 201 | 154 | 291 | 186 |
-| context_collector_1 | collector | 455 | 170 | 471 | 186 |
-| context | transition | 255 | 300 | 291 | 336 |
+| start | transition | 355 | 0 | 391 | 36 |
+| sfp_cli_netdiscover | default_step | 301 | 154 | 391 | 186 |
+| context_collector_1 | collector | 555 | 170 | 571 | 186 |
+| context | transition | 355 | 300 | 391 | 336 |
 
 ### 3.2 Complex Layout
 
@@ -130,7 +130,7 @@ In the scenario below, you can see that there is a `target` step, and so you kno
 
 The first step is a `default_step`, and is laid out on the same vertical centre line as the `start` transition.
 
-As discussed above, a `context collector` is always laid out to the right of the `default_step`, and a `semantic-export` edge is always drawn from the `context port` of the `default_step` to the `context collector`. The context collector is laid out on the same horizontal centre line as the `default_step`.
+As discussed above, a `context collector` is always laid out to the right of the `default_step`, and a `semantic` edge is always drawn from the `context port` of the `default_step` to the `context collector`. The context collector is laid out on the same horizontal centre line as the `default_step`.
 
 Immediately below this we see that the output of step 1 (`sfp_cli_subfinder`) is used by both step 2 (`sfp_cli_httpx`) and step 4 (`sfp_cli_nmap`), and so you know there must be a split, because two subsequent steps require the same input (i.e. they are in parallel, not sequence).
 
@@ -140,29 +140,29 @@ In order to do the split we establish the following rules:
 - The left hand vertical chain of steps is laid out so the right hand edge of the `default_step` is aligned with the left hand edge of the splitting `default_step`.
 - The right hand vertical chain of steps is laid out so the left hand edge of the `mirror_step` is aligned with the right hand edge of the splitting `default_step`
 - The `context collector` for the left hand vertical chain of steps is laid out on the same horizontal centre line as the `default_step` for the left hand vertical chain of steps, and the the `mirror_step` for the right hand vertical chain of steps.
-- The `semantic-export` edge from the `context port` of the `default_step` for the left hand vertical chain of steps is drawn to the `context collector` for the left hand vertical chain of steps.
-- The `semantic-export` edge from the `context port` of the `mirror_step` for the right hand vertical chain is drawn left to the shared `context collector` for that row.
-- A `semantic-export` edge is drawn from the first `context collector` step 1 (`sfp_cli_subfinder`) to the `context collector` for the split steps.
+- The `semantic` edge from the `context port` of the `default_step` for the left hand vertical chain of steps is drawn to the `context collector` for the left hand vertical chain of steps.
+- The `semantic` edge from the `context port` of the `mirror_step` for the right hand vertical chain is drawn left to the shared `context collector` for that row.
+- A `semantic` edge is drawn from the first `context collector` step 1 (`sfp_cli_subfinder`) to the `context collector` for the split steps.
 
-This logic is then repeated for the rest of the steps in the workflow. Finally, a `semantic-export` edge is drawn from the last `context collector` to the `context` transition.
+This logic is then repeated for the rest of the steps in the workflow. Finally, a `semantic` edge is drawn from the last `context collector` to the `context` transition.
 
 These rules then lead to the following layout (all numbers are in pixels):
 
 | workflow-icon | type | x | y | cx | cy |
 | --- | --- | ---: | ---: | ---: | ---: |
-| start | transition | 255 | 0 | 291 | 36 |
-| target | target | 221 | 162 | 291 | 186 |
-| sfp_cli_subfinder | default_step | 201 | 304 | 291 | 336 |
-| context_collector_1 | collector | 455 | 320 | 471 | 336 |
-| sfp_cli_httpx | default_step | 21 | 484 | 111 | 516 |
-| context_collector_2 | collector | 275 | 500 | 291 | 516 |
-| sfp_cli_nmap | mirror_step | 381 | 484 | 471 | 516 |
-| sfp_cli_katana | default_step | 21 | 634 | 111 | 666 |
-| context_collector_3 | collector | 275 | 650 | 291 | 666 |
-| sfp_cli_nerva | mirror_step | 381 | 634 | 471 | 666 |
-| sfp_cli_nuclei | default_step | 21 | 784 | 111 | 816 |
-| context_collector_4 | collector | 275 | 800 | 291 | 816 |
-| context | transition | 255 | 930 | 291 | 966 |
+| start | transition | 355 | 0 | 391 | 36 |
+| target | target | 321 | 162 | 391 | 186 |
+| sfp_cli_subfinder | default_step | 301 | 304 | 391 | 336 |
+| context_collector_1 | collector | 555 | 320 | 571 | 336 |
+| sfp_cli_httpx | default_step | 121 | 484 | 211 | 516 |
+| context_collector_2 | collector | 375 | 500 | 391 | 516 |
+| sfp_cli_nmap | mirror_step | 481 | 484 | 571 | 516 |
+| sfp_cli_katana | default_step | 121 | 634 | 211 | 666 |
+| context_collector_3 | collector | 375 | 650 | 391 | 666 |
+| sfp_cli_nerva | mirror_step | 481 | 634 | 571 | 666 |
+| sfp_cli_nuclei | default_step | 121 | 784 | 211 | 816 |
+| context_collector_4 | collector | 375 | 800 | 391 | 816 |
+| context | transition | 355 | 930 | 391 | 966 |
 
 ### 3.3. Edges for Expanded Steps
 
@@ -171,8 +171,8 @@ When the step is expanded, the four internal steps are revealed. Internal steps 
 - A `used-by` edge is drawn from the output port of the `input` sub-step (the first internal step) to the input port of the second internal step `config`.
 - A `used-by` edge is drawn from the output port of the `config` sub-step (the second internal step) to the input port of the third internal step `context`.
 - A `used-by` edge is drawn from the output port of the `context` sub-step (the third internal step) to the input port of the fourth internal step `output`.
-- A `semantic-export` edge is drawn from the context port of the `context` sub-step to the  for the expanded step to the context port of the expanded step. (Note this rule may create unecessary visual complexity inside  the expanded step,and may be removed later if required)
-- A `semantic-export` edge is drawn from the context port of the expanded step to the context collector for the expanded step.
+- A `semantic` edge is drawn from the context port of the `context` sub-step to the  for the expanded step to the context port of the expanded step. (Note this rule may create unecessary visual complexity inside  the expanded step,and may be removed later if required)
+- A `semantic` edge is drawn from the context port of the expanded step to the context collector for the expanded step.
 
 ### 3.4. Rules for more than two chains
 
