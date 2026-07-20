@@ -29,7 +29,7 @@ export default {
   setup(props) {
     const edgeType = computed(() => {
       const k = edgeKey(props.source.id, props.target.id);
-      return props.edgeMeta.get(k) || EDGE_TYPE.FOLLOWS;
+      return props.edgeMeta.get(k) || EDGE_TYPE.FOLLOWED_BY;
     });
     const label = computed(() =>
       props.showLabels ? edgeType.value : ""

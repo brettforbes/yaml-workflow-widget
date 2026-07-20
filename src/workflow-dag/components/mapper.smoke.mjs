@@ -66,9 +66,9 @@ if (!nmap || nmap.dependencies.length !== 1) {
 
 if (
   edgeMeta.get(edgeKey("__workflow_start__", WORKFLOW_TARGET_ID)) !==
-  EDGE_TYPE.FOLLOWS
+  EDGE_TYPE.FOLLOWED_BY
 ) {
-  console.error("FAIL: start→target must be follows");
+  console.error("FAIL: start→target must be followed-by");
   process.exit(1);
 }
 
@@ -82,14 +82,14 @@ if (edgeMeta.get(targetSubfinder) !== EDGE_TYPE.USED_BY) {
 }
 
 const semantic = edgeKey("sfp_cli_subfinder", "__ctxcol_sfp_cli_subfinder__");
-if (edgeMeta.get(semantic) !== EDGE_TYPE.SEMANTIC) {
-  console.error("FAIL: step→collector must be semantic-subgraph");
+if (edgeMeta.get(semantic) !== EDGE_TYPE.SEMANTIC_EXPORT) {
+  console.error("FAIL: step→collector must be semantic-export");
   process.exit(1);
 }
 
 const httpx = sampleModel.find((n) => n.id === "sfp_cli_httpx");
-if (!httpx || httpx.data?.lane !== 1 || httpx.data?.contextSide !== "left") {
-  console.error("FAIL: httpx (right of split) should be lane 1 / context left", httpx?.data);
+if (!httpx || httpx.data?.layoutChain !== "left") {
+  console.error("FAIL: httpx should be left chain", httpx?.data);
   process.exit(1);
 }
 

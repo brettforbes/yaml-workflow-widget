@@ -167,8 +167,17 @@ useNiceDag({
 
 ```bash
 .\start.ps1
-# http://localhost:4009 — load 12A2 then 12A; edit pencil; Pretty Print
+# http://localhost:4009 — load 12A2 then 12A; edit pencil; Pretty Print (▦)
 
-# After L0-S3:
-# npm test in apps/nice-dag/nice-dag-core for workflowSeed goldens
+node src/workflow-dag/components/mapper.smoke.mjs
+node src/workflow-dag/components/workflowSeedGolden.smoke.mjs
 ```
+
+---
+
+## 10. SPEC_GAP (L0-S11)
+
+| Gap | Status |
+|-----|--------|
+| §3.3 inner `semantic-export` from expanded context sub-step → parent context port | **Deferred** — seed sentence truncated; outer semantic-export only |
+| §3.4 multi-chain (>2) numeric golden fixture | **Deferred** — algorithm stubbed via odd/even chains; no ±1px table yet |

@@ -11,6 +11,7 @@ import {
   contextSideForLane,
   topoStepIds,
 } from "./contextRail.js";
+import { annotateWorkflowSeedLayout } from "./workflowSeedRoles.js";
 
 const CATEGORIES = ["input", "config", "context", "output"];
 
@@ -86,22 +87,22 @@ export function resolveStepInbound(step, steps, index, entryParentId) {
     // At most one inbound: use first needs entry for sequence follows.
     return {
       dependencies: [needs[0]],
-      edgeType: EDGE_TYPE.FOLLOWS,
+      edgeType: EDGE_TYPE.FOLLOWED_BY,
     };
   }
   if (index > 0) {
     return {
       dependencies: [steps[index - 1].id],
-      edgeType: EDGE_TYPE.FOLLOWS,
+      edgeType: EDGE_TYPE.FOLLOWED_BY,
     };
   }
   if (entryParentId) {
     return {
       dependencies: [entryParentId],
-      edgeType: EDGE_TYPE.FOLLOWS,
+      edgeType: EDGE_TYPE.FOLLOWED_BY,
     };
   }
-  return { dependencies: [], edgeType: EDGE_TYPE.FOLLOWS };
+  return { dependencies: [], edgeType: EDGE_TYPE.FOLLOWED_BY };
 }
 
 /**
@@ -155,7 +156,7 @@ export function workflowDocToNiceDagModel(doc) {
     nodes.push(targetNode);
     edgeMeta.set(
       edgeKey(WORKFLOW_START_ID, WORKFLOW_TARGET_ID),
-      EDGE_TYPE.FOLLOWS
+      EDGE_TYPE.FOLLOWED_BY
     );
     entryParentId = WORKFLOW_TARGET_ID;
   }
@@ -175,7 +176,7 @@ export function workflowDocToNiceDagModel(doc) {
 
   nodes.push(...stepNodes);
 
-  // Context collectors + semantic-subgraph rail (E2-S6).
+  // Context collectors + semantic-export rail (E2-S6 / L0).
   const order = topoStepIds(stepNodes);
   const collectors = [];
   let prevCollectorId = null;
@@ -194,9 +195,9 @@ export function workflowDocToNiceDagModel(doc) {
       },
     };
     collectors.push(col);
-    edgeMeta.set(edgeKey(stepId, cid), EDGE_TYPE.SEMANTIC);
+    edgeMeta.set(edgeKey(stepId, cid), EDGE_TYPE.SEMANTIC_EXPORT);
     if (prevCollectorId) {
-      edgeMeta.set(edgeKey(prevCollectorId, cid), EDGE_TYPE.SEMANTIC);
+      edgeMeta.set(edgeKey(prevCollectorId, cid), EDGE_TYPE.SEMANTIC_EXPORT);
     }
     prevCollectorId = cid;
   }
@@ -216,16 +217,18 @@ export function workflowDocToNiceDagModel(doc) {
     data: {
       kind: NODE_KIND.END,
       label: "final context",
-      yaml: "context:\n  # Aggregated semantic-subgraph outcomes",
+      yaml: "context:\n  # Aggregated semantic-export outcomes",
       raw: null,
     },
   });
   for (const dep of endDeps) {
     edgeMeta.set(
       edgeKey(dep, WORKFLOW_END_ID),
-      collectors.length > 0 ? EDGE_TYPE.SEMANTIC : EDGE_TYPE.FOLLOWS
+      collectors.length > 0 ? EDGE_TYPE.SEMANTIC_EXPORT : EDGE_TYPE.FOLLOWED_BY
     );
   }
+
+  annotateWorkflowSeedLayout(nodes, entryParentId);
 
   return { nodes, edgeMeta };
 }

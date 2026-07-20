@@ -1,0 +1,33 @@
+apiVersion: spiderfeet.workflow/v1
+kind: Workflow
+id: workflow--fd0341fa-c28c-4ccd-86f8-3f0500a2114d
+
+info:
+  name: Recon Local Network
+  description: >
+    Enumerate domains, map ports/services, and map live web surface + vulns.
+  author: Modeller
+  created: "2026-07-19T21:58:32+10:00"
+
+
+steps:
+  - id: sfp_cli_netdiscover
+    uses: tool.netdiscover
+    needs: []
+    input:
+      type: none
+    config:
+      argv:
+        - "-P"
+        - "$step.files.output"
+      files:
+        output:
+          mode: auto
+          format: line_text
+      capture:
+        family: structured_native
+        adapter: netdiscover
+    output:
+      vars: none
+    context:
+      export: scan_graph
