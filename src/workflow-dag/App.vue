@@ -514,8 +514,9 @@ export default {
       getNodeSize,
       mapEdgeToPoints: mapWorkflowSeedEdgeToPointsNiceDag,
       graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
-      subViewPadding: { top: 56, bottom: 36, left: 36, right: 48 },
-      gridConfig: { size: 20, color: "rgba(128,128,128,0.35)" },
+      /* Seed §2.4: content origin + padding ⇒ visual sub-step offsets + 214×528 host */
+      subViewPadding: { top: 56, bottom: 80, left: 36, right: 18 },
+      gridConfig: { size: 20, color: "rgba(128,128,128,0.35)", visible: false },
       getEdgeAttributes,
     });
 
@@ -1211,8 +1212,16 @@ body.wd-divider-dragging {
 .diagram-column.edit-mode .diagram-pane {
   outline: 1px dashed var(--wd-border);
 }
+/* Mesh/grid only in Edit Mode (WritableNiceDag always mounts editor bkg). */
+.diagram-pane .nice-dag-editor-bkg {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 .diagram-column.edit-mode .nice-dag-editor-bkg {
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 .edit-palette {
   position: absolute;

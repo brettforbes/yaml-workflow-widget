@@ -259,9 +259,12 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
     end.data.layoutCy = rankCy.get(endRank);
   }
 
-  for (const n of nodes) {
-    if (n.data?.kind === NODE_KIND.CATEGORY) {
-      n.data.layoutRole = "sub_step";
+  // Nested category leaves (Nice-DAG subview children) — not top-level nodes.
+  for (const step of stepNodes) {
+    for (const child of step.children || []) {
+      if (!child.data) child.data = {};
+      child.data.layoutRole = "sub_step";
+      child.data.contextSide = step.data.contextSide;
     }
   }
 }

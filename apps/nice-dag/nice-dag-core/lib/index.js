@@ -414,9 +414,10 @@ class H {
         const h = this.createChildVm(t, t.children);
         this.pChildVMs = [...this.pChildVMs.filter((d) => d.id !== h.id), h], i = h.size();
       }
-      t.width = i.width, t.height = i.height;
+      t.width = i.width, t.height = i.height, t.collapse = e;
       const r = t.editing;
-      t.editing = !1, this.doLayout(!0, !1), t.editing = r, this.fireModelChange({
+      // Cascade so child subview re-lays out under WORKFLOW_SEED before root placement.
+      t.editing = !1, this.doLayout(!0, !0), t.editing = r, this.fireModelChange({
         source: this,
         originalSource: t,
         type: e ? f.REMOVE_SUB_VIEW : f.ADD_SUB_VIEW

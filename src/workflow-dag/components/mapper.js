@@ -284,7 +284,8 @@ export function workflowStepsToNiceDagModel(
           raw,
           yaml: yamlText,
           label: category,
-          contextSide: null, // filled from parent after lanes assigned
+          layoutRole: "sub_step",
+          contextSide: null, // filled from parent after lanes / WorkflowSeed annotate
           uses: step.uses,
           stepId: step.id,
         },
