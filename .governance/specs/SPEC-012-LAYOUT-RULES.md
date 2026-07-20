@@ -18,7 +18,8 @@ Seed **overrides** prior UI layout/edge contracts. Tweak this file when seed cha
 | Name | Value | Notes |
 |------|------:|-------|
 | `CX` | 291 | Vertical centreline (`cx` of start / target / centre steps / end) |
-| `ROW_PITCH` | 116 | Δ`cy` between successive rows |
+| `ROW_PITCH` | 150 | Δ`cy` between successive rows |
+| `FIRST_SPLIT_PITCH` | 180 | Δ`cy` from centre default_step into first fan-out row |
 | `COLLECTOR_GAP` | 90 | Step edge → **collector centre** |
 | `TRANSITION` | 72×72 | start / context end |
 | `TARGET` | 140×48 | |
@@ -65,7 +66,7 @@ No `joint-*` nodes. `mode: "DEFAULT"`.
 1. Place `start` at `cx=CX`, `cy=36` (x=255, y=0).
 2. If workflow has `inputs` → place `target` at `cy=152`. Else first step at `cy=152`.
 3. Build step DAG from `needs` + `input.from` (`$steps.*` ⇒ data dep).
-4. Layer into ranks; each rank `cy += ROW_PITCH`.
+4. Layer into ranks; each rank `cy += ROW_PITCH`, except the first fan-out (split) rank uses `FIRST_SPLIT_PITCH` (180).
 5. Fan-out (2 consumers): longest chain **left** (`default_step`), shortest **right** (`mirror_step`); equal length → first in YAML order left.
 6. Align left chain right-edge to splitter left-edge; right chain left-edge to splitter right-edge.
 7. Collectors: default → right of step (`COLLECTOR_GAP` from right edge to collector centre); mirror → left; split → **one shared** collector on centreline.
@@ -83,27 +84,27 @@ No `joint-*` nodes. `mode: "DEFAULT"`.
 | workflow-icon | type | x | y | cx | cy |
 | --- | --- | ---: | ---: | ---: | ---: |
 | start | transition | 255 | 0 | 291 | 36 |
-| sfp_cli_netdiscover | default_step | 201 | 120 | 291 | 152 |
-| context_collector_1 | collector | 455 | 136 | 471 | 152 |
-| context | transition | 255 | 232 | 291 | 268 |
+| sfp_cli_netdiscover | default_step | 201 | 154 | 291 | 186 |
+| context_collector_1 | collector | 455 | 170 | 471 | 186 |
+| context | transition | 255 | 300 | 291 | 336 |
 
 ### 5.2 Complex — `.seed/12A_Workflow_YAML_Example.yaml`
 
 | workflow-icon | type | x | y | cx | cy |
 | --- | --- | ---: | ---: | ---: | ---: |
 | start | transition | 255 | 0 | 291 | 36 |
-| target | target | 221 | 128 | 291 | 152 |
-| sfp_cli_subfinder | default_step | 201 | 236 | 291 | 268 |
-| context_collector_1 | collector | 455 | 252 | 471 | 268 |
-| sfp_cli_httpx | default_step | 21 | 352 | 111 | 384 |
-| context_collector_2 | collector | 275 | 368 | 291 | 384 |
-| sfp_cli_nmap | mirror_step | 381 | 352 | 471 | 384 |
-| sfp_cli_katana | default_step | 21 | 468 | 111 | 500 |
-| context_collector_3 | collector | 275 | 484 | 291 | 500 |
-| sfp_cli_nerva | mirror_step | 381 | 468 | 471 | 500 |
-| sfp_cli_nuclei | default_step | 21 | 584 | 111 | 616 |
-| context_collector_4 | collector | 275 | 600 | 291 | 616 |
-| context | transition | 255 | 696 | 291 | 732 |
+| target | target | 221 | 162 | 291 | 186 |
+| sfp_cli_subfinder | default_step | 201 | 304 | 291 | 336 |
+| context_collector_1 | collector | 455 | 320 | 471 | 336 |
+| sfp_cli_httpx | default_step | 21 | 484 | 111 | 516 |
+| context_collector_2 | collector | 275 | 500 | 291 | 516 |
+| sfp_cli_nmap | mirror_step | 381 | 484 | 471 | 516 |
+| sfp_cli_katana | default_step | 21 | 634 | 111 | 666 |
+| context_collector_3 | collector | 275 | 650 | 291 | 666 |
+| sfp_cli_nerva | mirror_step | 381 | 634 | 471 | 666 |
+| sfp_cli_nuclei | default_step | 21 | 784 | 111 | 816 |
+| context_collector_4 | collector | 275 | 800 | 291 | 816 |
+| context | transition | 255 | 930 | 291 | 966 |
 
 ---
 

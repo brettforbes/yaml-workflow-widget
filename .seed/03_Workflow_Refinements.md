@@ -90,7 +90,8 @@ The aim is to define a set of rules so the "pretty print" function can be used t
 
 **Default spacing (applies to all layouts unless an exception is stated):**
 
-- **116 px** vertical spacing between the centre lines (`cy`) of each successive row of shapes. This is the default row pitch for Pretty Print.
+- **150 px** vertical spacing between the centre lines (`cy`) of each successive row of shapes. This is the default row pitch for Pretty Print.
+- **180 px** from a centre `default_step` down to the first fan-out (split) row, so diagonal edges are less steep.
 - **90 px** between the right edge of a `default_step` and the **centre** of its collector.
 - **90 px** between the left edge of a `mirror_step` and the **centre** of its collector.
 
@@ -113,9 +114,9 @@ These rules then lead to the following layout (all numbers are in pixels):
 | workflow-icon | type | x | y | cx | cy |
 | --- | --- | ---: | ---: | ---: | ---: |
 | start | transition | 255 | 0 | 291 | 36 |
-| sfp_cli_netdiscover | default_step | 201 | 120 | 291 | 152 |
-| context_collector_1 | collector | 455 | 136 | 471 | 152 |
-| context | transition | 255 | 232 | 291 | 268 |
+| sfp_cli_netdiscover | default_step | 201 | 154 | 291 | 186 |
+| context_collector_1 | collector | 455 | 170 | 471 | 186 |
+| context | transition | 255 | 300 | 291 | 336 |
 
 ### 3.2 Complex Layout
 
@@ -150,18 +151,18 @@ These rules then lead to the following layout (all numbers are in pixels):
 | workflow-icon | type | x | y | cx | cy |
 | --- | --- | ---: | ---: | ---: | ---: |
 | start | transition | 255 | 0 | 291 | 36 |
-| target | target | 221 | 128 | 291 | 152 |
-| sfp_cli_subfinder | default_step | 201 | 236 | 291 | 268 |
-| context_collector_1 | collector | 455 | 252 | 471 | 268 |
-| sfp_cli_httpx | default_step | 21 | 352 | 111 | 384 |
-| context_collector_2 | collector | 275 | 368 | 291 | 384 |
-| sfp_cli_nmap | mirror_step | 381 | 352 | 471 | 384 |
-| sfp_cli_katana | default_step | 21 | 468 | 111 | 500 |
-| context_collector_3 | collector | 275 | 484 | 291 | 500 |
-| sfp_cli_nerva | mirror_step | 381 | 468 | 471 | 500 |
-| sfp_cli_nuclei | default_step | 21 | 584 | 111 | 616 |
-| context_collector_4 | collector | 275 | 600 | 291 | 616 |
-| context | transition | 255 | 696 | 291 | 732 |
+| target | target | 221 | 162 | 291 | 186 |
+| sfp_cli_subfinder | default_step | 201 | 304 | 291 | 336 |
+| context_collector_1 | collector | 455 | 320 | 471 | 336 |
+| sfp_cli_httpx | default_step | 21 | 484 | 111 | 516 |
+| context_collector_2 | collector | 275 | 500 | 291 | 516 |
+| sfp_cli_nmap | mirror_step | 381 | 484 | 471 | 516 |
+| sfp_cli_katana | default_step | 21 | 634 | 111 | 666 |
+| context_collector_3 | collector | 275 | 650 | 291 | 666 |
+| sfp_cli_nerva | mirror_step | 381 | 634 | 471 | 666 |
+| sfp_cli_nuclei | default_step | 21 | 784 | 111 | 816 |
+| context_collector_4 | collector | 275 | 800 | 291 | 816 |
+| context | transition | 255 | 930 | 291 | 966 |
 
 ### 3.3. Edges for Expanded Steps
 
