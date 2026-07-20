@@ -92,6 +92,8 @@ export default {
     node: { type: Object, required: true },
     editable: { type: Boolean, default: false },
     selected: { type: Boolean, default: false },
+    /** Bumps when Nice-DAG fires model changes — required because node.collapse is not Vue-reactive. */
+    dagObservor: { type: Number, default: 0 },
   },
   emits: ["edit", "select"],
   setup(props, { emit }) {
@@ -100,9 +102,10 @@ export default {
     const portMode = ref(null); // 'input' | 'output' | null (body/chrome)
     let hideTimer = null;
 
-    const isExpanded = computed(
-      () => props.node.children?.length > 0 && !props.node.collapse
-    );
+    const isExpanded = computed(() => {
+      void props.dagObservor;
+      return props.node.children?.length > 0 && !props.node.collapse;
+    });
 
     const contextSide = computed(
       () => props.node.data?.contextSide || "right"
@@ -271,25 +274,5 @@ export default {
   line-height: 1;
   cursor: pointer;
   flex-shrink: 0;
-}
-</style>
-
-<style>
-.wf-connector-context {
-  width: 14px;
-  height: 14px;
-  border: 2px solid #009e73;
-  border-radius: 50%;
-  background: #e8fff6;
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.wf-connector-context-right {
-  right: -8px;
-}
-.wf-connector-context-left {
-  left: -8px;
 }
 </style>
