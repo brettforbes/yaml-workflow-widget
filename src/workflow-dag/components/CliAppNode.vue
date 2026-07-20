@@ -222,7 +222,8 @@ export default {
 .wf-cli-app-node.expanded {
   width: 100%;
   height: 100%;
-  min-height: 48px;
+  min-width: 214px;
+  min-height: 528px;
   border: 2px solid #666;
   background: rgba(250, 250, 250, 0.92);
   box-shadow: inset 0 0 0 1px #ddd;

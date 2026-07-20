@@ -41,7 +41,16 @@
         aria-label="Pretty-print YAML from diagram"
         @click="prettyPrintYaml"
       >
-        ☰
+        YAML
+      </button>
+      <button
+        type="button"
+        class="icon-btn"
+        title="Pretty Print diagram layout"
+        aria-label="Pretty Print diagram layout"
+        @click="prettyPrintLayout"
+      >
+        ▦
       </button>
       <button
         type="button"
@@ -157,14 +166,14 @@
           :style="{ left: edgeMenu.x + 'px', top: edgeMenu.y + 'px' }"
           @click.stop
         >
-          <button type="button" @click="connectSelected('follows')">
-            follows
+          <button type="button" @click="connectSelected('followed-by')">
+            followed-by
           </button>
           <button type="button" @click="connectSelected('used-by')">
             used-by
           </button>
-          <button type="button" @click="connectSelected('semantic-subgraph')">
-            semantic-subgraph
+          <button type="button" @click="connectSelected('semantic-export')">
+            semantic-export
           </button>
         </div>
         <NiceDagNodes v-slot="slotProps" :niceDagReactive="niceDagReactive">
@@ -324,6 +333,7 @@ import {
   postReady,
   postToHost,
 } from "./hostProtocol";
+import { mapWorkflowSeedEdgeToPointsNiceDag } from "./components/workflowSeedEdgePoints";
 import {
   explainWorkflowYaml,
   produceWorkflowForHost,
@@ -336,8 +346,8 @@ const COLLAPSED_H = 64;
 const START_SIZE = 72;
 const TARGET_W = 140;
 const TARGET_H = 48;
-const END_SIZE = 88;
-const COLLECTOR_SIZE = 28;
+const END_SIZE = 72;
+const COLLECTOR_SIZE = 32;
 const CODE_PANE_WIDTH_KEY = "workflow-dag:codePaneWidth";
 const CODE_PANE_MIN = 200;
 const CODE_PANE_MAX_RATIO = 0.75;
@@ -490,7 +500,7 @@ export default {
     const getEdgeAttributes = (edge) => {
       const type =
         edgeMeta.value.get(edgeKey(edge.source.id, edge.target.id)) ||
-        EDGE_TYPE.FOLLOWS;
+        EDGE_TYPE.FOLLOWED_BY;
       return {
         color: resolveEdgeColor(type, theme.value, edgeColored.value),
       };
@@ -498,13 +508,23 @@ export default {
 
     const { niceDagEl, niceDagReactive } = useNiceDag({
       editable: true,
+      mode: "DEFAULT",
+      layout: "WORKFLOW_SEED",
       initNodes,
       getNodeSize,
+      mapEdgeToPoints: mapWorkflowSeedEdgeToPointsNiceDag,
       graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
       subViewPadding: { top: 56, bottom: 36, left: 36, right: 48 },
       gridConfig: { size: 20, color: "rgba(128,128,128,0.35)" },
       getEdgeAttributes,
     });
+
+    const prettyPrintLayout = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag?.prettify) return;
+      niceDag.prettify();
+      applyCenter();
+    };
 
     const setTheme = (next) => {
       theme.value = normalizeTheme(next);
@@ -537,7 +557,7 @@ export default {
         if (!path) continue;
         const type =
           edgeMeta.value.get(edgeKey(edge.source.id, edge.target.id)) ||
-          EDGE_TYPE.FOLLOWS;
+          EDGE_TYPE.FOLLOWED_BY;
         path.setAttribute(
           "stroke",
           resolveEdgeColor(type, theme.value, edgeColored.value)
@@ -1005,6 +1025,7 @@ export default {
       editMode,
       toggleEditMode,
       prettyPrintYaml,
+      prettyPrintLayout,
       edgeMeta,
       resetView,
       onDiagramWheel,

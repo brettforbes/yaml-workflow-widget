@@ -60,7 +60,7 @@ Updated: 2026-07-20 (Epic L0 opened — WorkflowSeed layout)
 
 ## Locked decisions
 
-- Edge labels: `follows` | `used-by` | `semantic-subgraph`
+- Edge labels: `followed-by` | `used-by` | `semantic-export` (Epic L0 — seed `03_Workflow_Refinements.md`)
 - YAML tool field stays `uses: tool.*`
 - Langium must parse **YAML** (bridge in browser; full DocumentBuilder in Node/MCP)
 - Subtle icons only; no header button bars

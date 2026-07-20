@@ -26,7 +26,7 @@ export default {
   },
   setup(props) {
     const rows = computed(() =>
-      [EDGE_TYPE.FOLLOWS, EDGE_TYPE.USED_BY, EDGE_TYPE.SEMANTIC].map(
+      [EDGE_TYPE.FOLLOWED_BY, EDGE_TYPE.USED_BY, EDGE_TYPE.SEMANTIC_EXPORT].map(
         (type) => ({
           type,
           color: resolveEdgeColor(type, props.theme, props.colored),

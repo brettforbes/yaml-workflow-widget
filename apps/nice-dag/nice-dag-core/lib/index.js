@@ -3,6 +3,7 @@ var rt = (n, t, e) => t in n ? nt(n, t, { enumerable: !0, configurable: !0, writ
 var o = (n, t, e) => (rt(n, typeof t != "symbol" ? t + "" : t, e), e);
 import F from "dagre";
 import ht from "html2canvas";
+import { applyWorkflowSeedLayout } from "./workflowSeedLayout.js";
 var f = /* @__PURE__ */ ((n) => (n.REMOVE_SUB_VIEW = "REMOVE_SUB_VIEW", n.ADD_SUB_VIEW = "ADD_SUB_VIEW", n.RESIZE = "RESIZE", n.ADD_NODE = "ADD_NODE", n.REMOVE_NODE = "REMOVE_NODE", n.ADD_EDGE = "ADD_EDGE", n.REMOVE_EDGE = "REMOVE_EDGE", n))(f || {}), p = /* @__PURE__ */ ((n) => (n.SHRINK_NODE = "SHRINK_NODE", n.EXPAND_NODE = "EXPAND_NODE", n.POSITION_CHANGE = "POSITION_CHANGE", n.RESIZE = "RESIZE", n.REMOVED = "REMOVED", n.ADD_CHILD_NODE = "ADD_CHILD_NODE", n))(p || {}), D = /* @__PURE__ */ ((n) => (n.LR = "LR", n.RL = "RL", n.TB = "TB", n.BT = "BT", n))(D || {}), E = /* @__PURE__ */ ((n) => (n.CENTER_OF_BORDER = "CENTER_OF_BORDER", n.CENTER = "CENTER", n))(E || {}), K = /* @__PURE__ */ ((n) => (n.HIERARCHY = "HIERARCHY", n.FLATTEN = "FLATTEN", n))(K || {}), $ = /* @__PURE__ */ ((n) => (n.DEFAULT = "DEFAULT", n.WITH_JOINT_NODES = "WITH_JOINT_NODES", n))($ || {});
 function dt(n = []) {
   let t = [];
@@ -471,7 +472,11 @@ class H {
       e && this.childVMs.forEach((h) => {
         h.doLayout(t, e), this.vNodes.find((d) => d.id === h.id).resize(h.size());
       });
-      const i = Nt(this.vNodes, y(this.dagId).config.graphLabel);
+      const layoutConfig = y(this.dagId).config;
+      if (layoutConfig.layout === "WORKFLOW_SEED") {
+        applyWorkflowSeedLayout(this.vNodes, layoutConfig);
+      } else {
+      const i = Nt(this.vNodes, layoutConfig.graphLabel);
       let s = 0;
       this.vNodes.forEach((h) => {
         if (!h.editing) {
@@ -480,6 +485,7 @@ class H {
         }
         s++;
       });
+      }
       const r = this.resize(t);
       return this.pEdges.forEach((h) => {
         h.doLayout();
