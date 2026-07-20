@@ -279,7 +279,9 @@ class Y {
     o(this, "ref");
     this.source = t, this.target = e, this.pathRef = z(null, "path").withAttributes({
       "data-source-key": t.id,
-      "data-target-key": e.id
+      "data-target-key": e.id,
+      fill: "none",
+      "fill-opacity": "0"
     }).svgElement, this.ref = C().withClassNames(ut).withAbsolutePosition(Q).htmlElement, this.source.addNodeChangeListener(this), this.target.addNodeChangeListener(this);
   }
   destory() {
@@ -319,7 +321,9 @@ class Y {
       return `M${e.x},${e.y} L${s},${r} L${i.x},${i.y}`;
     })();
     a(this.pathRef).withAttributes({
-      d: h
+      d: h,
+      fill: "none",
+      "fill-opacity": "0"
     });
     const s = (e.x + i.x) / 2, r = (e.y + i.y) / 2, d = Math.sqrt((i.x - e.x) * (i.x - e.x) + (i.y - e.y) * (i.y - e.y)), l = `rotate(${ct(i.y - e.y, i.x - e.x)}deg)`;
     a(this.ref).withAbsolutePosition({
@@ -937,7 +941,9 @@ class k {
     });
     o(this, "renderEdge", (t) => {
       const e = t.pathRef, i = this.viewConfig.getEdgeAttributes(t), s = a(e).withAttributes({
-        stroke: i && i.color ? i.color : "rgb(204, 204, 204)"
+        stroke: i && i.color ? i.color : "rgb(204, 204, 204)",
+        fill: "none",
+        "fill-opacity": "0"
       }).svgElement;
       i.hideArrow || s.setAttribute("marker-mid", `url(#${this.model.dagId}-nice-dag-svg-arrow)`);
     });
