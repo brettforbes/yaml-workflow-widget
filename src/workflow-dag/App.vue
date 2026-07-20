@@ -571,6 +571,8 @@ export default {
           "stroke",
           resolveEdgeColor(type, theme.value, edgeColored.value)
         );
+        path.setAttribute("fill", "none");
+        path.setAttribute("fill-opacity", "0");
       }
     };
 
