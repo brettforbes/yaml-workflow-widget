@@ -51,23 +51,25 @@ function isExpandedStep(node) {
 }
 
 /**
- * Push nodes whose top is below the collapsed step bottom down by EXPAND_DELTA.
- * Expanded host grows downward from the collapsed top edge.
+ * Push nodes whose *seed* layoutCy is below an expanded step by EXPAND_DELTA (528−64).
+ * Never mutates layoutCy — re-entrant doLayout must stay idempotent.
  * @param {object[]} vNodes
  */
 function applyExpandPushDown(vNodes) {
-  const expanded = vNodes.filter(isExpandedStep);
+  const expanded = vNodes
+    .filter(isExpandedStep)
+    .sort((a, b) => (a.data?.layoutCy ?? 0) - (b.data?.layoutCy ?? 0));
   if (!expanded.length) return;
 
   for (const exp of expanded) {
-    const collapsedTop =
-      (exp.data?.layoutCy != null ? exp.data.layoutCy - 32 : exp.y) ;
-    const pushFromY = collapsedTop + 64;
+    const baseCy = exp.data?.layoutCy;
+    if (baseCy == null) continue;
     for (const node of vNodes) {
       if (node.id === exp.id) continue;
-      if (node.y >= pushFromY - 0.5) {
+      const nodeCy = node.data?.layoutCy;
+      if (nodeCy == null) continue;
+      if (nodeCy > baseCy) {
         node.y += EXPAND_DELTA;
-        if (node.data?.layoutCy != null) node.data.layoutCy += EXPAND_DELTA;
       }
     }
   }

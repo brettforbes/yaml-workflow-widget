@@ -313,11 +313,15 @@ class Y {
     this.target.removeDependency(this.source), this.target.model.removeEdge(this), this.target.removeNodeChangeListener(this), this.source.removeNodeChangeListener(this), this.pathRef.remove(), this.ref.remove();
   }
   doLayout() {
-    const { mapEdgeToPoints: t } = y(this.source.model.dagId).config, { source: e, target: i } = t(this), s = (e.x + i.x) / 2, r = (e.y + i.y) / 2, h = `M${e.x},${e.y} L${s},${r} L${i.x},${i.y}`;
+    const cfg = y(this.source.model.dagId).config, pts = cfg.mapEdgeToPoints(this), e = pts.source, i = pts.target;
+    const h = cfg.layout === "WORKFLOW_SEED" && pts.path ? pts.path : (() => {
+      const s = (e.x + i.x) / 2, r = (e.y + i.y) / 2;
+      return `M${e.x},${e.y} L${s},${r} L${i.x},${i.y}`;
+    })();
     a(this.pathRef).withAttributes({
       d: h
     });
-    const d = Math.sqrt((i.x - e.x) * (i.x - e.x) + (i.y - e.y) * (i.y - e.y)), l = `rotate(${ct(i.y - e.y, i.x - e.x)}deg)`;
+    const s = (e.x + i.x) / 2, r = (e.y + i.y) / 2, d = Math.sqrt((i.x - e.x) * (i.x - e.x) + (i.y - e.y) * (i.y - e.y)), l = `rotate(${ct(i.y - e.y, i.x - e.x)}deg)`;
     a(this.ref).withAbsolutePosition({
       x: s - d / 2,
       y: r - X / 2,
@@ -498,9 +502,13 @@ class H {
     o(this, "buildEdges", () => {
       this.pEdges = [];
       const t = {};
+      const seen = /* @__PURE__ */ new Set();
       this.vNodes.forEach((e) => t[e.id] = e), this.vNodes.forEach((e) => {
         x(e.dependencies) || e.dependencies.forEach((i) => {
-          this.pEdges.push(new Y(t[i], e));
+          if (!t[i]) return;
+          const key = `${i}->${e.id}`;
+          if (seen.has(key)) return;
+          seen.add(key), this.pEdges.push(new Y(t[i], e));
         });
       });
     });

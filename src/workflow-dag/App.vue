@@ -219,7 +219,9 @@
           />
           <CliAppNode
             v-else
+            :key="`${slotProps.node.id}-${slotProps.node.collapse ? 'c' : 'e'}`"
             :node="slotProps.node"
+            :dag-observor="niceDagReactive.observor"
             :editable="editMode"
             :selected="selectedNodeIds.includes(slotProps.node.id)"
             @edit="openEdit"
@@ -323,6 +325,7 @@ import InputFormModal from "./components/InputFormModal.vue";
 import ContextFormModal from "./components/ContextFormModal.vue";
 import ConfigFormModal from "./components/ConfigFormModal.vue";
 import "./components/CliWorkflowView.css";
+import "./components/ports.css";
 import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
 import { validateWorkflowYaml } from "./components/yamlValidate";
@@ -390,6 +393,10 @@ function getNodeSize(node) {
   }
   if (node.data?.category) {
     return { width: CATEGORY_W, height: CATEGORY_H };
+  }
+  // Seed §2.4 expanded host when Nice-DAG subview is open
+  if (node.children?.length && node.collapse === false) {
+    return { width: 214, height: 528 };
   }
   return { width: COLLAPSED_W, height: COLLAPSED_H };
 }
@@ -712,6 +719,17 @@ export default {
     const getMainLayer = () =>
       niceDagEl.value?.querySelector(".nice-dag-main-layer");
 
+    const ensurePanRoom = () => {
+      const main = getMainLayer();
+      const zoom = niceDagEl.value?.querySelector(".nice-dag-zoom-layer");
+      if (!main || !zoom) return;
+      const pad = 240;
+      const w = Math.max(zoom.scrollWidth, zoom.offsetWidth, main.clientWidth + pad);
+      const h = Math.max(zoom.scrollHeight, zoom.offsetHeight, main.clientHeight + pad);
+      zoom.style.minWidth = `${w}px`;
+      zoom.style.minHeight = `${h}px`;
+    };
+
     const applyCenter = () => {
       const niceDag = niceDagReactive.use();
       if (!niceDag || !niceDagEl.value) return;
@@ -720,6 +738,7 @@ export default {
         width: bounds.width,
         height: Math.max(bounds.height, 500),
       });
+      ensurePanRoom();
     };
 
     const resetView = () => {
@@ -738,6 +757,13 @@ export default {
     const onDiagramWheel = (event) => {
       const niceDag = niceDagReactive.use();
       if (!niceDag) return;
+      const main = getMainLayer();
+      // Shift+wheel → horizontal pan; plain wheel → zoom
+      if (event.shiftKey && main) {
+        event.preventDefault();
+        main.scrollLeft += event.deltaY;
+        return;
+      }
       event.preventDefault();
       const delta = event.deltaY > 0 ? -0.06 : 0.06;
       const next = Math.min(
@@ -747,6 +773,7 @@ export default {
       if (next === dagScale.value) return;
       dagScale.value = next;
       niceDag.setScale(next);
+      ensurePanRoom();
     };
 
     const onDiagramPanStart = (event) => {
@@ -760,6 +787,7 @@ export default {
       }
       const main = getMainLayer();
       if (!main) return;
+      ensurePanRoom();
       event.preventDefault();
       const startX = event.clientX;
       const startY = event.clientY;
@@ -1204,10 +1232,16 @@ body.wd-divider-dragging {
 }
 .diagram-pane .nice-dag-main-layer {
   overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
   cursor: grab;
 }
 .diagram-pane .nice-dag-main-layer.wd-panning {
   cursor: grabbing;
+}
+.diagram-pane .nice-dag-zoom-layer {
+  min-width: 100%;
+  min-height: 100%;
 }
 .diagram-column.edit-mode .diagram-pane {
   outline: 1px dashed var(--wd-border);
