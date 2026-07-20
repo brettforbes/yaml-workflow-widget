@@ -31,9 +31,12 @@ export default {
       const k = edgeKey(props.source.id, props.target.id);
       return props.edgeMeta.get(k) || EDGE_TYPE.FOLLOWED_BY;
     });
-    const label = computed(() =>
-      props.showLabels ? edgeType.value : ""
-    );
+    /** Shorten on-canvas only; legend keeps full `semantic-export`. */
+    const label = computed(() => {
+      if (!props.showLabels) return "";
+      if (edgeType.value === EDGE_TYPE.SEMANTIC_EXPORT) return "semantic";
+      return edgeType.value;
+    });
     const labelColor = computed(() =>
       resolveEdgeColor(edgeType.value, props.theme, props.colored)
     );
