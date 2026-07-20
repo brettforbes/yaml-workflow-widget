@@ -1,14 +1,40 @@
 /**
  * Seed §2.5: straight edges between port / collector / transition perimeters.
  * If extended, H/V edges pass through the shape centreline (same cx or cy).
+ *
+ * Expand push-down mutates node.y but keeps seed layoutCy (idempotent re-layout).
+ * Edge geometry must therefore prefer the *visual* centre after push-down, except
+ * for expanded step hosts which grow downward and keep their context centreline
+ * at seed layoutCy.
  */
 
 const PORT_R = 6;
 
+function isExpandedStepHost(node) {
+  const role = node.data?.layoutRole;
+  return (
+    (role === "default_step" ||
+      role === "mirror_step" ||
+      node.data?.kind === "cli-step") &&
+    node.children?.length > 0 &&
+    node.collapse === false
+  );
+}
+
 function nodeCentre(node) {
+  const geomX = node.x + (node.width || 0) / 2;
+  const geomY = node.y + (node.height || 0) / 2;
+  // Expanded hosts grow downward from collapsed top; context row stays at layoutCy.
+  if (isExpandedStepHost(node) && node.data?.layoutCy != null) {
+    return {
+      x: node.data?.layoutCx ?? geomX,
+      y: node.data.layoutCy,
+    };
+  }
+  // Prefer geometry so push-down (y += EXPAND_DELTA) moves edge endpoints with nodes.
   return {
-    x: node.data?.layoutCx ?? node.x + (node.width || 0) / 2,
-    y: node.data?.layoutCy ?? node.y + (node.height || 0) / 2,
+    x: node.data?.layoutCx ?? geomX,
+    y: geomY,
   };
 }
 
@@ -69,10 +95,11 @@ function snapToSharedAxis(from, to, source, target) {
     const x = scx;
     return { source: { x, y: from.y }, target: { x, y: to.y } };
   }
+  // Same seed row (layoutCy): snap to *visual* shared Y after expand push-down.
   const scy = source.data?.layoutCy;
   const tcy = target.data?.layoutCy;
   if (scy != null && tcy != null && Math.abs(scy - tcy) < 0.5) {
-    const y = scy;
+    const y = nodeCentre(source).y;
     return { source: { x: from.x, y }, target: { x: to.x, y } };
   }
   // Fallback: geometric centres aligned within 0.5px

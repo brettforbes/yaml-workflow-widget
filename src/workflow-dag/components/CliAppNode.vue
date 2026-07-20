@@ -59,7 +59,7 @@
       title="context export"
     />
     <YamlTooltip
-      v-if="showTooltip"
+      v-if="showTooltip && !isExpanded"
       :yaml="tooltipYaml"
       :title="tooltipTitle"
       @edit="onEdit"
@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import * as yaml from "js-yaml";
 import YamlTooltip from "./YamlTooltip.vue";
 
@@ -105,6 +105,15 @@ export default {
     const isExpanded = computed(() => {
       void props.dagObservor;
       return props.node.children?.length > 0 && !props.node.collapse;
+    });
+
+    // Expanded parent: never keep a stale body/port tooltip open.
+    watch(isExpanded, (expanded) => {
+      if (expanded) {
+        showTooltip.value = false;
+        portMode.value = null;
+        keepOpen.value = false;
+      }
     });
 
     const contextSide = computed(
