@@ -4,7 +4,8 @@
  */
 
 export const CX = 291;
-export const ROW_PITCH = 116;
+export const ROW_PITCH = 150;
+export const FIRST_SPLIT_PITCH = 180;
 export const COLLECTOR_GAP = 90;
 export const EXPAND_DELTA = 464;
 export const EXPANDED_MIN_W = 214;

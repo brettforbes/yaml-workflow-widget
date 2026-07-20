@@ -12,7 +12,10 @@ import {
 import { collectorId, topoStepIds } from "./contextRail.js";
 
 export const CX = 291;
-export const ROW_PITCH = 116;
+/** Default Δcy between successive rows. */
+export const ROW_PITCH = 150;
+/** Δcy from a centre default_step into the first fan-out (split) row — looser diagonals. */
+export const FIRST_SPLIT_PITCH = 180;
 export const COLLECTOR_GAP = 90;
 export const LEFT_CHAIN_CX = 111;
 export const RIGHT_CHAIN_CX = 471;
@@ -158,22 +161,6 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
   const ranks = assignLayoutRanks(stepNodes, entryParentId);
   const chains = assignLayoutChains(stepNodes);
 
-  if (start) {
-    start.data.layoutRole = "transition";
-    start.data.layoutRank = 0;
-    start.data.layoutChain = "centre";
-    start.data.layoutCx = CX;
-    start.data.layoutCy = 36;
-  }
-
-  if (target) {
-    target.data.layoutRole = "target";
-    target.data.layoutRank = 1;
-    target.data.layoutChain = "centre";
-    target.data.layoutCx = CX;
-    target.data.layoutCy = 36 + ROW_PITCH;
-  }
-
   const maxStepRank = stepNodes.length
     ? Math.max(...stepNodes.map((s) => ranks.get(s.id) || 0))
     : 0;
@@ -182,11 +169,51 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
   const splitRows = new Map();
   for (const step of stepNodes) {
     const rank = ranks.get(step.id) || 0;
+    if (!splitRows.has(rank)) splitRows.set(rank, []);
+    splitRows.get(rank).push(step);
+  }
+
+  let firstSplitRank = null;
+  for (const [rank, stepsAtRank] of [...splitRows.entries()].sort(
+    (a, b) => a[0] - b[0]
+  )) {
+    if (stepsAtRank.length >= 2) {
+      firstSplitRank = rank;
+      break;
+    }
+  }
+
+  /** cy by layoutRank — ROW_PITCH normally; FIRST_SPLIT_PITCH into first fan-out row. */
+  const rankCy = new Map([[0, 36]]);
+  for (let r = 1; r <= endRank; r++) {
+    const prev = rankCy.get(r - 1) ?? 36;
+    const pitch = r === firstSplitRank ? FIRST_SPLIT_PITCH : ROW_PITCH;
+    rankCy.set(r, prev + pitch);
+  }
+
+  if (start) {
+    start.data.layoutRole = "transition";
+    start.data.layoutRank = 0;
+    start.data.layoutChain = "centre";
+    start.data.layoutCx = CX;
+    start.data.layoutCy = rankCy.get(0);
+  }
+
+  if (target) {
+    target.data.layoutRole = "target";
+    target.data.layoutRank = 1;
+    target.data.layoutChain = "centre";
+    target.data.layoutCx = CX;
+    target.data.layoutCy = rankCy.get(1);
+  }
+
+  for (const step of stepNodes) {
+    const rank = ranks.get(step.id) || 0;
     const { chain, role } = chains.get(step.id) || {
       chain: "centre",
       role: "default_step",
     };
-    const cy = 36 + rank * ROW_PITCH;
+    const cy = rankCy.get(rank) ?? 36 + rank * ROW_PITCH;
     const cx = stepCenterX(chain);
     step.data.layoutRole = role;
     step.data.layoutRank = rank;
@@ -195,9 +222,6 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
     step.data.layoutCy = cy;
     step.data.collapsed = step.collapse !== false;
     step.data.contextSide = chain === "right" ? "left" : "right";
-
-    if (!splitRows.has(rank)) splitRows.set(rank, []);
-    splitRows.get(rank).push(step);
   }
 
   const sharedCollectorCxByRank = new Map();
@@ -214,7 +238,7 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
       chain: "centre",
       role: "default_step",
     };
-    const cy = 36 + rank * ROW_PITCH;
+    const cy = rankCy.get(rank) ?? 36 + rank * ROW_PITCH;
     const cx = stepCenterX(chain);
     const colNode = nodes.find((n) => n.id === collectorId(stepId));
     if (!colNode) continue;
@@ -232,7 +256,7 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
     end.data.layoutRank = endRank;
     end.data.layoutChain = "centre";
     end.data.layoutCx = CX;
-    end.data.layoutCy = 36 + endRank * ROW_PITCH;
+    end.data.layoutCy = rankCy.get(endRank);
   }
 
   for (const n of nodes) {

@@ -101,27 +101,28 @@ function layoutDoc(yamlRel, expected) {
   }
 }
 
+// ROW_PITCH=150; FIRST_SPLIT_PITCH=180 into first fan-out row.
 layoutDoc("../assets/12A2_Workflow_YAML_Example.yaml", [
   { id: WORKFLOW_START_ID, x: 255, y: 0, cx: 291, cy: 36 },
-  { id: "sfp_cli_netdiscover", x: 201, y: 120, cx: 291, cy: 152 },
-  { id: "__ctxcol_sfp_cli_netdiscover__", x: 455, y: 136, cx: 471, cy: 152 },
-  { id: WORKFLOW_END_ID, x: 255, y: 232, cx: 291, cy: 268 },
+  { id: "sfp_cli_netdiscover", x: 201, y: 154, cx: 291, cy: 186 },
+  { id: "__ctxcol_sfp_cli_netdiscover__", x: 455, y: 170, cx: 471, cy: 186 },
+  { id: WORKFLOW_END_ID, x: 255, y: 300, cx: 291, cy: 336 },
 ]);
 
 layoutDoc("../assets/12A_Workflow_YAML_Example.yaml", [
   { id: WORKFLOW_START_ID, x: 255, y: 0, cx: 291, cy: 36 },
-  { id: "__workflow_target__", x: 221, y: 128, cx: 291, cy: 152 },
-  { id: "sfp_cli_subfinder", x: 201, y: 236, cx: 291, cy: 268 },
-  { id: "__ctxcol_sfp_cli_subfinder__", x: 455, y: 252, cx: 471, cy: 268 },
-  { id: "sfp_cli_httpx", x: 21, y: 352, cx: 111, cy: 384 },
-  { id: "__ctxcol_sfp_cli_httpx__", x: 275, y: 368, cx: 291, cy: 384 },
-  { id: "sfp_cli_nmap", x: 381, y: 352, cx: 471, cy: 384 },
-  { id: "sfp_cli_katana", x: 21, y: 468, cx: 111, cy: 500 },
-  { id: "__ctxcol_sfp_cli_katana__", x: 275, y: 484, cx: 291, cy: 500 },
-  { id: "sfp_cli_nerva", x: 381, y: 468, cx: 471, cy: 500 },
-  { id: "sfp_cli_nuclei", x: 21, y: 584, cx: 111, cy: 616 },
-  { id: "__ctxcol_sfp_cli_nuclei__", x: 275, y: 600, cx: 291, cy: 616 },
-  { id: WORKFLOW_END_ID, x: 255, y: 696, cx: 291, cy: 732 },
+  { id: "__workflow_target__", x: 221, y: 162, cx: 291, cy: 186 },
+  { id: "sfp_cli_subfinder", x: 201, y: 304, cx: 291, cy: 336 },
+  { id: "__ctxcol_sfp_cli_subfinder__", x: 455, y: 320, cx: 471, cy: 336 },
+  { id: "sfp_cli_httpx", x: 21, y: 484, cx: 111, cy: 516 },
+  { id: "__ctxcol_sfp_cli_httpx__", x: 275, y: 500, cx: 291, cy: 516 },
+  { id: "sfp_cli_nmap", x: 381, y: 484, cx: 471, cy: 516 },
+  { id: "sfp_cli_katana", x: 21, y: 634, cx: 111, cy: 666 },
+  { id: "__ctxcol_sfp_cli_katana__", x: 275, y: 650, cx: 291, cy: 666 },
+  { id: "sfp_cli_nerva", x: 381, y: 634, cx: 471, cy: 666 },
+  { id: "sfp_cli_nuclei", x: 21, y: 784, cx: 111, cy: 816 },
+  { id: "__ctxcol_sfp_cli_nuclei__", x: 275, y: 800, cx: 291, cy: 816 },
+  { id: WORKFLOW_END_ID, x: 255, y: 930, cx: 291, cy: 966 },
 ]);
 
 console.log("OK: WorkflowSeed golden layouts (12A2 + 12A)");
