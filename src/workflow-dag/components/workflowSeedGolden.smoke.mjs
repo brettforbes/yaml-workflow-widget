@@ -25,23 +25,58 @@ function getNodeSize(node) {
 }
 
 function toViewNodes(modelNodes) {
-  return modelNodes.map((n) => ({
-    id: n.id,
-    data: n.data,
-    collapse: n.collapse !== false,
-    children: n.children,
-    width: 0,
-    height: 0,
-    x: 0,
-    y: 0,
-  }));
+  return modelNodes.map((n) => {
+    const node = {
+      id: n.id,
+      data: n.data,
+      collapse: n.collapse !== false,
+      children: n.children,
+      width: 0,
+      height: 0,
+      x: 0,
+      y: 0,
+      doLayoutCalls: 0,
+      doLayout() {
+        this.doLayoutCalls += 1;
+        // Mirror ViewNode.doLayout: positions must already be set.
+        if (
+          !Number.isFinite(this.x) ||
+          !Number.isFinite(this.y) ||
+          !this.width ||
+          !this.height
+        ) {
+          throw new Error(
+            `doLayout before seed coords for ${this.id}: ${this.x},${this.y},${this.width}x${this.height}`
+          );
+        }
+      },
+    };
+    return node;
+  });
+}
+
+/** Same sequence as ViewModel.doLayout WORKFLOW_SEED branch. */
+function applySeedLikeCore(vNodes) {
+  applyWorkflowSeedLayout(vNodes, { getNodeSize });
+  vNodes.forEach((h) => {
+    if (!h.editing) h.doLayout();
+  });
 }
 
 function layoutDoc(yamlRel, expected) {
   const doc = loadYaml(yamlRel);
   const { nodes } = workflowDocToNiceDagModel(doc);
   const vNodes = toViewNodes(nodes);
-  applyWorkflowSeedLayout(vNodes, { getNodeSize });
+  applySeedLikeCore(vNodes);
+
+  const missingDomSync = vNodes.filter((n) => n.doLayoutCalls < 1);
+  if (missingDomSync.length) {
+    console.error(
+      "FAIL: ViewNode.doLayout not invoked after seed layout:",
+      missingDomSync.map((n) => n.id)
+    );
+    process.exit(1);
+  }
 
   for (const row of expected) {
     const node = vNodes.find((n) => n.id === row.id || n.data?.label === row.id);

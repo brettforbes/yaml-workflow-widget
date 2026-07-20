@@ -539,12 +539,13 @@ export default {
       const niceDag = niceDagReactive.use();
       if (!niceDag) return;
       if (editMode.value) {
+        if ("gridVisible" in niceDag) niceDag.gridVisible = false;
         niceDag.stopEditing();
         editMode.value = false;
         pushDiagramToYaml();
       } else {
-        niceDag.startEditing();
         if ("gridVisible" in niceDag) niceDag.gridVisible = true;
+        niceDag.startEditing();
         editMode.value = true;
       }
     };
@@ -791,8 +792,8 @@ export default {
         selectedNodeIds.value = [];
         edgeMenu.value = { open: false, x: 0, y: 0 };
         if (editMode.value) {
-          niceDag.startEditing();
           if ("gridVisible" in niceDag) niceDag.gridVisible = true;
+          niceDag.startEditing();
         }
         refreshEdgeStrokes();
         applyCenter();
