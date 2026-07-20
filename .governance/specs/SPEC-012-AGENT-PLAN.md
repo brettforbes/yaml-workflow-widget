@@ -4,7 +4,7 @@
 |-------|-------|
 | Spec | [SPEC-012-update-widget.md](SPEC-012-update-widget.md) |
 | Source requirements | `.seed/02_Update_Widget_Requirements.md` |
-| Product surface after F0 | `src/` webpack iframe — `.\start.ps1` → `http://localhost:4001` |
+| Product surface after F0 | `src/` webpack iframe — `.\start.ps1` → `http://localhost:4009` |
 | Nice-DAG library | `apps/nice-dag/` only |
 | Langium package | `packages/workflow-lang/` |
 | Nice-DAG skill | `.cursor/skills/nice-dag/SKILL.md` (vendored copy; do not modify `yaml-workflow-dag` for product work) |
@@ -12,20 +12,24 @@
 
 ## Execution order
 
-`Prep → F0 → E1 → E2 → E3 → E4 → E5 → E6`
+`Prep → F0 → E1 → E2 → E3 → E4 → E5 → E6` (complete on develop)
 
-Do **not** start an epic until the previous epic’s acceptance is met (E3 may overlap E4 only for form work after E2; edit chrome does not wait on E3).
+**Active next:** `Epic L0` — WorkflowSeed layout replaces dagre in nice-dag-core.
 
-**Start here:** [F0-S1 #107](https://github.com/brettforbes/yaml-workflow-widget/issues/107) after reading the F0 epic [#100](https://github.com/brettforbes/yaml-workflow-widget/issues/100).
+**Start here:** [L0-S0 #195](https://github.com/brettforbes/yaml-workflow-widget/issues/195) after reading Epic L0 [#194](https://github.com/brettforbes/yaml-workflow-widget/issues/194) and [SPEC-012-LAYOUT-RULES.md](SPEC-012-LAYOUT-RULES.md).
+
+Seed overrides UI: [`.seed/03_Workflow_Refinements.md`](../../.seed/03_Workflow_Refinements.md).
 
 ## Locked decisions (repeat for lesser agents)
 
 - No feature work in `yaml-workflow-dag`.
-- Diagram edge labels: `follows` | `used-by` | `semantic-subgraph`. YAML `uses: tool.*` unchanged.
+- Diagram edge labels (L0): `followed-by` | `used-by` | `semantic-export`. YAML `uses: tool.*` unchanged.
+- Product layout: `layout: "WORKFLOW_SEED"` in nice-dag-core (**not** dagre). `mode: "DEFAULT"` (no joints).
 - Langium must parse **YAML**.
 - MCP: `explain_workflow` + `produce_workflow`.
 - Subtle icons only; no header button bars.
 - Layout 2c: product in webpack `src/`; `apps/` = Nice-DAG library only.
+- Dev launcher: `.\start.ps1` → `http://localhost:4009`.
 
 ## Issue map
 
@@ -79,12 +83,29 @@ Do **not** start an epic until the previous epic’s acceptance is met (E3 may o
 | E6-S5 | Host MCP bridge | R12-E6-05 | E6-S1, E5-S5 | [#145](https://github.com/brettforbes/yaml-workflow-widget/issues/145) |
 | E6-S6 | Content install audit | R12-E6-06 | Epic E6 | [#146](https://github.com/brettforbes/yaml-workflow-widget/issues/146) |
 
+| Epic L0 | WorkflowSeed layout + edit fix | seed 03 + LAYOUT-RULES | E6 done | [#194](https://github.com/brettforbes/yaml-workflow-widget/issues/194) |
+| L0-S0 | Fix editable / startEditing | LAYOUT-RULES | Epic L0 | [#195](https://github.com/brettforbes/yaml-workflow-widget/issues/195) |
+| L0-S1 | Author LAYOUT-RULES.md | seed 03 | Epic L0 | [#196](https://github.com/brettforbes/yaml-workflow-widget/issues/196) |
+| L0-S2 | Edge rename + legend/RMB | seed §2.6 | L0-S0 | [#197](https://github.com/brettforbes/yaml-workflow-widget/issues/197) |
+| L0-S3 | WorkflowSeedLayout + goldens in core | LAYOUT-RULES | L0-S1 | [#198](https://github.com/brettforbes/yaml-workflow-widget/issues/198) |
+| L0-S4 | App fromWorkflow roles | LAYOUT-RULES | L0-S1,S2 | [#199](https://github.com/brettforbes/yaml-workflow-widget/issues/199) |
+| L0-S5 | Core doLayout → WorkflowSeed | LAYOUT-RULES | L0-S3 | [#200](https://github.com/brettforbes/yaml-workflow-widget/issues/200) |
+| L0-S6 | App WORKFLOW_SEED + DEFAULT | LAYOUT-RULES | L0-S0,S4,S5 | [#201](https://github.com/brettforbes/yaml-workflow-widget/issues/201) |
+| L0-S7 | Collector + chrome + ports | seed §2.1–2.7 | L0-S6 | [#202](https://github.com/brettforbes/yaml-workflow-widget/issues/202) |
+| L0-S8 | Expand/collapse reflow | seed §2.4 | L0-S5,S6 | [#203](https://github.com/brettforbes/yaml-workflow-widget/issues/203) |
+| L0-S9 | Pretty Print → prettify | seed §1/§3 | L0-S6 | [#204](https://github.com/brettforbes/yaml-workflow-widget/issues/204) |
+| L0-S10 | Orthogonal perimeter edges | seed §2.5 | L0-S6 | [#205](https://github.com/brettforbes/yaml-workflow-widget/issues/205) |
+| L0-S11 | SPEC_GAP §3.3/§3.4 | SPEC_GAP | L0-S1 | [#206](https://github.com/brettforbes/yaml-workflow-widget/issues/206) |
+| L0-S12 | Agent plan / continuity / smokes | — | L0-S2…S9 | [#207](https://github.com/brettforbes/yaml-workflow-widget/issues/207) |
+
+L0 order: `S0 → S1∥S2 → S3∥S4 → S5 → S6 → S7∥S8∥S9 → S10 → S11∥S12`
+
 ## Verify (global)
 
 ```bash
 # Widget (after F0)
 .\start.ps1
-# open http://localhost:4001
+# open http://localhost:4009
 
 # Langium (E5)
 cd packages/workflow-lang && npm install && npm run build && npm run mcp:smoke

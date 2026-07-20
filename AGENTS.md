@@ -51,17 +51,21 @@ Source: `.seed/02_Update_Widget_Requirements.md`
 Spec: [`.governance/specs/SPEC-012-update-widget.md`](.governance/specs/SPEC-012-update-widget.md)  
 Agent plan / issue map: [`.governance/specs/SPEC-012-AGENT-PLAN.md`](.governance/specs/SPEC-012-AGENT-PLAN.md)
 
+**Active epic L0 (start here):** WorkflowSeed layout replaces dagre in nice-dag-core.
+
+| Doc / issue | Link |
+|-------------|------|
+| Layout rules (executable) | [`.governance/specs/SPEC-012-LAYOUT-RULES.md`](.governance/specs/SPEC-012-LAYOUT-RULES.md) |
+| Seed rules | [`.seed/03_Workflow_Refinements.md`](.seed/03_Workflow_Refinements.md) |
+| Epic L0 | [#194](https://github.com/brettforbes/yaml-workflow-widget/issues/194) |
+| Start story L0-S0 (edit fix) | [#195](https://github.com/brettforbes/yaml-workflow-widget/issues/195) |
+
 | Epic | Issue | Start story |
 |------|------:|-------------|
-| F0 Layout (webpack `src/` + `apps/nice-dag`) | [#100](https://github.com/brettforbes/yaml-workflow-widget/issues/100) | [#107](https://github.com/brettforbes/yaml-workflow-widget/issues/107) |
-| E1 Chrome / UX | [#101](https://github.com/brettforbes/yaml-workflow-widget/issues/101) | after F0 |
-| E2 Workflow model v2 | [#102](https://github.com/brettforbes/yaml-workflow-widget/issues/102) | after E1 |
-| E3 Category form UIs | [#103](https://github.com/brettforbes/yaml-workflow-widget/issues/103) | after E2 |
-| E4 Diagram edit mode | [#104](https://github.com/brettforbes/yaml-workflow-widget/issues/104) | after E2 |
-| E5 Langium YAML sync + MCP | [#105](https://github.com/brettforbes/yaml-workflow-widget/issues/105) | after E2/E4 |
-| E6 Embed / host protocol | [#106](https://github.com/brettforbes/yaml-workflow-widget/issues/106) | after E1/E5 |
+| **L0 WorkflowSeed layout** | [#194](https://github.com/brettforbes/yaml-workflow-widget/issues/194) | [#195](https://github.com/brettforbes/yaml-workflow-widget/issues/195) |
+| F0–E6 (landed) | [#100](https://github.com/brettforbes/yaml-workflow-widget/issues/100)–[#106](https://github.com/brettforbes/yaml-workflow-widget/issues/106) | closed |
 
-**F0 landed:** Product UI is `src/workflow-dag/` in the webpack iframe. Launcher: `.\start.ps1` → `http://localhost:4001`. Nice-DAG library only under `apps/nice-dag/`. The Vite app `apps/workflow-dag-viewer` is retired. Do not add features in `yaml-workflow-dag`.
+**F0 landed:** Product UI is `src/workflow-dag/` in the webpack iframe. Launcher: `.\start.ps1` → `http://localhost:4009`. Nice-DAG library only under `apps/nice-dag/`. The Vite app `apps/workflow-dag-viewer` is retired. Do not add features in `yaml-workflow-dag`.
 
 | Concern | Path |
 |---------|------|
