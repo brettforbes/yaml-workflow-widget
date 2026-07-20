@@ -103,26 +103,26 @@ function layoutDoc(yamlRel, expected) {
 
 // ROW_PITCH=150; FIRST_SPLIT_PITCH=180 into first fan-out row.
 layoutDoc("../assets/12A2_Workflow_YAML_Example.yaml", [
-  { id: WORKFLOW_START_ID, x: 255, y: 0, cx: 291, cy: 36 },
-  { id: "sfp_cli_netdiscover", x: 201, y: 154, cx: 291, cy: 186 },
-  { id: "__ctxcol_sfp_cli_netdiscover__", x: 455, y: 170, cx: 471, cy: 186 },
-  { id: WORKFLOW_END_ID, x: 255, y: 300, cx: 291, cy: 336 },
+  { id: WORKFLOW_START_ID, x: 355, y: 0, cx: 391, cy: 36 },
+  { id: "sfp_cli_netdiscover", x: 301, y: 154, cx: 391, cy: 186 },
+  { id: "__ctxcol_sfp_cli_netdiscover__", x: 555, y: 170, cx: 571, cy: 186 },
+  { id: WORKFLOW_END_ID, x: 355, y: 300, cx: 391, cy: 336 },
 ]);
 
 layoutDoc("../assets/12A_Workflow_YAML_Example.yaml", [
-  { id: WORKFLOW_START_ID, x: 255, y: 0, cx: 291, cy: 36 },
-  { id: "__workflow_target__", x: 221, y: 162, cx: 291, cy: 186 },
-  { id: "sfp_cli_subfinder", x: 201, y: 304, cx: 291, cy: 336 },
-  { id: "__ctxcol_sfp_cli_subfinder__", x: 455, y: 320, cx: 471, cy: 336 },
-  { id: "sfp_cli_httpx", x: 21, y: 484, cx: 111, cy: 516 },
-  { id: "__ctxcol_rank_3__", x: 275, y: 500, cx: 291, cy: 516 },
-  { id: "sfp_cli_nmap", x: 381, y: 484, cx: 471, cy: 516 },
-  { id: "sfp_cli_katana", x: 21, y: 634, cx: 111, cy: 666 },
-  { id: "__ctxcol_rank_4__", x: 275, y: 650, cx: 291, cy: 666 },
-  { id: "sfp_cli_nerva", x: 381, y: 634, cx: 471, cy: 666 },
-  { id: "sfp_cli_nuclei", x: 21, y: 784, cx: 111, cy: 816 },
-  { id: "__ctxcol_sfp_cli_nuclei__", x: 275, y: 800, cx: 291, cy: 816 },
-  { id: WORKFLOW_END_ID, x: 255, y: 930, cx: 291, cy: 966 },
+  { id: WORKFLOW_START_ID, x: 355, y: 0, cx: 391, cy: 36 },
+  { id: "__workflow_target__", x: 321, y: 162, cx: 391, cy: 186 },
+  { id: "sfp_cli_subfinder", x: 301, y: 304, cx: 391, cy: 336 },
+  { id: "__ctxcol_sfp_cli_subfinder__", x: 555, y: 320, cx: 571, cy: 336 },
+  { id: "sfp_cli_httpx", x: 121, y: 484, cx: 211, cy: 516 },
+  { id: "__ctxcol_rank_3__", x: 375, y: 500, cx: 391, cy: 516 },
+  { id: "sfp_cli_nmap", x: 481, y: 484, cx: 571, cy: 516 },
+  { id: "sfp_cli_katana", x: 121, y: 634, cx: 211, cy: 666 },
+  { id: "__ctxcol_rank_4__", x: 375, y: 650, cx: 391, cy: 666 },
+  { id: "sfp_cli_nerva", x: 481, y: 634, cx: 571, cy: 666 },
+  { id: "sfp_cli_nuclei", x: 121, y: 784, cx: 211, cy: 816 },
+  { id: "__ctxcol_sfp_cli_nuclei__", x: 375, y: 800, cx: 391, cy: 816 },
+  { id: WORKFLOW_END_ID, x: 355, y: 930, cx: 391, cy: 966 },
 ]);
 
 // Strong CX spine: start, target, subfinder, collectors 2–4, context end.
@@ -143,8 +143,8 @@ layoutDoc("../assets/12A_Workflow_YAML_Example.yaml", [
   for (const id of spineIds) {
     const n = vNodes.find((v) => v.id === id);
     const cx = n.x + n.width / 2;
-    if (Math.abs(cx - 291) > 0.5) {
-      console.error(`FAIL: spine ${id} cx=${cx}, expected 291`);
+    if (Math.abs(cx - 391) > 0.5) {
+      console.error(`FAIL: spine ${id} cx=${cx}, expected 391`);
       process.exit(1);
     }
   }

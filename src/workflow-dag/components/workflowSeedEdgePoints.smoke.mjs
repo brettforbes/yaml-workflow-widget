@@ -5,7 +5,7 @@
 import { mapWorkflowSeedEdgeToPoints } from "./workflowSeedEdgePoints.js";
 
 const EXPAND_DELTA = 464;
-const CX = 291;
+const CX = 391;
 
 function step(id, cy, { expanded = false, y = cy - 32 } = {}) {
   return {

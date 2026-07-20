@@ -17,7 +17,8 @@ Seed **overrides** prior UI layout/edge contracts. Tweak this file when seed cha
 
 | Name | Value | Notes |
 |------|------:|-------|
-| `CX` | 291 | Vertical centreline (`cx` of start / target / centre steps / end) |
+| `CX` | 391 | Vertical centreline (`cx` of start / target / centre steps / end); `291 + DIAGRAM_X_OFFSET` |
+| `DIAGRAM_X_OFFSET` | 100 | Global horizontal shift right from legacy spine at 291 |
 | `ROW_PITCH` | 150 | Δ`cy` between successive rows |
 | `FIRST_SPLIT_PITCH` | 180 | Δ`cy` from centre default_step into first fan-out row |
 | `COLLECTOR_GAP` | 90 | Step edge → **collector centre** |
@@ -83,28 +84,28 @@ No `joint-*` nodes. `mode: "DEFAULT"`.
 
 | workflow-icon | type | x | y | cx | cy |
 | --- | --- | ---: | ---: | ---: | ---: |
-| start | transition | 255 | 0 | 291 | 36 |
-| sfp_cli_netdiscover | default_step | 201 | 154 | 291 | 186 |
-| context_collector_1 | collector | 455 | 170 | 471 | 186 |
-| context | transition | 255 | 300 | 291 | 336 |
+| start | transition | 355 | 0 | 391 | 36 |
+| sfp_cli_netdiscover | default_step | 301 | 154 | 391 | 186 |
+| context_collector_1 | collector | 555 | 170 | 571 | 186 |
+| context | transition | 355 | 300 | 391 | 336 |
 
 ### 5.2 Complex — `.seed/12A_Workflow_YAML_Example.yaml`
 
 | workflow-icon | type | x | y | cx | cy |
 | --- | --- | ---: | ---: | ---: | ---: |
-| start | transition | 255 | 0 | 291 | 36 |
-| target | target | 221 | 162 | 291 | 186 |
-| sfp_cli_subfinder | default_step | 201 | 304 | 291 | 336 |
-| context_collector_1 | collector | 455 | 320 | 471 | 336 |
-| sfp_cli_httpx | default_step | 21 | 484 | 111 | 516 |
-| context_collector_2 | collector | 275 | 500 | 291 | 516 |
-| sfp_cli_nmap | mirror_step | 381 | 484 | 471 | 516 |
-| sfp_cli_katana | default_step | 21 | 634 | 111 | 666 |
-| context_collector_3 | collector | 275 | 650 | 291 | 666 |
-| sfp_cli_nerva | mirror_step | 381 | 634 | 471 | 666 |
-| sfp_cli_nuclei | default_step | 21 | 784 | 111 | 816 |
-| context_collector_4 | collector | 275 | 800 | 291 | 816 |
-| context | transition | 255 | 930 | 291 | 966 |
+| start | transition | 355 | 0 | 391 | 36 |
+| target | target | 321 | 162 | 391 | 186 |
+| sfp_cli_subfinder | default_step | 301 | 304 | 391 | 336 |
+| context_collector_1 | collector | 555 | 320 | 571 | 336 |
+| sfp_cli_httpx | default_step | 121 | 484 | 211 | 516 |
+| context_collector_2 | collector | 375 | 500 | 391 | 516 |
+| sfp_cli_nmap | mirror_step | 481 | 484 | 571 | 516 |
+| sfp_cli_katana | default_step | 121 | 634 | 211 | 666 |
+| context_collector_3 | collector | 375 | 650 | 391 | 666 |
+| sfp_cli_nerva | mirror_step | 481 | 634 | 571 | 666 |
+| sfp_cli_nuclei | default_step | 121 | 784 | 211 | 816 |
+| context_collector_4 | collector | 375 | 800 | 391 | 816 |
+| context | transition | 355 | 930 | 391 | 966 |
 
 ---
 
