@@ -496,17 +496,15 @@ export default {
       };
     };
 
-    const { niceDagEl, niceDagReactive } = useNiceDag(
-      {
-        initNodes,
-        getNodeSize,
-        graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
-        subViewPadding: { top: 56, bottom: 36, left: 36, right: 48 },
-        gridConfig: { size: 20, color: "rgba(128,128,128,0.35)" },
-        getEdgeAttributes,
-      },
-      true
-    );
+    const { niceDagEl, niceDagReactive } = useNiceDag({
+      editable: true,
+      initNodes,
+      getNodeSize,
+      graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
+      subViewPadding: { top: 56, bottom: 36, left: 36, right: 48 },
+      gridConfig: { size: 20, color: "rgba(128,128,128,0.35)" },
+      getEdgeAttributes,
+    });
 
     const setTheme = (next) => {
       theme.value = normalizeTheme(next);
