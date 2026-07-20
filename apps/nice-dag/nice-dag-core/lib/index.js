@@ -3,6 +3,7 @@ var rt = (n, t, e) => t in n ? nt(n, t, { enumerable: !0, configurable: !0, writ
 var o = (n, t, e) => (rt(n, typeof t != "symbol" ? t + "" : t, e), e);
 import F from "dagre";
 import ht from "html2canvas";
+import { applyWorkflowSeedLayout } from "./workflowSeedLayout.js";
 var f = /* @__PURE__ */ ((n) => (n.REMOVE_SUB_VIEW = "REMOVE_SUB_VIEW", n.ADD_SUB_VIEW = "ADD_SUB_VIEW", n.RESIZE = "RESIZE", n.ADD_NODE = "ADD_NODE", n.REMOVE_NODE = "REMOVE_NODE", n.ADD_EDGE = "ADD_EDGE", n.REMOVE_EDGE = "REMOVE_EDGE", n))(f || {}), p = /* @__PURE__ */ ((n) => (n.SHRINK_NODE = "SHRINK_NODE", n.EXPAND_NODE = "EXPAND_NODE", n.POSITION_CHANGE = "POSITION_CHANGE", n.RESIZE = "RESIZE", n.REMOVED = "REMOVED", n.ADD_CHILD_NODE = "ADD_CHILD_NODE", n))(p || {}), D = /* @__PURE__ */ ((n) => (n.LR = "LR", n.RL = "RL", n.TB = "TB", n.BT = "BT", n))(D || {}), E = /* @__PURE__ */ ((n) => (n.CENTER_OF_BORDER = "CENTER_OF_BORDER", n.CENTER = "CENTER", n))(E || {}), K = /* @__PURE__ */ ((n) => (n.HIERARCHY = "HIERARCHY", n.FLATTEN = "FLATTEN", n))(K || {}), $ = /* @__PURE__ */ ((n) => (n.DEFAULT = "DEFAULT", n.WITH_JOINT_NODES = "WITH_JOINT_NODES", n))($ || {});
 function dt(n = []) {
   let t = [];
@@ -278,7 +279,9 @@ class Y {
     o(this, "ref");
     this.source = t, this.target = e, this.pathRef = z(null, "path").withAttributes({
       "data-source-key": t.id,
-      "data-target-key": e.id
+      "data-target-key": e.id,
+      fill: "none",
+      "fill-opacity": "0"
     }).svgElement, this.ref = C().withClassNames(ut).withAbsolutePosition(Q).htmlElement, this.source.addNodeChangeListener(this), this.target.addNodeChangeListener(this);
   }
   destory() {
@@ -312,11 +315,17 @@ class Y {
     this.target.removeDependency(this.source), this.target.model.removeEdge(this), this.target.removeNodeChangeListener(this), this.source.removeNodeChangeListener(this), this.pathRef.remove(), this.ref.remove();
   }
   doLayout() {
-    const { mapEdgeToPoints: t } = y(this.source.model.dagId).config, { source: e, target: i } = t(this), s = (e.x + i.x) / 2, r = (e.y + i.y) / 2, h = `M${e.x},${e.y} L${s},${r} L${i.x},${i.y}`;
+    const cfg = y(this.source.model.dagId).config, pts = cfg.mapEdgeToPoints(this), e = pts.source, i = pts.target;
+    const h = cfg.layout === "WORKFLOW_SEED" && pts.path ? pts.path : (() => {
+      const s = (e.x + i.x) / 2, r = (e.y + i.y) / 2;
+      return `M${e.x},${e.y} L${s},${r} L${i.x},${i.y}`;
+    })();
     a(this.pathRef).withAttributes({
-      d: h
+      d: h,
+      fill: "none",
+      "fill-opacity": "0"
     });
-    const d = Math.sqrt((i.x - e.x) * (i.x - e.x) + (i.y - e.y) * (i.y - e.y)), l = `rotate(${ct(i.y - e.y, i.x - e.x)}deg)`;
+    const s = (e.x + i.x) / 2, r = (e.y + i.y) / 2, d = Math.sqrt((i.x - e.x) * (i.x - e.x) + (i.y - e.y) * (i.y - e.y)), l = `rotate(${ct(i.y - e.y, i.x - e.x)}deg)`;
     a(this.ref).withAbsolutePosition({
       x: s - d / 2,
       y: r - X / 2,
@@ -413,9 +422,10 @@ class H {
         const h = this.createChildVm(t, t.children);
         this.pChildVMs = [...this.pChildVMs.filter((d) => d.id !== h.id), h], i = h.size();
       }
-      t.width = i.width, t.height = i.height;
+      t.width = i.width, t.height = i.height, t.collapse = e;
       const r = t.editing;
-      t.editing = !1, this.doLayout(!0, !1), t.editing = r, this.fireModelChange({
+      // Cascade so child subview re-lays out under WORKFLOW_SEED before root placement.
+      t.editing = !1, this.doLayout(!0, !0), t.editing = r, this.fireModelChange({
         source: this,
         originalSource: t,
         type: e ? f.REMOVE_SUB_VIEW : f.ADD_SUB_VIEW
@@ -471,7 +481,14 @@ class H {
       e && this.childVMs.forEach((h) => {
         h.doLayout(t, e), this.vNodes.find((d) => d.id === h.id).resize(h.size());
       });
-      const i = Nt(this.vNodes, y(this.dagId).config.graphLabel);
+      const layoutConfig = y(this.dagId).config;
+      if (layoutConfig.layout === "WORKFLOW_SEED") {
+        applyWorkflowSeedLayout(this.vNodes, layoutConfig);
+        this.vNodes.forEach((h) => {
+          if (!h.editing) h.doLayout();
+        });
+      } else {
+      const i = Nt(this.vNodes, layoutConfig.graphLabel);
       let s = 0;
       this.vNodes.forEach((h) => {
         if (!h.editing) {
@@ -480,6 +497,7 @@ class H {
         }
         s++;
       });
+      }
       const r = this.resize(t);
       return this.pEdges.forEach((h) => {
         h.doLayout();
@@ -488,9 +506,13 @@ class H {
     o(this, "buildEdges", () => {
       this.pEdges = [];
       const t = {};
+      const seen = /* @__PURE__ */ new Set();
       this.vNodes.forEach((e) => t[e.id] = e), this.vNodes.forEach((e) => {
         x(e.dependencies) || e.dependencies.forEach((i) => {
-          this.pEdges.push(new Y(t[i], e));
+          if (!t[i]) return;
+          const key = `${i}->${e.id}`;
+          if (seen.has(key)) return;
+          seen.add(key), this.pEdges.push(new Y(t[i], e));
         });
       });
     });
@@ -919,7 +941,9 @@ class k {
     });
     o(this, "renderEdge", (t) => {
       const e = t.pathRef, i = this.viewConfig.getEdgeAttributes(t), s = a(e).withAttributes({
-        stroke: i && i.color ? i.color : "rgb(204, 204, 204)"
+        stroke: i && i.color ? i.color : "rgb(204, 204, 204)",
+        fill: "none",
+        "fill-opacity": "0"
       }).svgElement;
       i.hideArrow || s.setAttribute("marker-mid", `url(#${this.model.dagId}-nice-dag-svg-arrow)`);
     });
@@ -1849,7 +1873,10 @@ class Ht extends st {
     return this.adaptOverflow(), l;
   }
   drawGrid() {
-    this._gridVisible && this._grid.redraw();
+    if (!this._gridVisible || !this._grid) return;
+    const hasLines = (this._grid.xLines?.length || 0) > 0 || (this._grid.yLines?.length || 0) > 0;
+    if (hasLines) this._grid.redraw();
+    else this._grid.render();
   }
   render() {
     var e;

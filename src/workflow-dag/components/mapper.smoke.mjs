@@ -66,9 +66,9 @@ if (!nmap || nmap.dependencies.length !== 1) {
 
 if (
   edgeMeta.get(edgeKey("__workflow_start__", WORKFLOW_TARGET_ID)) !==
-  EDGE_TYPE.FOLLOWS
+  EDGE_TYPE.FOLLOWED_BY
 ) {
-  console.error("FAIL: start→target must be follows");
+  console.error("FAIL: start→target must be followed-by");
   process.exit(1);
 }
 
@@ -82,15 +82,43 @@ if (edgeMeta.get(targetSubfinder) !== EDGE_TYPE.USED_BY) {
 }
 
 const semantic = edgeKey("sfp_cli_subfinder", "__ctxcol_sfp_cli_subfinder__");
-if (edgeMeta.get(semantic) !== EDGE_TYPE.SEMANTIC) {
-  console.error("FAIL: step→collector must be semantic-subgraph");
+if (edgeMeta.get(semantic) !== EDGE_TYPE.SEMANTIC_EXPORT) {
+  console.error("FAIL: step→collector must be semantic-export");
+  process.exit(1);
+}
+
+const sharedCol = sampleModel.find((n) => n.id === "__ctxcol_rank_3__");
+if (!sharedCol?.data?.shared) {
+  console.error("FAIL: split row must share one collector on CX spine");
+  process.exit(1);
+}
+if (
+  edgeMeta.get(edgeKey("sfp_cli_httpx", "__ctxcol_rank_3__")) !==
+    EDGE_TYPE.SEMANTIC_EXPORT ||
+  edgeMeta.get(edgeKey("sfp_cli_nmap", "__ctxcol_rank_3__")) !==
+    EDGE_TYPE.SEMANTIC_EXPORT
+) {
+  console.error("FAIL: both split steps must semantic-export to shared collector");
   process.exit(1);
 }
 
 const httpx = sampleModel.find((n) => n.id === "sfp_cli_httpx");
-if (!httpx || httpx.data?.lane !== 1 || httpx.data?.contextSide !== "left") {
-  console.error("FAIL: httpx (right of split) should be lane 1 / context left", httpx?.data);
+if (!httpx || httpx.data?.layoutChain !== "left") {
+  console.error("FAIL: httpx should be left chain", httpx?.data);
   process.exit(1);
 }
 
-console.log("OK: target/end + used-by + context rail semantic");
+const subfinder = sampleModel.find((n) => n.id === "sfp_cli_subfinder");
+if (!subfinder?.children?.length || subfinder.collapse !== true) {
+  console.error("FAIL: steps must be collapsed HIERARCHY groups with children");
+  process.exit(1);
+}
+for (const cat of ["input", "config", "context", "output"]) {
+  const child = subfinder.children.find((c) => c.data?.category === cat);
+  if (!child || child.data?.layoutRole !== "sub_step") {
+    console.error(`FAIL: ${cat} child must have layoutRole sub_step`);
+    process.exit(1);
+  }
+}
+
+console.log("OK: target/end + used-by + context rail semantic + subview children");

@@ -1,8 +1,17 @@
 # SPEC-012 continuity (agent handoff)
 
-Updated: 2026-07-17 (E6-S6 content audit)
+Updated: 2026-07-20 (Epic L0 opened — WorkflowSeed layout)
 
-## Status: plan complete on `develop`
+## Status: F0–E6 complete on `develop`; **L0 active**
+
+| Epic | Issues | Outcome |
+|------|--------|---------|
+| **L0 #194** | #195–#207 | WorkflowSeed replaces dagre; edit fix; Pretty Print; seed edge names |
+
+**Start here:** [L0-S0 #195](https://github.com/brettforbes/yaml-workflow-widget/issues/195) — fix `useNiceDag({ editable: true })`.  
+**Rules:** [SPEC-012-LAYOUT-RULES.md](SPEC-012-LAYOUT-RULES.md) · seed [`.seed/03_Workflow_Refinements.md`](../../.seed/03_Workflow_Refinements.md)
+
+## Prior: plan complete on `develop` (F0–E6)
 
 | Epic | Issues | Outcome |
 |------|--------|---------|
@@ -32,7 +41,7 @@ Updated: 2026-07-17 (E6-S6 content audit)
 
 ## Product surface
 
-- `.\start.ps1` → `http://localhost:4001`
+- `.\start.ps1` → `http://localhost:4009`
 - UI: `src/workflow-dag/` (+ `HOST_PROTOCOL.md`)
 - Content (runtime): `src/content/{cli_app_arguments,nugget_structure}/`
 - Sample YAML: `src/workflow-dag/assets/12A_Workflow_YAML_Example.yaml`
@@ -51,7 +60,7 @@ Updated: 2026-07-17 (E6-S6 content audit)
 
 ## Locked decisions
 
-- Edge labels: `follows` | `used-by` | `semantic-subgraph`
+- Edge labels: `followed-by` | `used-by` | `semantic-export` (Epic L0 — seed `03_Workflow_Refinements.md`)
 - YAML tool field stays `uses: tool.*`
 - Langium must parse **YAML** (bridge in browser; full DocumentBuilder in Node/MCP)
 - Subtle icons only; no header button bars
@@ -62,7 +71,7 @@ Updated: 2026-07-17 (E6-S6 content audit)
 - Diagram↔YAML round-trip preserves step ids but may drop rich GSE/formatting nuances vs hand-authored 12A.
 - Host MCP explain is browser-safe (not full Langium AST); prefer stdio MCP for agents.
 - Local untracked moves under `.seed/cli_app_arguments/` are operator workspace noise — do not mix into SPEC-012 PRs.
-- Manual :4001 console smoke for host messages still recommended after deploys.
+- Manual :4009 console smoke for host messages still recommended after deploys.
 
 ## Verify shortcuts
 

@@ -33,5 +33,6 @@ export function applyValidatedYamlToNiceDag(niceDag, text) {
   if (!niceDag?.withNodes) return null;
   const { nodes, edgeMeta } = validatedYamlToNiceDagModel(text);
   niceDag.withNodes(nodes).render();
+  if (niceDag.prettify) niceDag.prettify();
   return { edgeMeta };
 }

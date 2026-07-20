@@ -9,8 +9,12 @@ import {
   assignLanes,
   collectorId,
   contextSideForLane,
-  topoStepIds,
 } from "./contextRail.js";
+import {
+  annotateWorkflowSeedLayout,
+  assignLayoutChains,
+  assignLayoutRanks,
+} from "./workflowSeedRoles.js";
 
 const CATEGORIES = ["input", "config", "context", "output"];
 
@@ -86,22 +90,22 @@ export function resolveStepInbound(step, steps, index, entryParentId) {
     // At most one inbound: use first needs entry for sequence follows.
     return {
       dependencies: [needs[0]],
-      edgeType: EDGE_TYPE.FOLLOWS,
+      edgeType: EDGE_TYPE.FOLLOWED_BY,
     };
   }
   if (index > 0) {
     return {
       dependencies: [steps[index - 1].id],
-      edgeType: EDGE_TYPE.FOLLOWS,
+      edgeType: EDGE_TYPE.FOLLOWED_BY,
     };
   }
   if (entryParentId) {
     return {
       dependencies: [entryParentId],
-      edgeType: EDGE_TYPE.FOLLOWS,
+      edgeType: EDGE_TYPE.FOLLOWED_BY,
     };
   }
-  return { dependencies: [], edgeType: EDGE_TYPE.FOLLOWS };
+  return { dependencies: [], edgeType: EDGE_TYPE.FOLLOWED_BY };
 }
 
 /**
@@ -155,7 +159,7 @@ export function workflowDocToNiceDagModel(doc) {
     nodes.push(targetNode);
     edgeMeta.set(
       edgeKey(WORKFLOW_START_ID, WORKFLOW_TARGET_ID),
-      EDGE_TYPE.FOLLOWS
+      EDGE_TYPE.FOLLOWED_BY
     );
     entryParentId = WORKFLOW_TARGET_ID;
   }
@@ -175,13 +179,29 @@ export function workflowDocToNiceDagModel(doc) {
 
   nodes.push(...stepNodes);
 
-  // Context collectors + semantic-subgraph rail (E2-S6).
-  const order = topoStepIds(stepNodes);
+  // Context collectors + semantic-export rail.
+  // Split ranks share one collector on the CX spine (seed §2.7 / centreline).
+  const ranks = assignLayoutRanks(stepNodes, entryParentId);
+  const chains = assignLayoutChains(stepNodes);
+  const byRank = new Map();
+  for (const n of stepNodes) {
+    const r = ranks.get(n.id) || 0;
+    if (!byRank.has(r)) byRank.set(r, []);
+    byRank.get(r).push(n);
+  }
   const collectors = [];
   let prevCollectorId = null;
-  for (const stepId of order) {
-    const cid = collectorId(stepId);
-    const deps = [stepId];
+  for (const rank of [...byRank.keys()].sort((a, b) => a - b)) {
+    const atRank = byRank.get(rank);
+    const shared = atRank.length >= 2;
+    const primary =
+      (shared &&
+        atRank.find((s) => (chains.get(s.id)?.chain || "") === "left")) ||
+      atRank[0];
+    const cid = shared
+      ? `__ctxcol_rank_${rank}__`
+      : collectorId(primary.id);
+    const deps = atRank.map((s) => s.id);
     if (prevCollectorId) deps.push(prevCollectorId);
     const col = {
       id: cid,
@@ -189,14 +209,19 @@ export function workflowDocToNiceDagModel(doc) {
       data: {
         kind: NODE_KIND.CONTEXT_COLLECTOR,
         label: "ctx",
-        forStep: stepId,
-        lane: lanes.get(stepId) || 0,
+        forStep: primary.id,
+        forSteps: atRank.map((s) => s.id),
+        shared,
+        layoutRank: rank,
+        lane: lanes.get(primary.id) || 0,
       },
     };
     collectors.push(col);
-    edgeMeta.set(edgeKey(stepId, cid), EDGE_TYPE.SEMANTIC);
+    for (const s of atRank) {
+      edgeMeta.set(edgeKey(s.id, cid), EDGE_TYPE.SEMANTIC_EXPORT);
+    }
     if (prevCollectorId) {
-      edgeMeta.set(edgeKey(prevCollectorId, cid), EDGE_TYPE.SEMANTIC);
+      edgeMeta.set(edgeKey(prevCollectorId, cid), EDGE_TYPE.SEMANTIC_EXPORT);
     }
     prevCollectorId = cid;
   }
@@ -216,16 +241,18 @@ export function workflowDocToNiceDagModel(doc) {
     data: {
       kind: NODE_KIND.END,
       label: "final context",
-      yaml: "context:\n  # Aggregated semantic-subgraph outcomes",
+      yaml: "context:\n  # Aggregated semantic-export outcomes",
       raw: null,
     },
   });
   for (const dep of endDeps) {
     edgeMeta.set(
       edgeKey(dep, WORKFLOW_END_ID),
-      collectors.length > 0 ? EDGE_TYPE.SEMANTIC : EDGE_TYPE.FOLLOWS
+      collectors.length > 0 ? EDGE_TYPE.SEMANTIC_EXPORT : EDGE_TYPE.FOLLOWED_BY
     );
   }
+
+  annotateWorkflowSeedLayout(nodes, entryParentId);
 
   return { nodes, edgeMeta };
 }
@@ -281,7 +308,8 @@ export function workflowStepsToNiceDagModel(
           raw,
           yaml: yamlText,
           label: category,
-          contextSide: null, // filled from parent after lanes assigned
+          layoutRole: "sub_step",
+          contextSide: null, // filled from parent after lanes / WorkflowSeed annotate
           uses: step.uses,
           stepId: step.id,
         },

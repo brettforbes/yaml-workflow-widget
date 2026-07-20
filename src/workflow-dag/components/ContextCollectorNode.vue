@@ -5,7 +5,6 @@
     :title="node.data?.label || 'context'"
     @click="(e) => editable && $emit('select', node.id, e)"
   >
-    <span class="wf-context-collector-dot" />
     <button
       v-if="editable"
       type="button"
@@ -31,20 +30,14 @@ export default {
 </script>
 
 <style scoped>
+/* Seed §2.1: collector 32×32 circle (ports are 12×12). */
 .wf-context-collector {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
-.wf-context-collector-dot {
-  width: 18px;
-  height: 18px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid #009e73;
   background: #e8fff6;
-  display: block;
+  box-sizing: border-box;
+  position: relative;
 }
 </style>

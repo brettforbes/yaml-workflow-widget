@@ -6,7 +6,9 @@
     @mouseleave="onLeave"
     @click="(e) => editable && $emit('select', node.id, e)"
   >
+    <div class="wf-connector wf-connector-in" title="input" />
     <span class="wf-target-label">target</span>
+    <div class="wf-connector wf-connector-out" title="output" />
     <button
       v-if="editable"
       type="button"

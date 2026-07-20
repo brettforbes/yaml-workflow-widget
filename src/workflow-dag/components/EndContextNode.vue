@@ -75,12 +75,13 @@ export default {
 </script>
 
 <style scoped>
+/* Seed §2.1: transition = 72×72 (same as start). Must match getNodeSize or CX spine drifts. */
 .wf-end-node {
   position: relative;
-  width: 88px;
-  height: 88px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  border: 3px solid #222;
+  border: 2px solid #222;
   background: #e8e8e8;
   display: flex;
   align-items: center;

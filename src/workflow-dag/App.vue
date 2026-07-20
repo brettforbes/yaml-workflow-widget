@@ -41,7 +41,16 @@
         aria-label="Pretty-print YAML from diagram"
         @click="prettyPrintYaml"
       >
-        ☰
+        YAML
+      </button>
+      <button
+        type="button"
+        class="icon-btn"
+        title="Pretty Print diagram layout"
+        aria-label="Pretty Print diagram layout"
+        @click="prettyPrintLayout"
+      >
+        ▦
       </button>
       <button
         type="button"
@@ -157,14 +166,14 @@
           :style="{ left: edgeMenu.x + 'px', top: edgeMenu.y + 'px' }"
           @click.stop
         >
-          <button type="button" @click="connectSelected('follows')">
-            follows
+          <button type="button" @click="connectSelected('followed-by')">
+            followed-by
           </button>
           <button type="button" @click="connectSelected('used-by')">
             used-by
           </button>
-          <button type="button" @click="connectSelected('semantic-subgraph')">
-            semantic-subgraph
+          <button type="button" @click="connectSelected('semantic-export')">
+            semantic-export
           </button>
         </div>
         <NiceDagNodes v-slot="slotProps" :niceDagReactive="niceDagReactive">
@@ -210,7 +219,9 @@
           />
           <CliAppNode
             v-else
+            :key="`${slotProps.node.id}-${slotProps.node.collapse ? 'c' : 'e'}`"
             :node="slotProps.node"
+            :dag-observor="niceDagReactive.observor"
             :editable="editMode"
             :selected="selectedNodeIds.includes(slotProps.node.id)"
             @edit="openEdit"
@@ -314,6 +325,7 @@ import InputFormModal from "./components/InputFormModal.vue";
 import ContextFormModal from "./components/ContextFormModal.vue";
 import ConfigFormModal from "./components/ConfigFormModal.vue";
 import "./components/CliWorkflowView.css";
+import "./components/ports.css";
 import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
 import { validateWorkflowYaml } from "./components/yamlValidate";
@@ -324,6 +336,7 @@ import {
   postReady,
   postToHost,
 } from "./hostProtocol";
+import { mapWorkflowSeedEdgeToPointsNiceDag } from "./components/workflowSeedEdgePoints";
 import {
   explainWorkflowYaml,
   produceWorkflowForHost,
@@ -336,8 +349,8 @@ const COLLAPSED_H = 64;
 const START_SIZE = 72;
 const TARGET_W = 140;
 const TARGET_H = 48;
-const END_SIZE = 88;
-const COLLECTOR_SIZE = 28;
+const END_SIZE = 72;
+const COLLECTOR_SIZE = 32;
 const CODE_PANE_WIDTH_KEY = "workflow-dag:codePaneWidth";
 const CODE_PANE_MIN = 200;
 const CODE_PANE_MAX_RATIO = 0.75;
@@ -380,6 +393,10 @@ function getNodeSize(node) {
   }
   if (node.data?.category) {
     return { width: CATEGORY_W, height: CATEGORY_H };
+  }
+  // Seed §2.4 expanded host when Nice-DAG subview is open
+  if (node.children?.length && node.collapse === false) {
+    return { width: 214, height: 528 };
   }
   return { width: COLLAPSED_W, height: COLLAPSED_H };
 }
@@ -490,23 +507,32 @@ export default {
     const getEdgeAttributes = (edge) => {
       const type =
         edgeMeta.value.get(edgeKey(edge.source.id, edge.target.id)) ||
-        EDGE_TYPE.FOLLOWS;
+        EDGE_TYPE.FOLLOWED_BY;
       return {
         color: resolveEdgeColor(type, theme.value, edgeColored.value),
       };
     };
 
-    const { niceDagEl, niceDagReactive } = useNiceDag(
-      {
-        initNodes,
-        getNodeSize,
-        graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
-        subViewPadding: { top: 56, bottom: 36, left: 36, right: 48 },
-        gridConfig: { size: 20, color: "rgba(128,128,128,0.35)" },
-        getEdgeAttributes,
-      },
-      true
-    );
+    const { niceDagEl, niceDagReactive } = useNiceDag({
+      editable: true,
+      mode: "DEFAULT",
+      layout: "WORKFLOW_SEED",
+      initNodes,
+      getNodeSize,
+      mapEdgeToPoints: mapWorkflowSeedEdgeToPointsNiceDag,
+      graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
+      /* Seed §2.4: content origin + padding ⇒ visual sub-step offsets + 214×528 host */
+      subViewPadding: { top: 56, bottom: 80, left: 36, right: 18 },
+      gridConfig: { size: 20, color: "rgba(128,128,128,0.35)", visible: false },
+      getEdgeAttributes,
+    });
+
+    const prettyPrintLayout = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag?.prettify) return;
+      niceDag.prettify();
+      applyCenter();
+    };
 
     const setTheme = (next) => {
       theme.value = normalizeTheme(next);
@@ -521,12 +547,13 @@ export default {
       const niceDag = niceDagReactive.use();
       if (!niceDag) return;
       if (editMode.value) {
+        if ("gridVisible" in niceDag) niceDag.gridVisible = false;
         niceDag.stopEditing();
         editMode.value = false;
         pushDiagramToYaml();
       } else {
-        niceDag.startEditing();
         if ("gridVisible" in niceDag) niceDag.gridVisible = true;
+        niceDag.startEditing();
         editMode.value = true;
       }
     };
@@ -539,11 +566,13 @@ export default {
         if (!path) continue;
         const type =
           edgeMeta.value.get(edgeKey(edge.source.id, edge.target.id)) ||
-          EDGE_TYPE.FOLLOWS;
+          EDGE_TYPE.FOLLOWED_BY;
         path.setAttribute(
           "stroke",
           resolveEdgeColor(type, theme.value, edgeColored.value)
         );
+        path.setAttribute("fill", "none");
+        path.setAttribute("fill-opacity", "0");
       }
     };
 
@@ -692,6 +721,17 @@ export default {
     const getMainLayer = () =>
       niceDagEl.value?.querySelector(".nice-dag-main-layer");
 
+    const ensurePanRoom = () => {
+      const main = getMainLayer();
+      const zoom = niceDagEl.value?.querySelector(".nice-dag-zoom-layer");
+      if (!main || !zoom) return;
+      const pad = 240;
+      const w = Math.max(zoom.scrollWidth, zoom.offsetWidth, main.clientWidth + pad);
+      const h = Math.max(zoom.scrollHeight, zoom.offsetHeight, main.clientHeight + pad);
+      zoom.style.minWidth = `${w}px`;
+      zoom.style.minHeight = `${h}px`;
+    };
+
     const applyCenter = () => {
       const niceDag = niceDagReactive.use();
       if (!niceDag || !niceDagEl.value) return;
@@ -700,6 +740,7 @@ export default {
         width: bounds.width,
         height: Math.max(bounds.height, 500),
       });
+      ensurePanRoom();
     };
 
     const resetView = () => {
@@ -718,6 +759,13 @@ export default {
     const onDiagramWheel = (event) => {
       const niceDag = niceDagReactive.use();
       if (!niceDag) return;
+      const main = getMainLayer();
+      // Shift+wheel → horizontal pan; plain wheel → zoom
+      if (event.shiftKey && main) {
+        event.preventDefault();
+        main.scrollLeft += event.deltaY;
+        return;
+      }
       event.preventDefault();
       const delta = event.deltaY > 0 ? -0.06 : 0.06;
       const next = Math.min(
@@ -727,6 +775,7 @@ export default {
       if (next === dagScale.value) return;
       dagScale.value = next;
       niceDag.setScale(next);
+      ensurePanRoom();
     };
 
     const onDiagramPanStart = (event) => {
@@ -740,6 +789,7 @@ export default {
       }
       const main = getMainLayer();
       if (!main) return;
+      ensurePanRoom();
       event.preventDefault();
       const startX = event.clientX;
       const startY = event.clientY;
@@ -773,8 +823,8 @@ export default {
         selectedNodeIds.value = [];
         edgeMenu.value = { open: false, x: 0, y: 0 };
         if (editMode.value) {
-          niceDag.startEditing();
           if ("gridVisible" in niceDag) niceDag.gridVisible = true;
+          niceDag.startEditing();
         }
         refreshEdgeStrokes();
         applyCenter();
@@ -1007,6 +1057,7 @@ export default {
       editMode,
       toggleEditMode,
       prettyPrintYaml,
+      prettyPrintLayout,
       edgeMeta,
       resetView,
       onDiagramWheel,
@@ -1183,16 +1234,30 @@ body.wd-divider-dragging {
 }
 .diagram-pane .nice-dag-main-layer {
   overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
   cursor: grab;
 }
 .diagram-pane .nice-dag-main-layer.wd-panning {
   cursor: grabbing;
 }
+.diagram-pane .nice-dag-zoom-layer {
+  min-width: 100%;
+  min-height: 100%;
+}
 .diagram-column.edit-mode .diagram-pane {
   outline: 1px dashed var(--wd-border);
 }
+/* Mesh/grid only in Edit Mode (WritableNiceDag always mounts editor bkg). */
+.diagram-pane .nice-dag-editor-bkg {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 .diagram-column.edit-mode .nice-dag-editor-bkg {
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 .edit-palette {
   position: absolute;

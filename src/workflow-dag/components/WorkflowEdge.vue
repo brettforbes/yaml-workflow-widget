@@ -29,11 +29,14 @@ export default {
   setup(props) {
     const edgeType = computed(() => {
       const k = edgeKey(props.source.id, props.target.id);
-      return props.edgeMeta.get(k) || EDGE_TYPE.FOLLOWS;
+      return props.edgeMeta.get(k) || EDGE_TYPE.FOLLOWED_BY;
     });
-    const label = computed(() =>
-      props.showLabels ? edgeType.value : ""
-    );
+    /** Shorten on-canvas only; legend keeps full `semantic-export`. */
+    const label = computed(() => {
+      if (!props.showLabels) return "";
+      if (edgeType.value === EDGE_TYPE.SEMANTIC_EXPORT) return "semantic";
+      return edgeType.value;
+    });
     const labelColor = computed(() =>
       resolveEdgeColor(edgeType.value, props.theme, props.colored)
     );
@@ -43,14 +46,18 @@ export default {
 </script>
 
 <style scoped>
+/*
+ * Parent Nice-DAG edge host is already rotated to match the edge angle.
+ * translateY offsets the label perpendicular to the line (parallel text, offset).
+ */
 .wf-edge-label {
   text-align: center;
-  margin-top: -14px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
   pointer-events: none;
+  transform: translateY(-12px);
   text-shadow: 0 0 3px var(--wd-surface-muted, #fff);
 }
 .wf-edge-label.mono {

@@ -59,7 +59,7 @@
       title="context export"
     />
     <YamlTooltip
-      v-if="showTooltip"
+      v-if="showTooltip && !isExpanded"
       :yaml="tooltipYaml"
       :title="tooltipTitle"
       @edit="onEdit"
@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import * as yaml from "js-yaml";
 import YamlTooltip from "./YamlTooltip.vue";
 
@@ -92,6 +92,8 @@ export default {
     node: { type: Object, required: true },
     editable: { type: Boolean, default: false },
     selected: { type: Boolean, default: false },
+    /** Bumps when Nice-DAG fires model changes — required because node.collapse is not Vue-reactive. */
+    dagObservor: { type: Number, default: 0 },
   },
   emits: ["edit", "select"],
   setup(props, { emit }) {
@@ -100,9 +102,19 @@ export default {
     const portMode = ref(null); // 'input' | 'output' | null (body/chrome)
     let hideTimer = null;
 
-    const isExpanded = computed(
-      () => props.node.children?.length > 0 && !props.node.collapse
-    );
+    const isExpanded = computed(() => {
+      void props.dagObservor;
+      return props.node.children?.length > 0 && !props.node.collapse;
+    });
+
+    // Expanded parent: never keep a stale body/port tooltip open.
+    watch(isExpanded, (expanded) => {
+      if (expanded) {
+        showTooltip.value = false;
+        portMode.value = null;
+        keepOpen.value = false;
+      }
+    });
 
     const contextSide = computed(
       () => props.node.data?.contextSide || "right"
@@ -222,7 +234,8 @@ export default {
 .wf-cli-app-node.expanded {
   width: 100%;
   height: 100%;
-  min-height: 48px;
+  min-width: 214px;
+  min-height: 528px;
   border: 2px solid #666;
   background: rgba(250, 250, 250, 0.92);
   box-shadow: inset 0 0 0 1px #ddd;
@@ -241,16 +254,17 @@ export default {
 .wf-chrome-mirrored {
   flex-direction: row-reverse;
 }
+/* Header sits in subViewPadding.top (56px) band above content children. */
 .wf-cli-app-node.expanded .wf-cli-app-header {
-  height: auto;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 40px;
+  height: 48px;
   border-bottom: 1px solid #eee;
   background: #f0f0f0;
   border-radius: 10px 10px 0 0;
+  z-index: 2;
 }
 .wf-cli-app-label {
   font-size: 13px;
@@ -269,25 +283,5 @@ export default {
   line-height: 1;
   cursor: pointer;
   flex-shrink: 0;
-}
-</style>
-
-<style>
-.wf-connector-context {
-  width: 14px;
-  height: 14px;
-  border: 2px solid #009e73;
-  border-radius: 50%;
-  background: #e8fff6;
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.wf-connector-context-right {
-  right: -8px;
-}
-.wf-connector-context-left {
-  left: -8px;
 }
 </style>
