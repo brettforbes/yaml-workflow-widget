@@ -573,6 +573,14 @@ export default {
         );
         path.setAttribute("fill", "none");
         path.setAttribute("fill-opacity", "0");
+        path.setAttribute("stroke-width", "1.5");
+        path.removeAttribute("marker-mid");
+        if (niceDag.uid) {
+          path.setAttribute(
+            "marker-end",
+            `url(#${niceDag.uid}-nice-dag-svg-arrow)`
+          );
+        }
       }
     };
 
