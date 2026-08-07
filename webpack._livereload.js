@@ -57,7 +57,7 @@ class LiveReloadPlugin {
 
     validate(schema, options, {name: 'Livereload Plugin'});
 
-    this.defaultPort = 35729;
+    this.defaultPort = 35735;
     this.options = Object.assign({
       protocol: '',
       port: this.defaultPort,

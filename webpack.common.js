@@ -12,7 +12,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 
 const htmlBodyContent = fs.readFileSync(paths.src + '/html/content.html').toString();
 
-const htmlHeader = isDevelopment ? "<script src='http://localhost:35729/livereload.js'></script>" : "";
+const htmlHeader = isDevelopment ? "<script src='http://localhost:35735/livereload.js'></script>" : "";
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
@@ -157,9 +157,10 @@ module.exports = {
         ]
     }),
 
-    // auto reload the page using http://localhost:35729/livereload.js
+    // auto reload the page using http://localhost:35735/livereload.js
     // new LiveReloadPlugin({}),
     isDevelopment && new WebpackFileWatcherLiveReload({
+        port: 35735,
         watchFiles: [
             './src/**/*',
             '!./src/*.test.js'

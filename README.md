@@ -20,7 +20,7 @@ Run the development server:
 npm start
 ```
 
-You can view the development server at [http://localhost:4001](http://localhost:4001).
+You can view the development server at [http://localhost:4009](http://localhost:4009).
 
 ### Production build
 
