@@ -227,6 +227,7 @@ module.exports = {
         exclude: [
           path.resolve(__dirname, 'src/workflow-dag'),
           path.resolve(__dirname, 'apps/nice-dag'),
+          path.resolve(__dirname, 'packages/workflow-lang/out'),
           /node_modules/,
         ],
         use: [
