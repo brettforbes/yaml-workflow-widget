@@ -77,7 +77,7 @@ function W(n, t = ":scope>svg", e = "nice-dag-svg-arrow") {
       "http://www.w3.org/2000/svg",
       "marker"
     ), h = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    r.setAttribute("id", e), r.setAttribute("markerUnits", "strokeWidth"), r.setAttribute("markerWidth", "12"), r.setAttribute("markerHeight", "12"), r.setAttribute("viewBox", "0 0 12 12"), r.setAttribute("refX", "6"), r.setAttribute("refY", "6"), r.setAttribute("orient", "auto"), h.setAttribute("d", "M2,2 L10,6 L2,10 L6,6 L2,2"), h.setAttribute("fill", "#000"), r.appendChild(h), s.appendChild(r), i.appendChild(s), n.appendChild(i);
+    r.setAttribute("id", e), r.setAttribute("markerUnits", "userSpaceOnUse"), r.setAttribute("markerWidth", "8"), r.setAttribute("markerHeight", "8"), r.setAttribute("viewBox", "0 0 8 8"), r.setAttribute("refX", "8"), r.setAttribute("refY", "4"), r.setAttribute("orient", "auto"), h.setAttribute("d", "M0,0 L8,4 L0,8 Z"), h.setAttribute("fill", "context-stroke"), r.appendChild(h), s.appendChild(r), i.appendChild(s), n.appendChild(i);
   }
   return new b(i);
 }
@@ -323,7 +323,8 @@ class Y {
     a(this.pathRef).withAttributes({
       d: h,
       fill: "none",
-      "fill-opacity": "0"
+      "fill-opacity": "0",
+      "stroke-width": "1.5"
     });
     const s = (e.x + i.x) / 2, r = (e.y + i.y) / 2, d = Math.sqrt((i.x - e.x) * (i.x - e.x) + (i.y - e.y) * (i.y - e.y)), l = `rotate(${ct(i.y - e.y, i.x - e.x)}deg)`;
     a(this.ref).withAbsolutePosition({
@@ -943,9 +944,10 @@ class k {
       const e = t.pathRef, i = this.viewConfig.getEdgeAttributes(t), s = a(e).withAttributes({
         stroke: i && i.color ? i.color : "rgb(204, 204, 204)",
         fill: "none",
-        "fill-opacity": "0"
+        "fill-opacity": "0",
+        "stroke-width": "1.5"
       }).svgElement;
-      i.hideArrow || s.setAttribute("marker-mid", `url(#${this.model.dagId}-nice-dag-svg-arrow)`);
+      i.hideArrow || s.setAttribute("marker-end", `url(#${this.model.dagId}-nice-dag-svg-arrow)`);
     });
     o(this, "getNodeLayerSizeStyle", () => {
       const t = this.model.size(!1);

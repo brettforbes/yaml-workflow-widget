@@ -11,7 +11,11 @@ __pycache__/
 .agents/
 
 # Agent/local scratch (never commit)
+.governance/tmp/
 .governance/tmp-*
+.seed/z_temp.md
+.seed/nugget_structure/
+.seed/cli_app_arguments/
 packages/workflow-lang/out/
 packages/workflow-lang/src/language/generated/
 packages/workflow-lang/syntaxes/

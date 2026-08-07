@@ -20,7 +20,7 @@ module.exports = merge(common, {
     open: true,
     compress: false,
     hot: true,
-    port: 4001,
+    port: 4009,
     devMiddleware: {
         writeToDisk: true,
     }

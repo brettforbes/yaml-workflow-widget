@@ -1,5 +1,7 @@
 # Host ↔ iframe postMessage protocol (SPEC-012 E6 / R12-E6-01)
 
+**Embed integration guide (layout modes, host shell patterns, YAML execution flow):** [`EMBED_GUIDE.md`](EMBED_GUIDE.md)
+
 Channel: `window.parent.postMessage` / iframe `message` events.  
 Payload: JSON object (or JSON string). Prefer objects; stringified JSON is accepted.
 
