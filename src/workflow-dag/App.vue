@@ -1379,9 +1379,21 @@ body.wd-divider-dragging {
   outline: 2px solid var(--wd-accent);
   outline-offset: 2px;
 }
+/* R13-22 / Y2-1 — full-bleed embed (no 33% shrink overlays; .seed/18 §2.2.5). */
 .dag-host.embed .embed-diagram {
-  max-width: 33.333%;
-  margin: 0 auto;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.dag-host.embed .split-layout {
+  width: 100%;
+  height: 100%;
+}
+.dag-host.embed .diagram-pane {
+  width: 100%;
+  height: 100%;
 }
 .code-pane {
   flex: 0 0 auto;
