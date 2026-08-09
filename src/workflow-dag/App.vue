@@ -338,6 +338,7 @@ import {
   explainWorkflowYaml,
   produceWorkflowForHost,
 } from "./components/hostMcp";
+import { SEED_CX, computeDagGeometry } from "./dagGeometry";
 
 const CATEGORY_W = 160;
 const CATEGORY_H = 56;
@@ -426,6 +427,8 @@ export default {
     const codeCollapsed = ref(false);
     const codePaneWidth = ref(readStoredCodePaneWidth());
     const dagScale = ref(DEFAULT_DAG_SCALE);
+    /** R13-23 — bbox / centreline at 100% zoom (updated on every layout). */
+    const dagGeometry = ref(null);
     const theme = ref(readStoredTheme());
     const settingsOpen = ref(false);
     const edgeColored = ref(true);
@@ -780,6 +783,29 @@ export default {
       zoom.style.minHeight = `${h}px`;
     };
 
+    /**
+     * R13-23 — recompute DAG bbox at 100% zoom after layout / applyCenter.
+     * Exposed as `window.__workflowDagGeometry` for operator verify.
+     * @returns {import('./dagGeometry').DagGeometry|null}
+     */
+    const recomputeDagGeometry = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag?.getAllNodes) {
+        dagGeometry.value = null;
+        return null;
+      }
+      const geom = computeDagGeometry(niceDag.getAllNodes(), getNodeSize, {
+        centreLineX: SEED_CX,
+      });
+      dagGeometry.value = geom;
+      if (typeof window !== "undefined") {
+        window.__workflowDagGeometry = geom;
+      }
+      return geom;
+    };
+
+    const getDagGeometry = () => dagGeometry.value;
+
     const applyCenter = () => {
       const niceDag = niceDagReactive.use();
       if (!niceDag || !niceDagEl.value) return;
@@ -789,6 +815,7 @@ export default {
         height: Math.max(bounds.height, 500),
       });
       ensurePanRoom();
+      recomputeDagGeometry();
     };
 
     const resetView = () => {
@@ -1112,6 +1139,9 @@ export default {
       prettyPrintLayout,
       edgeMeta,
       resetView,
+      dagGeometry,
+      getDagGeometry,
+      recomputeDagGeometry,
       onDiagramWheel,
       onDiagramPanStart,
       yamlText,
