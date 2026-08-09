@@ -129,10 +129,10 @@ Several UX modes are **split between the widget URL/query params and the host pa
 **Widget:** load with **`?embed=1`**
 
 - Hides the YAML code pane and split divider.
-- Diagram column uses `.embed-diagram` styling (centred, max ~⅓ of iframe width).
-- Toolbar (settings, edit, pretty-print) remains inside the iframe.
+- Diagram column uses full-bleed `.embed-diagram` styling (fills the iframe; no ⅓-width shrink — R13-22).
+- Embed chrome is host-driven (`setEditMode` / `openSettings`); settings can still open inside the iframe.
 
-**Host:** size the iframe to the diagram width you want (typical **380–520px** for a vertical workflow; min height **~520px** because `.diagram-pane` min-height is 480px + toolbar).
+**Host:** size the iframe to the Composer column width (partial or full); min height **~520px** because `.diagram-pane` min-height is 480px.
 
 ```html
 <iframe src="/workflows/widget/?embed=1" style="width: 440px; height: 100%; border: 0;"></iframe>
