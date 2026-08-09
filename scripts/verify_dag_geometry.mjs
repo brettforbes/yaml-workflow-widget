@@ -3,8 +3,10 @@
  */
 import {
   computeDagGeometry,
+  computeFitScale,
   GOLDEN_GEOMETRY,
   SEED_CX,
+  DEFAULT_FIT_SCALE,
 } from "../src/workflow-dag/dagGeometry.js";
 
 const COLLECTOR = 32;
@@ -85,5 +87,30 @@ ok =
   assertMatch("12A", computeDagGeometry(nodes12A), GOLDEN_GEOMETRY["12A"]) &&
   ok;
 
+// R13-24 fit scale
+const g12A = computeDagGeometry(nodes12A);
+const wideOk =
+  computeFitScale(g12A, 200) < DEFAULT_FIT_SCALE &&
+  computeFitScale(g12A, 2000) === DEFAULT_FIT_SCALE;
+const edgeCheck = (() => {
+  const scale = computeFitScale(g12A, 200, { insetPx: 5 });
+  const rendered = g12A.width * scale;
+  const available = 200 - 10;
+  return Math.abs(rendered - available) < 0.5;
+})();
+if (!wideOk || !edgeCheck) {
+  console.error("FAIL fit scale", {
+    narrow: computeFitScale(g12A, 200),
+    wide: computeFitScale(g12A, 2000),
+    edgeCheck,
+  });
+  ok = false;
+} else {
+  console.log("OK fit-scale", {
+    narrow: computeFitScale(g12A, 200),
+    wideHost: computeFitScale(g12A, 2000),
+  });
+}
+
 if (!ok) process.exit(1);
-console.log("VERIFIED_OK dag geometry vs LAYOUT-RULES goldens");
+console.log("VERIFIED_OK dag geometry + fit scale vs LAYOUT-RULES goldens");

@@ -13,9 +13,9 @@ Status legend: `planned` → `open` → `in progress` → `in review` → `done`
 | Y1-2 — Add host messages `setEditMode`/`openSettings`/`setLegendVisible` + docs | [#236](https://github.com/brettforbes/yaml-workflow-widget/issues/236) | R13-21 | Y1-1 | done ([#245](https://github.com/brettforbes/yaml-workflow-widget/pull/245)) |
 | Epic Y2 — Embed layout fix | [#231](https://github.com/brettforbes/yaml-workflow-widget/issues/231) | R13-22 | — | done |
 | Y2-1 — Remove 33% embed shrink + overlays; full-bleed centered diagram | [#237](https://github.com/brettforbes/yaml-workflow-widget/issues/237) | R13-22 | — | done |
-| Epic Y3 — Dimensions + fit rules | [#232](https://github.com/brettforbes/yaml-workflow-widget/issues/232) | R13-23..24 | Y2 | in progress |
+| Epic Y3 — Dimensions + fit rules | [#232](https://github.com/brettforbes/yaml-workflow-widget/issues/232) | R13-23..24 | Y2 | done |
 | Y3-1 — Track DAG bbox/centre-line at 100% zoom | [#238](https://github.com/brettforbes/yaml-workflow-widget/issues/238) | R13-23 | Y2-1 | done |
-| Y3-2 — Default 50%/fit-to-width view + on-canvas reset | [#239](https://github.com/brettforbes/yaml-workflow-widget/issues/239) | R13-24 | Y3-1 | open |
+| Y3-2 — Default 50%/fit-to-width view + on-canvas reset | [#239](https://github.com/brettforbes/yaml-workflow-widget/issues/239) | R13-24 | Y3-1 | done |
 | Epic Y4 — Zoom/pan rework + legend toggle | [#233](https://github.com/brettforbes/yaml-workflow-widget/issues/233) | R13-25..26 | Y3 | open |
 | Y4-1 — CTRL+/-/CTRL-wheel zoom; wheel=vertical pan; drag=pan | [#240](https://github.com/brettforbes/yaml-workflow-widget/issues/240) | R13-25 | Y3-2 | open |
 | Y4-2 — Settings "Show legend" toggle + host `setLegendVisible` | [#241](https://github.com/brettforbes/yaml-workflow-widget/issues/241) | R13-26 | Y1-2 | open |
