@@ -869,26 +869,61 @@ export default {
       applyDefaultView();
     };
 
-    const onDiagramWheel = (event) => {
+    /** R13-25 — clamp-compatible zoom step used by CTRL+/- and CTRL+wheel. */
+    const zoomByDelta = (delta) => {
       const niceDag = niceDagReactive.use();
-      if (!niceDag) return;
-      const main = getMainLayer();
-      // Shift+wheel → horizontal pan; plain wheel → zoom
-      if (event.shiftKey && main) {
-        event.preventDefault();
-        main.scrollLeft += event.deltaY;
-        return;
-      }
-      event.preventDefault();
-      const delta = event.deltaY > 0 ? -0.06 : 0.06;
+      if (!niceDag) return false;
       const next = Math.min(
         MAX_DAG_SCALE,
         Math.max(MIN_DAG_SCALE, +(dagScale.value + delta).toFixed(2))
       );
-      if (next === dagScale.value) return;
+      if (next === dagScale.value) return false;
       dagScale.value = next;
       niceDag.setScale(next);
       ensurePanRoom();
+      return true;
+    };
+
+    const onDiagramWheel = (event) => {
+      const main = getMainLayer();
+      if (!main) return;
+      // R13-25: CTRL/META+wheel = zoom; plain wheel = vertical pan (scrollbar).
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+        const delta = event.deltaY > 0 ? -0.06 : 0.06;
+        zoomByDelta(delta);
+        return;
+      }
+      event.preventDefault();
+      main.scrollTop += event.deltaY;
+      if (event.deltaX) {
+        main.scrollLeft += event.deltaX;
+      } else if (event.shiftKey) {
+        // Some mice emit vertical delta under Shift for horizontal intent.
+        main.scrollLeft += event.deltaY;
+      }
+    };
+
+    const onZoomKeyDown = (event) => {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      const t = event.target;
+      if (
+        t &&
+        typeof t.closest === "function" &&
+        t.closest(
+          "textarea, input, select, .yaml-editor, [contenteditable='true']"
+        )
+      ) {
+        return;
+      }
+      const key = event.key;
+      if (key === "+" || key === "=") {
+        event.preventDefault();
+        zoomByDelta(0.1);
+      } else if (key === "-" || key === "_") {
+        event.preventDefault();
+        zoomByDelta(-0.1);
+      }
     };
 
     const onDiagramPanStart = (event) => {
@@ -1022,6 +1057,7 @@ export default {
 
     onMounted(() => {
       window.addEventListener("message", onHostMessage);
+      window.addEventListener("keydown", onZoomKeyDown);
       const hostWidth = document.querySelector(".split-layout")?.clientWidth;
       persistCodePaneWidth(clampCodePaneWidth(codePaneWidth.value, hostWidth));
       const niceDag = niceDagReactive.use();
@@ -1039,6 +1075,7 @@ export default {
 
     onBeforeUnmount(() => {
       window.removeEventListener("message", onHostMessage);
+      window.removeEventListener("keydown", onZoomKeyDown);
       if (validateTimer) clearTimeout(validateTimer);
       if (diagramSyncTimer) clearTimeout(diagramSyncTimer);
       const niceDag = niceDagReactive.use();
