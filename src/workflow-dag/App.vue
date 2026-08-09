@@ -30,6 +30,10 @@
             <input v-model="edgeColored" type="checkbox" />
             <span>Colored edges + labels</span>
           </label>
+          <label class="settings-row">
+            <input v-model="showLegend" type="checkbox" />
+            <span>Show legend</span>
+          </label>
           <p class="settings-hint">
             Off = single-color edges with labels only
           </p>
@@ -72,6 +76,10 @@
         <label class="settings-row">
           <input v-model="edgeColored" type="checkbox" />
           <span>Colored edges + labels</span>
+        </label>
+        <label class="settings-row">
+          <input v-model="showLegend" type="checkbox" />
+          <span>Show legend</span>
         </label>
         <p class="settings-hint">Off = single-color edges with labels only</p>
       </div>

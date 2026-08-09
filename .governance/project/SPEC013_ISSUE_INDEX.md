@@ -16,9 +16,9 @@ Status legend: `planned` → `open` → `in progress` → `in review` → `done`
 | Epic Y3 — Dimensions + fit rules | [#232](https://github.com/brettforbes/yaml-workflow-widget/issues/232) | R13-23..24 | Y2 | done |
 | Y3-1 — Track DAG bbox/centre-line at 100% zoom | [#238](https://github.com/brettforbes/yaml-workflow-widget/issues/238) | R13-23 | Y2-1 | done |
 | Y3-2 — Default 50%/fit-to-width view + on-canvas reset | [#239](https://github.com/brettforbes/yaml-workflow-widget/issues/239) | R13-24 | Y3-1 | done |
-| Epic Y4 — Zoom/pan rework + legend toggle | [#233](https://github.com/brettforbes/yaml-workflow-widget/issues/233) | R13-25..26 | Y3 | in progress |
+| Epic Y4 — Zoom/pan rework + legend toggle | [#233](https://github.com/brettforbes/yaml-workflow-widget/issues/233) | R13-25..26 | Y3 | done |
 | Y4-1 — CTRL+/-/CTRL-wheel zoom; wheel=vertical pan; drag=pan | [#240](https://github.com/brettforbes/yaml-workflow-widget/issues/240) | R13-25 | Y3-2 | done |
-| Y4-2 — Settings "Show legend" toggle + host `setLegendVisible` | [#241](https://github.com/brettforbes/yaml-workflow-widget/issues/241) | R13-26 | Y1-2 | open |
+| Y4-2 — Settings "Show legend" toggle + host `setLegendVisible` | [#241](https://github.com/brettforbes/yaml-workflow-widget/issues/241) | R13-26 | Y1-2 | done |
 | Epic Y5 — YAML widget acceptance | [#234](https://github.com/brettforbes/yaml-workflow-widget/issues/234) | R13-27 | Y1–Y4 | open |
 | Y5-1 — Smoke + visual verification on 12A/12A2 (embed + standalone) — OPERATOR GATE | [#242](https://github.com/brettforbes/yaml-workflow-widget/issues/242) | R13-27 | all above | open |
 
