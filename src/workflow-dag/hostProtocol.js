@@ -13,6 +13,11 @@ export const HOST_MSG = {
   THEME_CHANGED: "themeChanged",
   SELECT_STEP: "selectStep",
   STEP_SELECTED: "stepSelected",
+  /** R13-21 — host-driven chrome (SPEC-013) */
+  SET_EDIT_MODE: "setEditMode",
+  EDIT_MODE_CHANGED: "editModeChanged",
+  OPEN_SETTINGS: "openSettings",
+  SET_LEGEND_VISIBLE: "setLegendVisible",
   MCP_EXPLAIN: "mcpExplain",
   MCP_PRODUCE: "mcpProduce",
   MCP_RESULT: "mcpResult",
