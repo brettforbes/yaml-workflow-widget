@@ -4,8 +4,9 @@
     :class="{ embed: isEmbed }"
     :data-theme="theme"
   >
-    <div class="toolbar border-bottom px-2 py-1 d-flex align-items-center gap-2">
-      <strong class="me-auto">CLI Workflow DAG</strong>
+    <!-- R13-20: title bar removed in all modes. Standalone keeps minimal chrome;
+         embed is host-driven (Y1-2 setEditMode / openSettings). -->
+    <div v-if="!isEmbed" class="standalone-chrome">
       <div class="settings-wrap">
         <button
           type="button"
@@ -37,24 +38,6 @@
       <button
         type="button"
         class="icon-btn"
-        title="Pretty-print YAML from diagram"
-        aria-label="Pretty-print YAML from diagram"
-        @click="prettyPrintYaml"
-      >
-        YAML
-      </button>
-      <button
-        type="button"
-        class="icon-btn"
-        title="Pretty Print diagram layout"
-        aria-label="Pretty Print diagram layout"
-        @click="prettyPrintLayout"
-      >
-        ▦
-      </button>
-      <button
-        type="button"
-        class="icon-btn"
         :title="editMode ? 'Exit edit mode' : 'Enter edit mode'"
         :aria-pressed="editMode ? 'true' : 'false'"
         aria-label="Toggle diagram edit mode"
@@ -71,13 +54,27 @@
       >
         ⌖
       </button>
-      <a
-        v-if="!isEmbed"
-        class="btn btn-sm btn-outline-secondary"
-        href="?embed=1"
-        >Embed mode</a
-      >
-      <a v-else class="btn btn-sm btn-outline-secondary" href="?">Full page</a>
+      <a class="btn btn-sm btn-outline-secondary" href="?embed=1">Embed mode</a>
+    </div>
+    <!-- Embed: settings panel can still open via host openSettings (Y1-2). -->
+    <div
+      v-if="isEmbed && settingsOpen"
+      class="settings-wrap embed-settings"
+    >
+      <div class="settings-panel" @click.stop>
+        <label class="settings-row">
+          <span>Theme</span>
+          <select v-model="theme" @change="setTheme(theme)">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <label class="settings-row">
+          <input v-model="edgeColored" type="checkbox" />
+          <span>Colored edges + labels</span>
+        </label>
+        <p class="settings-hint">Off = single-color edges with labels only</p>
+      </div>
     </div>
     <div class="split-layout flex-grow-1 overflow-hidden">
       <aside
@@ -1113,15 +1110,32 @@ body,
   margin: 0;
 }
 .dag-host {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100vh;
   background: var(--wd-bg);
   color: var(--wd-text);
 }
-.toolbar {
+.standalone-chrome {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
   background: var(--wd-toolbar-bg);
-  border-color: var(--wd-border) !important;
+  border: 1px solid var(--wd-border);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.embed-settings {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 30;
 }
 .icon-btn {
   border: none;
