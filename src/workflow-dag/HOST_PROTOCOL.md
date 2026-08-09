@@ -28,6 +28,9 @@ Outbound widget → host messages use `target: "parent"`.
 | `getYaml` | `{ requestId?: string }` | Reply with `yamlResult` |
 | `setTheme` | `{ theme: "light"\|"dark" }` or `"light"\|"dark"` | Apply E1 theme; emit `themeChanged` |
 | `selectStep` | `{ stepId: string }` | Select / scroll to step node when present |
+| `setEditMode` | `{ editing: boolean }` | Enter/exit diagram edit mode; emit `editModeChanged` (R13-21) |
+| `openSettings` | `{}` | Open the settings panel (R13-21) |
+| `setLegendVisible` | `{ visible: boolean }` | Show/hide edge legend (R13-21 / R13-26) |
 | `mcpExplain` | `{ code?: string }` | Reply `mcpResult` with explain text (E6-S5) |
 | `mcpProduce` | `{ intent: string }` | Reply `mcpResult` with produced YAML (E6-S5) |
 
@@ -39,6 +42,7 @@ Outbound widget → host messages use `target: "parent"`.
 | `validationResult` | `{ ok: boolean, diagnostics: object[] }` | After debounced validate |
 | `yamlResult` | `{ yaml: string, ok: boolean, requestId?: string }` | Response to `getYaml` |
 | `stepSelected` | `{ stepId: string }` | User selects a step node |
+| `editModeChanged` | `{ editing: boolean }` | After host/UI edit-mode toggle (R13-21) |
 | `mcpResult` | `{ ok: boolean, text?: string, yaml?: string, requestId?: string, error?: string }` | Response to MCP bridge calls |
 | `themeChanged` | `{ theme: "light"\|"dark" }` | After theme applies (host or UI) |
 

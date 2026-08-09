@@ -235,7 +235,7 @@
             :show-labels="true"
           />
         </NiceDagEdges>
-        <EdgeLegend :theme="theme" :colored="edgeColored" />
+        <EdgeLegend v-if="showLegend" :theme="theme" :colored="edgeColored" />
         <div v-if="editMode" class="edit-palette" @click.stop>
           <button type="button" title="Add step" @click="addNodeKind('step')">
             + step
@@ -430,6 +430,7 @@ export default {
     const settingsOpen = ref(false);
     const edgeColored = ref(true);
     const editMode = ref(false);
+    const showLegend = ref(true);
     const selectedNodeIds = ref([]);
     const edgeMenu = ref({ open: false, x: 0, y: 0 });
     const yamlText = ref(sampleYaml);
@@ -540,19 +541,41 @@ export default {
       pushDiagramToYaml();
     };
 
-    const toggleEditMode = () => {
+    const setEditMode = (editing) => {
+      const want = !!editing;
       const niceDag = niceDagReactive.use();
-      if (!niceDag) return;
-      if (editMode.value) {
+      if (!niceDag) {
+        editMode.value = want;
+        postToHost(HOST_MSG.EDIT_MODE_CHANGED, { editing: want });
+        return;
+      }
+      if (want === editMode.value) {
+        postToHost(HOST_MSG.EDIT_MODE_CHANGED, { editing: want });
+        return;
+      }
+      if (want) {
+        if ("gridVisible" in niceDag) niceDag.gridVisible = true;
+        niceDag.startEditing();
+        editMode.value = true;
+      } else {
         if ("gridVisible" in niceDag) niceDag.gridVisible = false;
         niceDag.stopEditing();
         editMode.value = false;
         pushDiagramToYaml();
-      } else {
-        if ("gridVisible" in niceDag) niceDag.gridVisible = true;
-        niceDag.startEditing();
-        editMode.value = true;
       }
+      postToHost(HOST_MSG.EDIT_MODE_CHANGED, { editing: editMode.value });
+    };
+
+    const toggleEditMode = () => {
+      setEditMode(!editMode.value);
+    };
+
+    const openSettings = () => {
+      settingsOpen.value = true;
+    };
+
+    const setLegendVisible = (visible) => {
+      showLegend.value = !!visible;
     };
 
     const refreshEdgeStrokes = () => {
@@ -635,6 +658,26 @@ export default {
         const stepId =
           payload?.stepId ?? payload?.id ?? payload?.step ?? payload;
         if (typeof stepId === "string") selectStepById(stepId);
+        return;
+      }
+      if (type === HOST_MSG.SET_EDIT_MODE) {
+        const editing =
+          typeof payload === "boolean"
+            ? payload
+            : payload?.editing ?? payload?.editMode ?? payload?.value;
+        setEditMode(!!editing);
+        return;
+      }
+      if (type === HOST_MSG.OPEN_SETTINGS) {
+        openSettings();
+        return;
+      }
+      if (type === HOST_MSG.SET_LEGEND_VISIBLE) {
+        const visible =
+          typeof payload === "boolean"
+            ? payload
+            : payload?.visible ?? payload?.show ?? payload?.value;
+        setLegendVisible(visible !== false && visible !== 0);
         return;
       }
       // mcpExplain / mcpProduce — in-iframe bridge (E6-S5); stdio MCP remains in workflow-lang
@@ -1060,7 +1103,11 @@ export default {
       settingsOpen,
       edgeColored,
       editMode,
+      showLegend,
       toggleEditMode,
+      setEditMode,
+      openSettings,
+      setLegendVisible,
       prettyPrintYaml,
       prettyPrintLayout,
       edgeMeta,
