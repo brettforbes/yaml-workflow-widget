@@ -338,7 +338,13 @@ import {
   explainWorkflowYaml,
   produceWorkflowForHost,
 } from "./components/hostMcp";
-import { SEED_CX, computeDagGeometry } from "./dagGeometry";
+import {
+  SEED_CX,
+  DEFAULT_FIT_SCALE,
+  FIT_EDGE_INSET_PX,
+  computeDagGeometry,
+  computeFitScale,
+} from "./dagGeometry";
 
 const CATEGORY_W = 160;
 const CATEGORY_H = 56;
@@ -353,7 +359,8 @@ const CODE_PANE_WIDTH_KEY = "workflow-dag:codePaneWidth";
 const CODE_PANE_MIN = 200;
 const CODE_PANE_MAX_RATIO = 0.75;
 const CODE_PANE_DEFAULT = 480;
-const DEFAULT_DAG_SCALE = 1;
+/** R13-24 — default view prefers 50%; may zoom out further to fit width. */
+const DEFAULT_DAG_SCALE = DEFAULT_FIT_SCALE;
 const MIN_DAG_SCALE = 0.25;
 const MAX_DAG_SCALE = 1;
 
@@ -532,7 +539,7 @@ export default {
       const niceDag = niceDagReactive.use();
       if (!niceDag?.prettify) return;
       niceDag.prettify();
-      applyCenter();
+      applyDefaultView();
     };
 
     const setTheme = (next) => {
@@ -818,17 +825,48 @@ export default {
       recomputeDagGeometry();
     };
 
-    const resetView = () => {
+    /**
+     * R13-24 — default host view: 50% (or fit-to-width), centred, Start at top.
+     */
+    const applyDefaultView = () => {
       const niceDag = niceDagReactive.use();
-      if (!niceDag) return;
-      dagScale.value = DEFAULT_DAG_SCALE;
-      niceDag.setScale(DEFAULT_DAG_SCALE);
-      applyCenter();
+      if (!niceDag || !niceDagEl.value) return;
+      const geom = recomputeDagGeometry() || dagGeometry.value;
+      const bounds = niceDagEl.value.getBoundingClientRect();
+      const scale = computeFitScale(geom, bounds.width, {
+        preferredScale: DEFAULT_FIT_SCALE,
+        insetPx: FIT_EDGE_INSET_PX,
+        minScale: MIN_DAG_SCALE,
+        maxScale: MAX_DAG_SCALE,
+      });
+      dagScale.value = scale;
+      niceDag.setScale(scale);
+      niceDag.center({
+        width: bounds.width,
+        height: Math.max(bounds.height, 500),
+      });
+      ensurePanRoom();
+      recomputeDagGeometry();
       const main = getMainLayer();
-      if (main) {
+      if (!main) return;
+      // Start shape at top; vertical scroll reveals the rest.
+      main.scrollTop = 0;
+      const g = dagGeometry.value || geom;
+      if (!g) {
         main.scrollLeft = 0;
-        main.scrollTop = 0;
+        return;
       }
+      const zoom = niceDagEl.value.querySelector(".nice-dag-zoom-layer");
+      const zoomLeft = zoom ? parseFloat(zoom.style.left || "0") || 0 : 0;
+      const contentCentre = g.centreLineX * scale;
+      main.scrollLeft = Math.max(
+        0,
+        contentCentre + zoomLeft - main.clientWidth / 2
+      );
+    };
+
+    const resetView = () => {
+      applyDefaultView();
     };
 
     const onDiagramWheel = (event) => {
@@ -902,7 +940,7 @@ export default {
           niceDag.startEditing();
         }
         refreshEdgeStrokes();
-        applyCenter();
+        applyDefaultView();
       } catch (e) {
         console.warn("[workflow-dag] YAML→DAG apply failed", e);
       } finally {
@@ -988,14 +1026,15 @@ export default {
       persistCodePaneWidth(clampCodePaneWidth(codePaneWidth.value, hostWidth));
       const niceDag = niceDagReactive.use();
       if (niceDag) {
-        niceDag.setScale(DEFAULT_DAG_SCALE);
-        applyCenter();
         if (typeof niceDag.addNiceDagChangeListener === "function") {
           niceDag.addNiceDagChangeListener(dagChangeListener);
         }
       }
-      runYamlValidate(yamlText.value);
-      postReady();
+      // R13-24 default view after validate→YAML→DAG settles.
+      void runYamlValidate(yamlText.value).finally(() => {
+        applyDefaultView();
+        postReady();
+      });
     });
 
     onBeforeUnmount(() => {
@@ -1139,6 +1178,7 @@ export default {
       prettyPrintLayout,
       edgeMeta,
       resetView,
+      applyDefaultView,
       dagGeometry,
       getDagGeometry,
       recomputeDagGeometry,

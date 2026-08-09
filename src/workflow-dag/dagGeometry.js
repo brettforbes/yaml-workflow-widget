@@ -6,6 +6,45 @@
 /** Vertical centreline from SPEC-012 LAYOUT-RULES / workflowSeedLayout. */
 export const SEED_CX = 391;
 
+/** R13-24 Rule 1 — preferred default zoom. */
+export const DEFAULT_FIT_SCALE = 0.5;
+
+/** R13-24 Rule 2 — L/R inset when fitting wide diagrams. */
+export const FIT_EDGE_INSET_PX = 5;
+
+/**
+ * R13-24 — choose scale: prefer 50%; if too wide, zoom out so L/R edges sit
+ * `insetPx` inside the viewport.
+ * @param {DagGeometry|null|undefined} geom
+ * @param {number} viewportWidth
+ * @param {{ preferredScale?: number, insetPx?: number, minScale?: number, maxScale?: number }} [options]
+ * @returns {number}
+ */
+export function computeFitScale(geom, viewportWidth, options = {}) {
+  const preferred = Number.isFinite(options.preferredScale)
+    ? options.preferredScale
+    : DEFAULT_FIT_SCALE;
+  const inset = Number.isFinite(options.insetPx)
+    ? options.insetPx
+    : FIT_EDGE_INSET_PX;
+  const minScale = Number.isFinite(options.minScale) ? options.minScale : 0.25;
+  const maxScale = Number.isFinite(options.maxScale) ? options.maxScale : 1;
+  const width = Number(geom?.width);
+  if (!Number.isFinite(width) || width <= 0) {
+    return clampScale(preferred, minScale, maxScale);
+  }
+  const available = Math.max(1, Number(viewportWidth) - inset * 2);
+  let scale = preferred;
+  if (width * preferred > available) {
+    scale = available / width;
+  }
+  return clampScale(+scale.toFixed(4), minScale, maxScale);
+}
+
+function clampScale(n, min, max) {
+  return Math.min(max, Math.max(min, n));
+}
+
 /**
  * @typedef {object} DagGeometry
  * @property {number} zoomBasis Always 1 — measurements are at 100% zoom.
