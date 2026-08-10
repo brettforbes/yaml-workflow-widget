@@ -1,15 +1,25 @@
 <template>
   <div
     class="wf-cli-app-node"
-    :class="{
-      expanded: isExpanded,
-      collapsed: !isExpanded,
-      'wf-node-selected': selected,
-    }"
+    :class="[
+      {
+        expanded: isExpanded,
+        collapsed: !isExpanded,
+        'wf-node-selected': selected,
+      },
+      statusClass,
+    ]"
+    :data-step-status="normalizedStatus || undefined"
     @mouseenter="onChromeEnter"
     @mouseleave="onChromeLeave"
     @click="onSelectClick"
   >
+    <span
+      v-if="normalizedStatus"
+      class="wf-step-status-icon"
+      :title="normalizedStatus"
+      aria-hidden="true"
+    >{{ statusGlyph }}</span>
     <div
       class="wf-connector wf-connector-in"
       @mouseenter.stop="onPortEnter('input')"
@@ -92,6 +102,8 @@ export default {
     node: { type: Object, required: true },
     editable: { type: Boolean, default: false },
     selected: { type: Boolean, default: false },
+    /** SPEC-015 R15-08 — waiting | running | complete | failed (empty = no status chrome). */
+    status: { type: String, default: "" },
     /** Bumps when Nice-DAG fires model changes — required because node.collapse is not Vue-reactive. */
     dagObservor: { type: Number, default: 0 },
   },
@@ -101,6 +113,23 @@ export default {
     const keepOpen = ref(false);
     const portMode = ref(null); // 'input' | 'output' | null (body/chrome)
     let hideTimer = null;
+
+    const ALLOWED = new Set(["waiting", "running", "complete", "failed"]);
+    const GLYPHS = {
+      waiting: "⏱",
+      running: "↻",
+      complete: "✓",
+      failed: "✕",
+    };
+
+    const normalizedStatus = computed(() => {
+      const s = typeof props.status === "string" ? props.status.trim() : "";
+      return ALLOWED.has(s) ? s : "";
+    });
+    const statusClass = computed(() =>
+      normalizedStatus.value ? `wf-step-status-${normalizedStatus.value}` : ""
+    );
+    const statusGlyph = computed(() => GLYPHS[normalizedStatus.value] || "");
 
     const isExpanded = computed(() => {
       void props.dagObservor;
@@ -203,6 +232,9 @@ export default {
       isExpanded,
       contextSide,
       chromeMirrored,
+      normalizedStatus,
+      statusClass,
+      statusGlyph,
       showTooltip,
       keepOpen,
       tooltipYaml,
@@ -226,6 +258,75 @@ export default {
   border-radius: 10px;
   background: #fafafa;
   box-sizing: border-box;
+}
+/* SPEC-015 R15-08 — status shade + icon; selection outline stays composable. */
+.wf-cli-app-node.wf-step-status-waiting {
+  background: var(--wd-status-waiting);
+  border-color: color-mix(in srgb, var(--wd-status-waiting) 55%, #666);
+}
+.wf-cli-app-node.wf-step-status-running {
+  background: var(--wd-status-running);
+  border-color: color-mix(in srgb, var(--wd-status-running) 40%, #333);
+}
+.wf-cli-app-node.wf-step-status-complete {
+  background: var(--wd-status-complete);
+  border-color: color-mix(in srgb, var(--wd-status-complete) 35%, #222);
+  color: #fff;
+}
+.wf-cli-app-node.wf-step-status-complete .wf-cli-app-label {
+  color: #fff;
+}
+.wf-cli-app-node.wf-step-status-failed {
+  background: var(--wd-status-failed);
+  border-color: color-mix(in srgb, var(--wd-status-failed) 35%, #222);
+  color: #fff;
+}
+.wf-cli-app-node.wf-step-status-failed .wf-cli-app-label {
+  color: #fff;
+}
+.wf-step-status-icon {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 3;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.85);
+  color: #222;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.wf-cli-app-node.wf-step-status-running .wf-step-status-icon {
+  animation: wf-status-pulse 1.1s ease-in-out infinite;
+}
+.wf-cli-app-node.wf-step-status-running {
+  animation: wf-status-node-pulse 1.1s ease-in-out infinite;
+}
+@keyframes wf-status-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.75;
+  }
+}
+@keyframes wf-status-node-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.08);
+  }
 }
 .wf-cli-app-node.collapsed {
   width: 180px;

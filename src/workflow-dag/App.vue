@@ -229,6 +229,7 @@
             :dag-observor="niceDagReactive.observor"
             :editable="editMode"
             :selected="selectedNodeIds.includes(slotProps.node.id)"
+            :status="stepStatuses[slotProps.node.id] || ''"
             @edit="openEdit"
             @select="onNodeSelect"
           />
