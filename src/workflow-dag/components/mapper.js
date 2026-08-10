@@ -150,6 +150,8 @@ export function workflowDocToNiceDagModel(doc) {
       data: {
         kind: NODE_KIND.TARGET,
         label: "target",
+        // SPEC-016 C1 — context port on the right edge (target → collector).
+        contextSide: "right",
         yaml: yaml
           .dump({ inputs: doc.inputs }, { lineWidth: 120, noRefs: true })
           .trimEnd(),
