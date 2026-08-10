@@ -7,6 +7,7 @@ import {
   NODE_KIND,
   WORKFLOW_END_ID,
   WORKFLOW_START_ID,
+  WORKFLOW_TARGET_COLLECTOR_ID,
   WORKFLOW_TARGET_ID,
 } from "./mapper.js";
 import { collectorId, topoStepIds } from "./contextRail.js";
@@ -23,6 +24,7 @@ export const LEFT_CHAIN_CX = 111 + DIAGRAM_X_OFFSET;
 export const RIGHT_CHAIN_CX = 471 + DIAGRAM_X_OFFSET;
 
 const STEP_W = 180;
+const TARGET_W = 140;
 
 /**
  * Longest-path rank from workflow entry (start or target).
@@ -207,6 +209,22 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
     target.data.layoutChain = "centre";
     target.data.layoutCx = CX;
     target.data.layoutCy = rankCy.get(1);
+    target.data.contextSide = "right";
+  }
+
+  // SPEC-016 C2 — target collector sits on the target row, to the right.
+  const targetCollector = nodes.find(
+    (n) =>
+      n.id === WORKFLOW_TARGET_COLLECTOR_ID ||
+      (n.data?.kind === NODE_KIND.CONTEXT_COLLECTOR &&
+        n.data?.forStep === WORKFLOW_TARGET_ID)
+  );
+  if (target && targetCollector) {
+    targetCollector.data.layoutRole = "collector";
+    targetCollector.data.layoutRank = 1;
+    targetCollector.data.layoutChain = "centre";
+    targetCollector.data.layoutCx = CX + TARGET_W / 2 + COLLECTOR_GAP;
+    targetCollector.data.layoutCy = target.data.layoutCy;
   }
 
   for (const step of stepNodes) {
@@ -249,6 +267,14 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
             n.data.forSteps.includes(step.id)))
     );
     if (!colNode || placedCollectors.has(colNode.id)) continue;
+    // Target collector is placed above; never re-home it onto a step row.
+    if (
+      colNode.id === WORKFLOW_TARGET_COLLECTOR_ID ||
+      colNode.data?.forStep === WORKFLOW_TARGET_ID
+    ) {
+      placedCollectors.add(colNode.id);
+      continue;
+    }
     placedCollectors.add(colNode.id);
     const shared = sharedCollectorCxByRank.get(rank);
     const ccx = collectorCenter(cx, chain, role, shared);
