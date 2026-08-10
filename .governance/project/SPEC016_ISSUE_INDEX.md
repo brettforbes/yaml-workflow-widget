@@ -19,9 +19,9 @@ Status legend: `open` → `in progress` → `in review` → `done`.
 | Code | Issue | Requirement | Depends on | Status |
 |------|-------|-------------|------------|--------|
 | Epic C | [#267](https://github.com/brettforbes/yaml-workflow-widget/issues/267) | R16-09..11 | — | open |
-| C1 — Right-edge context port on Target box | [#268](https://github.com/brettforbes/yaml-workflow-widget/issues/268) | R16-09 | — | open |
-| C2 — Target context collector seeded from `inputs.targets` | [#269](https://github.com/brettforbes/yaml-workflow-widget/issues/269) | R16-10 | C1 | open |
-| C3 — Docs + smoke for target port/collector | [#270](https://github.com/brettforbes/yaml-workflow-widget/issues/270) | R16-11 | C2 | open |
+| C1 — Right-edge context port on Target box | [#268](https://github.com/brettforbes/yaml-workflow-widget/issues/268) | R16-09 | — | done |
+| C2 — Target context collector seeded from `inputs.targets` | [#269](https://github.com/brettforbes/yaml-workflow-widget/issues/269) | R16-10 | C1 | done |
+| C3 — Docs + smoke for target port/collector | [#270](https://github.com/brettforbes/yaml-workflow-widget/issues/270) | R16-11 | C2 | done |
 
 ## Execution order
 

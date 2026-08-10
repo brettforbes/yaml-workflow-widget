@@ -183,3 +183,10 @@ node src/workflow-dag/components/workflowSeedGolden.smoke.mjs
 |-----|--------|
 | §3.3 inner `semantic-export` from expanded context sub-step → parent context port | **Deferred** — seed sentence truncated; outer semantic-export only |
 | §3.4 multi-chain (>2) numeric golden fixture | **Deferred** — algorithm stubbed via odd/even chains; no ±1px table yet |
+
+## SPEC-016 addendum — Target context port + collector
+
+- Target box has a **right-edge context port** (`wf-connector-context-right`).
+- A diagram-chrome collector `__ctxcol_target__` sits on the Target row at `CX + TARGET_W/2 + COLLECTOR_GAP`, seeded from `inputs.targets`.
+- Edge: Target.ctx → `__ctxcol_target__` (semantic-export). Collector ids remain stripped from YAML round-trip.
+- Do **not** change frozen 12A/12A2 step coordinates; only this Target-row chrome is added.
