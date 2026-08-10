@@ -6,15 +6,15 @@
 /** Vertical centreline from SPEC-012 LAYOUT-RULES / workflowSeedLayout. */
 export const SEED_CX = 391;
 
-/** R13-24 Rule 1 — preferred default zoom. */
-export const DEFAULT_FIT_SCALE = 0.5;
+/** R13-24 Rule 1 — preferred default zoom (70%). */
+export const DEFAULT_FIT_SCALE = 0.7;
 
-/** R13-24 Rule 2 — L/R inset when fitting wide diagrams. */
-export const FIT_EDGE_INSET_PX = 5;
+/** R13-24 Rule 2 — L/R inset when fitting wide diagrams (graph width + inset each side). */
+export const FIT_EDGE_INSET_PX = 10;
 
 /**
- * R13-24 — choose scale: prefer 50%; if too wide, zoom out so L/R edges sit
- * `insetPx` inside the viewport.
+ * R13-24 — choose scale: prefer 70%; if too wide, zoom out so L/R edges sit
+ * `insetPx` inside the viewport (graph width + inset on each side).
  * @param {DagGeometry|null|undefined} geom
  * @param {number} viewportWidth
  * @param {{ preferredScale?: number, insetPx?: number, minScale?: number, maxScale?: number }} [options]
@@ -34,10 +34,9 @@ export function computeFitScale(geom, viewportWidth, options = {}) {
     return clampScale(preferred, minScale, maxScale);
   }
   const available = Math.max(1, Number(viewportWidth) - inset * 2);
-  let scale = preferred;
-  if (width * preferred > available) {
-    scale = available / width;
-  }
+  const fitScale = available / width;
+  // Prefer 70%; if graph at 70% is wider than viewport−2×inset, zoom out to fit.
+  const scale = width * preferred > available ? fitScale : preferred;
   return clampScale(+scale.toFixed(4), minScale, maxScale);
 }
 

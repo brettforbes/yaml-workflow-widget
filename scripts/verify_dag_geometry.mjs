@@ -87,28 +87,33 @@ ok =
   assertMatch("12A", computeDagGeometry(nodes12A), GOLDEN_GEOMETRY["12A"]) &&
   ok;
 
-// R13-24 fit scale
+// R13-24 fit scale (Rule 1 = 70%, Rule 2 = 10px insets)
 const g12A = computeDagGeometry(nodes12A);
 const wideOk =
   computeFitScale(g12A, 200) < DEFAULT_FIT_SCALE &&
   computeFitScale(g12A, 2000) === DEFAULT_FIT_SCALE;
 const edgeCheck = (() => {
-  const scale = computeFitScale(g12A, 200, { insetPx: 5 });
+  const scale = computeFitScale(g12A, 200, { insetPx: 10 });
   const rendered = g12A.width * scale;
-  const available = 200 - 10;
+  const available = 200 - 20;
   return Math.abs(rendered - available) < 0.5;
 })();
-if (!wideOk || !edgeCheck) {
+const prefer70 =
+  computeFitScale(g12A, 2000) === DEFAULT_FIT_SCALE && DEFAULT_FIT_SCALE === 0.7;
+if (!wideOk || !edgeCheck || !prefer70) {
   console.error("FAIL fit scale", {
     narrow: computeFitScale(g12A, 200),
     wide: computeFitScale(g12A, 2000),
     edgeCheck,
+    prefer70,
+    DEFAULT_FIT_SCALE,
   });
   ok = false;
 } else {
   console.log("OK fit-scale", {
     narrow: computeFitScale(g12A, 200),
     wideHost: computeFitScale(g12A, 2000),
+    preferred: DEFAULT_FIT_SCALE,
   });
 }
 

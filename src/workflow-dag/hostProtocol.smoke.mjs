@@ -17,6 +17,8 @@ const required = [
   "selectStep",
   "stepSelected",
   "setStepStatuses",
+  "resetView",
+  "setLayoutMode",
 ];
 for (const key of required) {
   const found = Object.values(HOST_MSG).includes(key);
