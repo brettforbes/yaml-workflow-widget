@@ -24,6 +24,8 @@ export const HOST_MSG = {
   RESET_VIEW: "resetView",
   /** Host left-column full — 50/50 code|diagram, diagram at 100% top-centre. */
   SET_LAYOUT_MODE: "setLayoutMode",
+  /** Tooltip "UI" → host opens CliScanApp for step. */
+  OPEN_CLI_UI: "openCliUi",
   MCP_EXPLAIN: "mcpExplain",
   MCP_PRODUCE: "mcpProduce",
   MCP_RESULT: "mcpResult",

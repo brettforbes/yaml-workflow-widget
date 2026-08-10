@@ -4,6 +4,14 @@
       <span>{{ title }}</span>
       <span class="wf-yaml-tooltip-actions">
         <button
+          v-if="showCliUi"
+          type="button"
+          class="wf-yaml-tooltip-edit"
+          @click="$emit('cliUi')"
+        >
+          UI
+        </button>
+        <button
           v-if="showForm"
           type="button"
           class="wf-yaml-tooltip-edit"
@@ -32,8 +40,10 @@ export default {
     yaml: { type: String, default: "" },
     title: { type: String, default: "" },
     showForm: { type: Boolean, default: false },
+    /** Show UI button (closed step body or expanded config sub-node → host CliScanApp). */
+    showCliUi: { type: Boolean, default: false },
   },
-  emits: ["edit", "form"],
+  emits: ["edit", "form", "cliUi"],
   setup(props) {
     const highlighted = computed(() => {
       const code = props.yaml || "";

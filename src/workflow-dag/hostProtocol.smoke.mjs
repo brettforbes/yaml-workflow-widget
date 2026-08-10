@@ -19,6 +19,7 @@ const required = [
   "setStepStatuses",
   "resetView",
   "setLayoutMode",
+  "openCliUi",
 ];
 for (const key of required) {
   const found = Object.values(HOST_MSG).includes(key);

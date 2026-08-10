@@ -269,6 +269,7 @@
             :selected="selectedNodeIds.includes(slotProps.node.id)"
             @edit="openEdit"
             @form="openCategoryForm"
+            @cli-ui="openCliUiFromNode"
             @select="onNodeSelect"
           />
           <CliAppNode
@@ -280,6 +281,7 @@
             :selected="selectedNodeIds.includes(slotProps.node.id)"
             :status="stepStatuses[slotProps.node.id] || ''"
             @edit="openEdit"
+            @cli-ui="openCliUiFromNode"
             @select="onNodeSelect"
           />
         </NiceDagNodes>
@@ -1370,6 +1372,29 @@ export default {
       modalOpen.value = true;
     };
 
+    const openCliUiFromNode = ({ node, stepId, category }) => {
+      let id = stepId || node?.id || "";
+      // Config child ids are typically `<parent>__config` — host resolves to tool step.
+      if (category === "config" && node?.parentId) {
+        id = node.parentId;
+      } else if (typeof id === "string" && id.includes("__")) {
+        id = id.split("__")[0];
+      }
+      if (!id) return;
+      let uses = node?.data?.uses || "";
+      if (!uses && category === "config" && node?.parentId) {
+        const niceDag = niceDagReactive.use();
+        const parent = niceDag?.findNodeById?.(node.parentId);
+        uses = parent?.data?.uses || "";
+      }
+      const toolId = uses.startsWith("tool.") ? uses.slice(5) : uses || null;
+      postToHost(HOST_MSG.OPEN_CLI_UI, {
+        stepId: id,
+        uses: uses || null,
+        toolId: toolId || null,
+      });
+    };
+
     const openCategoryForm = ({ node, uses, category }) => {
       const cat = category || node?.data?.category;
       const u = uses || node?.data?.uses || "";
@@ -1453,6 +1478,7 @@ export default {
       contextFormOpen,
       contextFormNode,
       openCategoryForm,
+      openCliUiFromNode,
       selectedNodeIds,
       edgeMenu,
       onNodeSelect,
