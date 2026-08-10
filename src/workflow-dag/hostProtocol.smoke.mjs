@@ -16,6 +16,7 @@ const required = [
   "setTheme",
   "selectStep",
   "stepSelected",
+  "setStepStatuses",
 ];
 for (const key of required) {
   const found = Object.values(HOST_MSG).includes(key);

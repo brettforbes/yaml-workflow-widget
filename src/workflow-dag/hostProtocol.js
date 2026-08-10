@@ -18,6 +18,8 @@ export const HOST_MSG = {
   EDIT_MODE_CHANGED: "editModeChanged",
   OPEN_SETTINGS: "openSettings",
   SET_LEGEND_VISIBLE: "setLegendVisible",
+  /** SPEC-015 R15-07 — live per-step run status for DAG shading. */
+  SET_STEP_STATUSES: "setStepStatuses",
   MCP_EXPLAIN: "mcpExplain",
   MCP_PRODUCE: "mcpProduce",
   MCP_RESULT: "mcpResult",
