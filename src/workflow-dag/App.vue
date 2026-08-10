@@ -236,6 +236,7 @@
             :node="slotProps.node"
             :editable="editMode"
             :selected="selectedNodeIds.includes(slotProps.node.id)"
+            :status="stepStatuses[slotProps.node.id] || ''"
             @edit="openEdit"
             @select="onNodeSelect"
           />
@@ -244,6 +245,7 @@
             :node="slotProps.node"
             :editable="editMode"
             :selected="selectedNodeIds.includes(slotProps.node.id)"
+            :status="stepStatuses[slotProps.node.id] || ''"
             @edit="openEdit"
             @select="onNodeSelect"
           />
