@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="dagHostEl"
     class="dag-host"
     :class="{ embed: isEmbed }"
     :data-theme="theme"
@@ -37,6 +38,30 @@
           <p class="settings-hint">
             Off = single-color edges with labels only
           </p>
+          <div class="settings-status-colors">
+            <div class="settings-section-label">
+              Step status colors ({{ theme }})
+            </div>
+            <label
+              v-for="key in statusColorKeys"
+              :key="key"
+              class="settings-row"
+            >
+              <span class="text-capitalize">{{ key }}</span>
+              <input
+                type="color"
+                :value="statusColors[theme][key]"
+                @input="onStatusColorInput(key, $event.target.value)"
+              />
+            </label>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary w-100"
+              @click="resetStatusColorDefaults"
+            >
+              Reset status colors
+            </button>
+          </div>
         </div>
       </div>
       <button
@@ -82,6 +107,30 @@
           <span>Show legend</span>
         </label>
         <p class="settings-hint">Off = single-color edges with labels only</p>
+        <div class="settings-status-colors">
+          <div class="settings-section-label">
+            Step status colors ({{ theme }})
+          </div>
+          <label
+            v-for="key in statusColorKeys"
+            :key="`embed-${key}`"
+            class="settings-row"
+          >
+            <span class="text-capitalize">{{ key }}</span>
+            <input
+              type="color"
+              :value="statusColors[theme][key]"
+              @input="onStatusColorInput(key, $event.target.value)"
+            />
+          </label>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary w-100"
+            @click="resetStatusColorDefaults"
+          >
+            Reset status colors
+          </button>
+        </div>
       </div>
     </div>
     <div class="split-layout flex-grow-1 overflow-hidden">
@@ -334,6 +383,13 @@ import "./components/CliWorkflowView.css";
 import "./components/ports.css";
 import "./theme.css";
 import { applyTheme, normalizeTheme, readStoredTheme } from "./theme";
+import {
+  STATUS_KEYS,
+  applyStatusColors,
+  readStoredStatusColors,
+  resetStatusColors,
+  writeStoredStatusColors,
+} from "./statusColors";
 import { validateWorkflowYaml } from "./components/yamlValidate";
 import { applyValidatedYamlToNiceDag } from "./components/yamlToDag";
 import {
@@ -445,6 +501,7 @@ export default {
     const dagScale = ref(DEFAULT_DAG_SCALE);
     /** R13-23 — bbox / centreline at 100% zoom (updated on every layout). */
     const dagGeometry = ref(null);
+    const dagHostEl = ref(null);
     const theme = ref(readStoredTheme());
     const settingsOpen = ref(false);
     const edgeColored = ref(true);
@@ -456,6 +513,9 @@ export default {
      * Keyed by DSL step id (CLI node id), not `${id}__category` children.
      */
     const stepStatuses = ref({});
+    /** SPEC-015 R15-10 — per-theme status color overrides. */
+    const statusColors = ref(readStoredStatusColors());
+    const statusColorKeys = STATUS_KEYS;
     const edgeMenu = ref({ open: false, x: 0, y: 0 });
     const yamlText = ref(sampleYaml);
     /** Last YAML that successfully validated — diagram must not use invalid edits (R12-E5-02). */
@@ -559,6 +619,28 @@ export default {
     const setTheme = (next) => {
       theme.value = normalizeTheme(next);
       postToHost(HOST_MSG.THEME_CHANGED, { theme: theme.value });
+    };
+
+    const syncStatusColorsToHost = () => {
+      applyStatusColors(dagHostEl.value, theme.value, statusColors.value);
+    };
+
+    const onStatusColorInput = (key, value) => {
+      const t = theme.value === "dark" ? "dark" : "light";
+      statusColors.value = {
+        ...statusColors.value,
+        [t]: {
+          ...statusColors.value[t],
+          [key]: value,
+        },
+      };
+      writeStoredStatusColors(statusColors.value);
+      syncStatusColorsToHost();
+    };
+
+    const resetStatusColorDefaults = () => {
+      statusColors.value = resetStatusColors();
+      syncStatusColorsToHost();
     };
 
     const prettyPrintYaml = () => {
@@ -788,12 +870,17 @@ export default {
       (t) => {
         applyTheme(t);
         refreshEdgeStrokes();
+        syncStatusColorsToHost();
       },
       { immediate: true }
     );
 
     watch(edgeColored, () => {
       refreshEdgeStrokes();
+    });
+
+    watch(dagHostEl, () => {
+      syncStatusColorsToHost();
     });
 
     const persistCodePaneWidth = (width) => {
@@ -1108,6 +1195,7 @@ export default {
       window.addEventListener("keydown", onZoomKeyDown);
       const hostWidth = document.querySelector(".split-layout")?.clientWidth;
       persistCodePaneWidth(clampCodePaneWidth(codePaneWidth.value, hostWidth));
+      syncStatusColorsToHost();
       const niceDag = niceDagReactive.use();
       if (niceDag) {
         if (typeof niceDag.addNiceDagChangeListener === "function") {
@@ -1246,6 +1334,7 @@ export default {
 
     return {
       isEmbed,
+      dagHostEl,
       codeCollapsed,
       codePaneWidth,
       startDividerDrag,
@@ -1261,6 +1350,10 @@ export default {
       setLegendVisible,
       stepStatuses,
       setStepStatuses,
+      statusColors,
+      statusColorKeys,
+      onStatusColorInput,
+      resetStatusColorDefaults,
       prettyPrintYaml,
       prettyPrintLayout,
       edgeMeta,
@@ -1386,6 +1479,25 @@ body,
   margin: 0;
   font-size: 10px;
   color: var(--wd-text-muted);
+}
+.settings-status-colors {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--wd-border);
+}
+.settings-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--wd-text);
+}
+.settings-status-colors input[type="color"] {
+  width: 36px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--wd-border);
+  background: transparent;
+  cursor: pointer;
 }
 .split-layout {
   display: flex;
