@@ -37,8 +37,10 @@
       :yaml="node.data?.yaml || ''"
       :title="node.data?.category || 'category'"
       :show-form="showForm"
+      :show-cli-ui="showCliUi"
       @edit="onEdit"
       @form="onForm"
+      @cli-ui="onCliUi"
       @mouseenter="keepOpen = true"
       @mouseleave="hideSoon"
     />
@@ -57,7 +59,7 @@ export default {
     editable: { type: Boolean, default: false },
     selected: { type: Boolean, default: false },
   },
-  emits: ["edit", "form", "select"],
+  emits: ["edit", "form", "cliUi", "select"],
   setup(props, { emit }) {
     const showTooltip = ref(false);
     const keepOpen = ref(false);
@@ -67,12 +69,12 @@ export default {
     const isConfig = computed(() => props.node.data?.category === "config");
     const isOutput = computed(() => props.node.data?.category === "output");
     const isInput = computed(() => props.node.data?.category === "input");
+    /** Config opens host CliScanApp; other categories keep Form modals. */
+    const showCliUi = computed(() => isConfig.value);
     const showForm = computed(
       () =>
-        isConfig.value ||
-        isOutput.value ||
-        isInput.value ||
-        isContext.value
+        !isConfig.value &&
+        (isOutput.value || isInput.value || isContext.value)
     );
     const contextSide = computed(() => {
       return props.node.data?.contextSide || "right";
@@ -110,18 +112,30 @@ export default {
       });
     };
 
+    const onCliUi = () => {
+      showTooltip.value = false;
+      emit("cliUi", {
+        node: props.node,
+        stepId: props.node.parentId || props.node.id,
+        uses: props.node.data?.uses || "",
+        category: props.node.data?.category,
+      });
+    };
+
     return {
       showTooltip,
       keepOpen,
       isContext,
       isConfig,
       showForm,
+      showCliUi,
       contextSide,
       onEnter,
       onLeave,
       hideSoon,
       onEdit,
       onForm,
+      onCliUi,
     };
   },
 };

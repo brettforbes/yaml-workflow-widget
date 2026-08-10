@@ -72,7 +72,9 @@
       v-if="showTooltip && !isExpanded"
       :yaml="tooltipYaml"
       :title="tooltipTitle"
+      :show-cli-ui="portMode == null"
       @edit="onEdit"
+      @cli-ui="onCliUi"
       @mouseenter="keepOpen = true"
       @mouseleave="hideSoon"
     />
@@ -107,7 +109,7 @@ export default {
     /** Bumps when Nice-DAG fires model changes — required because node.collapse is not Vue-reactive. */
     dagObservor: { type: Number, default: 0 },
   },
-  emits: ["edit", "select"],
+  emits: ["edit", "cliUi", "select"],
   setup(props, { emit }) {
     const showTooltip = ref(false);
     const keepOpen = ref(false);
@@ -223,6 +225,15 @@ export default {
       });
     };
 
+    const onCliUi = () => {
+      showTooltip.value = false;
+      emit("cliUi", {
+        node: props.node,
+        stepId: props.node.id,
+        uses: props.node.data?.uses || "",
+      });
+    };
+
     const onSelectClick = (e) => {
       if (!props.editable) return;
       emit("select", props.node.id, e);
@@ -245,6 +256,7 @@ export default {
       onPortLeave,
       hideSoon,
       onEdit,
+      onCliUi,
       onSelectClick,
     };
   },
