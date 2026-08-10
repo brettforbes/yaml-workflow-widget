@@ -450,6 +450,11 @@ export default {
     const editMode = ref(false);
     const showLegend = ref(true);
     const selectedNodeIds = ref([]);
+    /**
+     * SPEC-015 R15-07 — `{ "<stepId>": "waiting"|"running"|"complete"|"failed" }`.
+     * Keyed by DSL step id (CLI node id), not `${id}__category` children.
+     */
+    const stepStatuses = ref({});
     const edgeMenu = ref({ open: false, x: 0, y: 0 });
     const yamlText = ref(sampleYaml);
     /** Last YAML that successfully validated — diagram must not use invalid edits (R12-E5-02). */
@@ -596,6 +601,36 @@ export default {
       showLegend.value = !!visible;
     };
 
+    const ALLOWED_STEP_STATUSES = new Set([
+      "waiting",
+      "running",
+      "complete",
+      "failed",
+    ]);
+
+    /**
+     * SPEC-015 R15-07 — replace-semantics. Payload `{ statuses: { stepId: state } }`
+     * or a bare map. Empty / missing clears. Unknown states are dropped.
+     */
+    const setStepStatuses = (payload) => {
+      const raw =
+        payload && typeof payload === "object" && payload.statuses != null
+          ? payload.statuses
+          : payload;
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+        stepStatuses.value = {};
+        return;
+      }
+      const next = {};
+      for (const [stepId, state] of Object.entries(raw)) {
+        if (typeof stepId !== "string" || !stepId) continue;
+        if (typeof state !== "string") continue;
+        if (!ALLOWED_STEP_STATUSES.has(state)) continue;
+        next[stepId] = state;
+      }
+      stepStatuses.value = next;
+    };
+
     const refreshEdgeStrokes = () => {
       const niceDag = niceDagReactive.use();
       if (!niceDag?.getAllEdges) return;
@@ -696,6 +731,10 @@ export default {
             ? payload
             : payload?.visible ?? payload?.show ?? payload?.value;
         setLegendVisible(visible !== false && visible !== 0);
+        return;
+      }
+      if (type === HOST_MSG.SET_STEP_STATUSES) {
+        setStepStatuses(payload);
         return;
       }
       // mcpExplain / mcpProduce — in-iframe bridge (E6-S5); stdio MCP remains in workflow-lang
@@ -1219,6 +1258,8 @@ export default {
       setEditMode,
       openSettings,
       setLegendVisible,
+      stepStatuses,
+      setStepStatuses,
       prettyPrintYaml,
       prettyPrintLayout,
       edgeMeta,
