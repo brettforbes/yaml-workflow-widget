@@ -12,6 +12,10 @@
     }}</span>
     <span class="wf-target-label">target</span>
     <div class="wf-connector wf-connector-out" title="output" />
+    <div
+      class="wf-connector wf-connector-context wf-connector-context-right"
+      title="context export"
+    />
     <button
       v-if="editable"
       type="button"
