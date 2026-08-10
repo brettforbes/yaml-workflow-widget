@@ -171,6 +171,10 @@ export function mapWorkflowSeedEdgeToPoints({ source, target }) {
   } else if (isStep(source) && isCollector(target)) {
     from = portPerimeter(source, "ctx", target);
     to = circlePerimeter(target, source);
+  } else if (isTarget(source) && isCollector(target)) {
+    // SPEC-016 C2 — Target.ctx (right) → target context collector.
+    from = portPerimeter(source, "ctx", target);
+    to = circlePerimeter(target, source);
   } else if (isCollector(source) && isCollector(target)) {
     from = circlePerimeter(source, target);
     to = circlePerimeter(target, source);

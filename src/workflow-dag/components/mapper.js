@@ -29,6 +29,8 @@ export const NODE_KIND = {
 
 export const WORKFLOW_START_ID = "__workflow_start__";
 export const WORKFLOW_TARGET_ID = "__workflow_target__";
+/** SPEC-016 C2 — context collector seeded from workflow inputs.targets. */
+export const WORKFLOW_TARGET_COLLECTOR_ID = "__ctxcol_target__";
 export const WORKFLOW_END_ID = "__workflow_end__";
 
 const STEPS_FROM_RE = /\$steps\.([A-Za-z0-9_-]+)\./;
@@ -193,6 +195,37 @@ export function workflowDocToNiceDagModel(doc) {
   }
   const collectors = [];
   let prevCollectorId = null;
+
+  // SPEC-016 C2 — target-seeded collector is first in the context rail.
+  if (hasInputs) {
+    const targetValues =
+      (doc.inputs &&
+        doc.inputs.targets &&
+        (doc.inputs.targets.values || doc.inputs.targets)) ||
+      [];
+    const values = Array.isArray(targetValues) ? targetValues : [];
+    const targetCollector = {
+      id: WORKFLOW_TARGET_COLLECTOR_ID,
+      dependencies: [WORKFLOW_TARGET_ID],
+      data: {
+        kind: NODE_KIND.CONTEXT_COLLECTOR,
+        label: "ctx",
+        forStep: WORKFLOW_TARGET_ID,
+        forSteps: [WORKFLOW_TARGET_ID],
+        shared: false,
+        layoutRank: 1,
+        lane: 0,
+        seedTargets: values.map((v) => String(v)),
+        raw: { targets: values },
+      },
+    };
+    collectors.push(targetCollector);
+    edgeMeta.set(
+      edgeKey(WORKFLOW_TARGET_ID, WORKFLOW_TARGET_COLLECTOR_ID),
+      EDGE_TYPE.SEMANTIC_EXPORT
+    );
+    prevCollectorId = WORKFLOW_TARGET_COLLECTOR_ID;
+  }
   for (const rank of [...byRank.keys()].sort((a, b) => a - b)) {
     const atRank = byRank.get(rank);
     const shared = atRank.length >= 2;
