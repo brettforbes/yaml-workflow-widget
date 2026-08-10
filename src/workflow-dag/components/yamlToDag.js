@@ -34,5 +34,11 @@ export function applyValidatedYamlToNiceDag(niceDag, text) {
   const { nodes, edgeMeta } = validatedYamlToNiceDagModel(text);
   niceDag.withNodes(nodes).render();
   if (niceDag.prettify) niceDag.prettify();
+  // withNodes() does not fire NiceDag change listeners. Vue NiceDagNodes/Edges
+  // teleport into node/edge shells only when observor bumps — without this,
+  // embed setYaml can leave empty shells (edges visible, no shapes/labels).
+  if (typeof niceDag.fireNiceDagChange === "function") {
+    niceDag.fireNiceDagChange();
+  }
   return { edgeMeta };
 }

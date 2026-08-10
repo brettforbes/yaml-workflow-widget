@@ -20,6 +20,10 @@ export const HOST_MSG = {
   SET_LEGEND_VISIBLE: "setLegendVisible",
   /** SPEC-015 R15-07 — live per-step run status for DAG shading. */
   SET_STEP_STATUSES: "setStepStatuses",
+  /** Host toolbar — re-apply default/fit view (70% or fit+10px insets). */
+  RESET_VIEW: "resetView",
+  /** Host left-column full — 50/50 code|diagram, diagram at 100% top-centre. */
+  SET_LAYOUT_MODE: "setLayoutMode",
   MCP_EXPLAIN: "mcpExplain",
   MCP_PRODUCE: "mcpProduce",
   MCP_RESULT: "mcpResult",

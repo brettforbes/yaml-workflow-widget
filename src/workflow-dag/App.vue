@@ -424,7 +424,7 @@ const CODE_PANE_WIDTH_KEY = "workflow-dag:codePaneWidth";
 const CODE_PANE_MIN = 200;
 const CODE_PANE_MAX_RATIO = 0.75;
 const CODE_PANE_DEFAULT = 480;
-/** R13-24 — default view prefers 50%; may zoom out further to fit width. */
+/** R13-24 — default view prefers 70%; may zoom out further to fit width. */
 const DEFAULT_DAG_SCALE = DEFAULT_FIT_SCALE;
 const MIN_DAG_SCALE = 0.25;
 const MAX_DAG_SCALE = 1;
@@ -820,6 +820,14 @@ export default {
         setStepStatuses(payload);
         return;
       }
+      if (type === HOST_MSG.RESET_VIEW) {
+        resetView();
+        return;
+      }
+      if (type === HOST_MSG.SET_LAYOUT_MODE) {
+        setLayoutMode(payload);
+        return;
+      }
       // mcpExplain / mcpProduce — in-iframe bridge (E6-S5); stdio MCP remains in workflow-lang
       if (type === HOST_MSG.MCP_EXPLAIN) {
         const code =
@@ -961,32 +969,14 @@ export default {
     };
 
     /**
-     * R13-24 — default host view: 50% (or fit-to-width), centred, Start at top.
+     * Scroll so Start is at top and centreline is horizontally centred.
+     * @param {number} scale
      */
-    const applyDefaultView = () => {
-      const niceDag = niceDagReactive.use();
-      if (!niceDag || !niceDagEl.value) return;
-      const geom = recomputeDagGeometry() || dagGeometry.value;
-      const bounds = niceDagEl.value.getBoundingClientRect();
-      const scale = computeFitScale(geom, bounds.width, {
-        preferredScale: DEFAULT_FIT_SCALE,
-        insetPx: FIT_EDGE_INSET_PX,
-        minScale: MIN_DAG_SCALE,
-        maxScale: MAX_DAG_SCALE,
-      });
-      dagScale.value = scale;
-      niceDag.setScale(scale);
-      niceDag.center({
-        width: bounds.width,
-        height: Math.max(bounds.height, 500),
-      });
-      ensurePanRoom();
-      recomputeDagGeometry();
+    const scrollDiagramToTopCentre = (scale) => {
       const main = getMainLayer();
-      if (!main) return;
-      // Start shape at top; vertical scroll reveals the rest.
+      if (!main || !niceDagEl.value) return;
       main.scrollTop = 0;
-      const g = dagGeometry.value || geom;
+      const g = dagGeometry.value;
       if (!g) {
         main.scrollLeft = 0;
         return;
@@ -1000,7 +990,81 @@ export default {
       );
     };
 
+    /**
+     * R13-24 — default host view: 70% (or fit-to-width+10px), centred, Start at top.
+     * Uses rAF so viewport width is measured after Composer partial/full layout settles.
+     */
+    const applyDefaultView = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag || !niceDagEl.value) return;
+      requestAnimationFrame(() => {
+        const geom = recomputeDagGeometry() || dagGeometry.value;
+        if (!niceDagEl.value) return;
+        const bounds = niceDagEl.value.getBoundingClientRect();
+        const scale = computeFitScale(geom, bounds.width, {
+          preferredScale: DEFAULT_FIT_SCALE,
+          insetPx: FIT_EDGE_INSET_PX,
+          minScale: MIN_DAG_SCALE,
+          maxScale: MAX_DAG_SCALE,
+        });
+        dagScale.value = scale;
+        niceDag.setScale(scale);
+        niceDag.center({
+          width: bounds.width,
+          height: Math.max(bounds.height, 500),
+        });
+        ensurePanRoom();
+        recomputeDagGeometry();
+        scrollDiagramToTopCentre(scale);
+      });
+    };
+
+    /**
+     * Host full-column: code pane = left half; diagram at 100%, Start at top centreline.
+     */
+    const applyFullscreenSplitView = () => {
+      const niceDag = niceDagReactive.use();
+      if (!niceDag || !niceDagEl.value) return;
+      codeCollapsed.value = false;
+      const host = document.querySelector(".split-layout");
+      const hostW = host?.clientWidth || window.innerWidth;
+      codePaneWidth.value = clampCodePaneWidth(Math.round(hostW / 2), hostW);
+      persistCodePaneWidth(codePaneWidth.value);
+      const scale = 1;
+      dagScale.value = scale;
+      niceDag.setScale(scale);
+      requestAnimationFrame(() => {
+        if (!niceDagEl.value) return;
+        const bounds = niceDagEl.value.getBoundingClientRect();
+        niceDag.center({
+          width: bounds.width,
+          height: Math.max(bounds.height, 500),
+        });
+        ensurePanRoom();
+        recomputeDagGeometry();
+        scrollDiagramToTopCentre(scale);
+      });
+    };
+
+    /** 'default' | 'fullscreen' — host left-column full uses fullscreen split. */
+    const layoutMode = ref("default");
+
     const resetView = () => {
+      if (layoutMode.value === "fullscreen") {
+        applyFullscreenSplitView();
+        return;
+      }
+      applyDefaultView();
+    };
+
+    const setLayoutMode = (mode) => {
+      const m = typeof mode === "string" ? mode : mode?.mode || mode?.layout;
+      if (m === "fullscreen" || m === "full") {
+        layoutMode.value = "fullscreen";
+        applyFullscreenSplitView();
+        return;
+      }
+      layoutMode.value = "default";
       applyDefaultView();
     };
 
@@ -1359,6 +1423,7 @@ export default {
       edgeMeta,
       resetView,
       applyDefaultView,
+      setLayoutMode,
       dagGeometry,
       getDagGeometry,
       recomputeDagGeometry,
