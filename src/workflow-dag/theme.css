@@ -11,6 +11,11 @@
   --wd-code-fg: #212529;
   --wd-toolbar-bg: #ffffff;
   --wd-accent: #0d6efd;
+  /* SPEC-015 R15-09 — step status shades (one hue × 3 + distinct failed) */
+  --wd-status-waiting: #cfe2ff;
+  --wd-status-running: #6ea8fe;
+  --wd-status-complete: #0d6efd;
+  --wd-status-failed: #dc3545;
 }
 
 [data-theme="dark"] {
@@ -24,4 +29,9 @@
   --wd-code-fg: #d4d4d4;
   --wd-toolbar-bg: #1f1f1f;
   --wd-accent: #6ea8fe;
+  /* SPEC-015 R15-09 — step status shades (one hue × 3 + distinct failed) */
+  --wd-status-waiting: #1e3a5f;
+  --wd-status-running: #3d7dd6;
+  --wd-status-complete: #6ea8fe;
+  --wd-status-failed: #e35d6a;
 }
