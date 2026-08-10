@@ -15,9 +15,9 @@ Statuses are keyed by DSL step id (matches `findNodeById(stepId)` / `mapper.js` 
 |------|-------|-------------|------------|--------|
 | Epic B | [#252](https://github.com/brettforbes/yaml-workflow-widget/issues/252) | R15-07..11 | — | in progress |
 | B1 — setStepStatuses postMessage + stepStatuses state | [#253](https://github.com/brettforbes/yaml-workflow-widget/issues/253) | R15-07 | — | done |
-| B2 — Node status rendering (shade + icon) | [#254](https://github.com/brettforbes/yaml-workflow-widget/issues/254) | R15-08 | B1, B3 | in review |
+| B2 — Node status rendering (shade + icon) | [#254](https://github.com/brettforbes/yaml-workflow-widget/issues/254) | R15-08 | B1, B3 | done |
 | B3 — Theme status color tokens (light + dark) | [#255](https://github.com/brettforbes/yaml-workflow-widget/issues/255) | R15-09 | — | done |
-| B4 — Settings: per-theme status color pickers + persistence | [#257](https://github.com/brettforbes/yaml-workflow-widget/issues/257) | R15-10 | B3 | open |
+| B4 — Settings: per-theme status color pickers + persistence | [#257](https://github.com/brettforbes/yaml-workflow-widget/issues/257) | R15-10 | B3 | in review |
 | B5 — Docs (HOST_PROTOCOL/EMBED_GUIDE) + smoke test | [#256](https://github.com/brettforbes/yaml-workflow-widget/issues/256) | R15-11 | B1 | open |
 
 ## Execution order
