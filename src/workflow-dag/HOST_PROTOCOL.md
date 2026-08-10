@@ -31,6 +31,7 @@ Outbound widget → host messages use `target: "parent"`.
 | `setEditMode` | `{ editing: boolean }` | Enter/exit diagram edit mode; emit `editModeChanged` (R13-21) |
 | `openSettings` | `{}` | Open the settings panel (R13-21) |
 | `setLegendVisible` | `{ visible: boolean }` | Show/hide edge legend (R13-21 / R13-26) |
+| `setStepStatuses` | `{ statuses: { [stepId]: "waiting"\|"running"\|"complete"\|"failed" } }` | Replace live step status map for DAG shading (SPEC-015 R15-07); empty `{}` clears |
 | `mcpExplain` | `{ code?: string }` | Reply `mcpResult` with explain text (E6-S5) |
 | `mcpProduce` | `{ intent: string }` | Reply `mcpResult` with produced YAML (E6-S5) |
 
@@ -68,6 +69,27 @@ iframe.contentWindow.postMessage({
 - **Host → iframe `selectStep`**: `{ stepId }` selects the Nice-DAG node (scroll into view when possible) and updates `selectedNodeIds`.
 - **Iframe → host `stepSelected`**: emitted when the user clicks a step/start/target/end/collector node (edit mode and read mode).
 - Host tabs can drive the diagram; diagram clicks can drive host tabs.
+
+### Live step status (SPEC-015)
+
+- **Host → iframe `setStepStatuses`**: replace-semantics map keyed by **DSL step id** (CLI node id, e.g. `sfp_cli_nmap` — not `${id}__category` children).
+- Allowed states: `waiting` | `running` | `complete` | `failed`.
+- Empty `statuses: {}` (or a non-object payload) clears all status chrome.
+- Nodes shade via `--wd-status-*` theme tokens; icons provide a colorblind fallback. Status colors are editable in Settings (per light/dark theme).
+
+```js
+iframe.contentWindow.postMessage({
+  type: 'setStepStatuses',
+  payload: {
+    statuses: {
+      sfp_cli_nmap: 'running',
+      sfp_cli_httpx: 'waiting',
+      sfp_cli_nuclei: 'complete',
+    },
+  },
+  target: 'iframe',
+}, '*');
+```
 
 
 - **`setYaml`**: replaces the code pane and **immediately** validates; valid YAML remounts the diagram; emits `validationResult` and (when ok) `yamlChanged`.

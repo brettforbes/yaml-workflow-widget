@@ -57,6 +57,7 @@ The widget validates YAML with Langium, updates the diagram only when validation
 |---------|---------|--------|
 | `setYaml` | `{ yaml: string }` or raw string | Replace editor text; validate immediately; remount diagram if valid |
 | `getYaml` | `{ requestId?: string }` | Reply with `yamlResult` |
+| `setStepStatuses` | `{ statuses: { [stepId]: "waiting"\|"running"\|"complete"\|"failed" } }` | Live DAG step shading (SPEC-015); empty map clears |
 
 ```js
 postToWidget("setYaml", {
@@ -117,6 +118,24 @@ window.addEventListener("message", (event) => {
 Canonical sample: `src/workflow-dag/assets/12A_Workflow_YAML_Example.yaml`.
 
 ---
+
+## 2.1 Live step status (SPEC-015)
+
+While a workflow or single step runs, the host should poll backend status and push a full replace map:
+
+```js
+postToWidget("setStepStatuses", {
+  statuses: {
+    sfp_cli_nmap: "running",
+    sfp_cli_httpx: "waiting",
+  },
+});
+```
+
+- Keys are DSL **step ids** (same as `selectStep` / CLI node ids).
+- States: `waiting` | `running` | `complete` | `failed`.
+- Clear on reset: `postToWidget("setStepStatuses", { statuses: {} })`.
+- Operators can customize status colors (light/dark) via the iframe Settings panel; defaults live in theme tokens.
 
 ## 3. Layout modes (iframe + host container)
 
