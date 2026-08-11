@@ -16,6 +16,10 @@
   --wd-status-running: #f2aa84;
   --wd-status-complete: #4e95d9;
   --wd-status-failed: #ff7979;
+  /* SPEC-017 R17-12 — edge palette (overridden via edgeColors.js); context chrome uses semantic-export */
+  --wd-edge-followed-by: #156082;
+  --wd-edge-used-by: #e97132;
+  --wd-edge-semantic-export: #78206e;
 }
 
 [data-theme="dark"] {
@@ -34,4 +38,7 @@
   --wd-status-running: #f2aa84;
   --wd-status-complete: #4e95d9;
   --wd-status-failed: #ff7979;
+  --wd-edge-followed-by: #156082;
+  --wd-edge-used-by: #e97132;
+  --wd-edge-semantic-export: #78206e;
 }

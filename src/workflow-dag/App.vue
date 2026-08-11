@@ -485,6 +485,7 @@ import {
 } from "./statusColors";
 import {
   EDGE_COLOR_KEYS,
+  applyEdgeColors,
   readStoredEdgeColors,
   resetEdgeColors,
   resolveStoredEdgeColor,
@@ -731,6 +732,23 @@ export default {
 
     const syncStatusColorsToHost = () => {
       applyStatusColors(dagHostEl.value, theme.value, statusColors.value);
+      const t = theme.value === "dark" ? "dark" : "light";
+      const bucket = statusColors.value?.[t] || statusColors.value?.light || {};
+      postToHost(HOST_MSG.STATUS_COLORS_CHANGED, {
+        theme: t,
+        colors: {
+          waiting: bucket.waiting,
+          running: bucket.running,
+          complete: bucket.complete,
+          failed: bucket.failed,
+        },
+      });
+    };
+
+    const syncEdgeColorsToDiagram = () => {
+      applyEdgeColors(dagHostEl.value, theme.value, edgeColors.value);
+      // Also on document root so port/collector CSS vars resolve outside .dag-host.
+      applyEdgeColors(document.documentElement, theme.value, edgeColors.value);
     };
 
     const onStatusColorInput = (key, value) => {
@@ -759,15 +777,19 @@ export default {
           [key]: value,
         },
       });
+      syncEdgeColorsToDiagram();
       // Force Nice-DAG edge repaint when colors change.
       const niceDag = niceDagReactive.use();
       niceDag?.render?.();
+      refreshEdgeStrokes();
     };
 
     const resetEdgeColorDefaults = () => {
       edgeColors.value = resetEdgeColors();
+      syncEdgeColorsToDiagram();
       const niceDag = niceDagReactive.use();
       niceDag?.render?.();
+      refreshEdgeStrokes();
     };
 
     const prettyPrintYaml = () => {
@@ -1009,6 +1031,7 @@ export default {
       theme,
       (t) => {
         applyTheme(t);
+        syncEdgeColorsToDiagram();
         refreshEdgeStrokes();
         syncStatusColorsToHost();
       },
@@ -1021,6 +1044,7 @@ export default {
 
     watch(dagHostEl, () => {
       syncStatusColorsToHost();
+      syncEdgeColorsToDiagram();
     });
 
     const persistCodePaneWidth = (width) => {
@@ -1392,6 +1416,7 @@ export default {
       const hostWidth = document.querySelector(".split-layout")?.clientWidth;
       persistCodePaneWidth(clampCodePaneWidth(codePaneWidth.value, hostWidth));
       syncStatusColorsToHost();
+      syncEdgeColorsToDiagram();
       const niceDag = niceDagReactive.use();
       if (niceDag) {
         if (typeof niceDag.addNiceDagChangeListener === "function") {
@@ -1401,7 +1426,11 @@ export default {
       // R13-24 default view after validate→YAML→DAG settles.
       void runYamlValidate(yamlText.value).finally(() => {
         applyDefaultView();
+        // Re-emit after ready so hosts that attach on `ready` still get legend colors.
+        syncStatusColorsToHost();
+        syncEdgeColorsToDiagram();
         postReady();
+        syncStatusColorsToHost();
       });
     });
 
