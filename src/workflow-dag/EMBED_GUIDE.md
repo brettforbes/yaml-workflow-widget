@@ -136,6 +136,7 @@ postToWidget("setStepStatuses", {
 - States: `waiting` | `running` | `complete` | `failed`.
 - Clear on reset: `postToWidget("setStepStatuses", { statuses: {} })`.
 - Operators can customize status colors (light/dark) via the iframe Settings panel; defaults live in theme tokens.
+- **SPEC-017:** Settings also accept **hex text** (`#RRGGBB`) alongside the color picker for status colors and the three edge types (`followed-by`, `used-by`, `semantic-export`). Defaults (both themes): waiting `#FFFF99`, running `#F2AA84`, complete `#4E95D9`, failed `#FF7979`, followed-by `#156082`, used-by `#E97132`, semantic-export `#78206E`. Persisted in `localStorage` (`workflow-dag-status-colors`, `workflow-dag-edge-colors`).
 
 ## 3. Layout modes (iframe + host container)
 
