@@ -18,10 +18,10 @@ Status legend: `open` → `in progress` → `in review` → `done`.
 
 | Code | Issue | Requirement | Depends on | Status |
 |------|-------|-------------|------------|--------|
-| Epic C | [#274](https://github.com/brettforbes/yaml-workflow-widget/issues/274) | R17-11..13 | — | open |
-| C1 — Status hex + picker + defaults | [#275](https://github.com/brettforbes/yaml-workflow-widget/issues/275) | R17-11 | — | open |
-| C2 — Edge-type hex + picker + defaults | [#276](https://github.com/brettforbes/yaml-workflow-widget/issues/276) | R17-12 | — | open |
-| C3 — Docs + smoke | [#277](https://github.com/brettforbes/yaml-workflow-widget/issues/277) | R17-13 | C1, C2 | open |
+| Epic C | [#274](https://github.com/brettforbes/yaml-workflow-widget/issues/274) | R17-11..13 | — | done |
+| C1 — Status hex + picker + defaults | [#275](https://github.com/brettforbes/yaml-workflow-widget/issues/275) | R17-11 | — | done |
+| C2 — Edge-type hex + picker + defaults | [#276](https://github.com/brettforbes/yaml-workflow-widget/issues/276) | R17-12 | — | done |
+| C3 — Docs + smoke | [#277](https://github.com/brettforbes/yaml-workflow-widget/issues/277) | R17-13 | C1, C2 | done |
 
 ## Execution order
 
@@ -46,6 +46,7 @@ Independent of backend A* / host B* — safe first parallel lane.
 ## Key files
 
 - `src/workflow-dag/statusColors.js` — status defaults + storage (C1)
+- `src/workflow-dag/edgeColors.js` — edge defaults + storage (C2)
 - `src/workflow-dag/components/edgeMeta.js` — EDGE_COLORS / resolveEdgeColor (C2)
 - `src/workflow-dag/App.vue` — settings panel (C1, C2)
 
