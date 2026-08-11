@@ -91,3 +91,25 @@ export function resolveStoredEdgeColor(edgeType, theme, colored, colors) {
   const bucket = normalizeEdgeColors(colors)[t];
   return bucket[edgeType] || SHARED_EDGE_DEFAULTS[edgeType] || "#666666";
 }
+
+/**
+ * Apply active theme edge colors as CSS variables (context ports/circles use semantic-export).
+ * @param {HTMLElement | null | undefined} el
+ * @param {"light"|"dark"} theme
+ * @param {{ light: object, dark: object }} colors
+ */
+export function applyEdgeColors(el, theme, colors) {
+  if (!el || typeof el.style?.setProperty !== "function") return;
+  const normalized = normalizeEdgeColors(colors);
+  const t = theme === "dark" ? "dark" : "light";
+  const bucket = normalized[t];
+  el.style.setProperty(
+    "--wd-edge-followed-by",
+    bucket[EDGE_TYPE.FOLLOWED_BY]
+  );
+  el.style.setProperty("--wd-edge-used-by", bucket[EDGE_TYPE.USED_BY]);
+  el.style.setProperty(
+    "--wd-edge-semantic-export",
+    bucket[EDGE_TYPE.SEMANTIC_EXPORT]
+  );
+}

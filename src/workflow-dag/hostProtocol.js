@@ -11,6 +11,8 @@ export const HOST_MSG = {
   VALIDATION_RESULT: "validationResult",
   SET_THEME: "setTheme",
   THEME_CHANGED: "themeChanged",
+  /** Active theme status colors for host chrome legend (Composer title bar). */
+  STATUS_COLORS_CHANGED: "statusColorsChanged",
   SELECT_STEP: "selectStep",
   STEP_SELECTED: "stepSelected",
   /** R13-21 — host-driven chrome (SPEC-013) */

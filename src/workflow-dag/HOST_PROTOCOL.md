@@ -46,6 +46,7 @@ Outbound widget → host messages use `target: "parent"`.
 | `editModeChanged` | `{ editing: boolean }` | After host/UI edit-mode toggle (R13-21) |
 | `mcpResult` | `{ ok: boolean, text?: string, yaml?: string, requestId?: string, error?: string }` | Response to MCP bridge calls |
 | `themeChanged` | `{ theme: "light"\|"dark" }` | After theme applies (host or UI) |
+| `statusColorsChanged` | `{ theme: "light"\|"dark", colors: { waiting, running, complete, failed } }` | On mount / theme change / settings edit — host Composer status legend swatches |
 
 ## MCP attach (R12-E6-05)
 

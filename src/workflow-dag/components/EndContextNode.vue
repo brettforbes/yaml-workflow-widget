@@ -81,8 +81,13 @@ export default {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  border: 2px solid #222;
-  background: #e8e8e8;
+  /* Match semantic-export edge / context-rail colour. */
+  border: 2px solid var(--wd-edge-semantic-export, #78206e);
+  background: color-mix(
+    in srgb,
+    var(--wd-edge-semantic-export, #78206e) 22%,
+    var(--wd-surface, #ffffff)
+  );
   display: flex;
   align-items: center;
   justify-content: center;

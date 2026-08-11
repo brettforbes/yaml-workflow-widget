@@ -23,8 +23,13 @@
 .wf-connector-context {
   width: 12px;
   height: 12px;
-  border: 1px solid #009e73;
-  background: #e8fff6;
+  /* Match semantic-export edge color (settings-driven via --wd-edge-semantic-export). */
+  border: 1px solid var(--wd-edge-semantic-export, #78206e);
+  background: color-mix(
+    in srgb,
+    var(--wd-edge-semantic-export, #78206e) 22%,
+    var(--wd-surface, #ffffff)
+  );
   top: 50%;
   transform: translateY(-50%);
 }

@@ -35,8 +35,13 @@ export default {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid #009e73;
-  background: #e8fff6;
+  /* Match semantic-export edge color (settings-driven). */
+  border: 2px solid var(--wd-edge-semantic-export, #78206e);
+  background: color-mix(
+    in srgb,
+    var(--wd-edge-semantic-export, #78206e) 22%,
+    var(--wd-surface, #ffffff)
+  );
   box-sizing: border-box;
   position: relative;
 }
