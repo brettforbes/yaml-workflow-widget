@@ -7,19 +7,17 @@ export const STORAGE_KEY = "workflow-dag-status-colors";
 
 export const STATUS_KEYS = ["waiting", "running", "complete", "failed"];
 
+/** SPEC-017 R17-11 — same operator palette in light and dark themes. */
+const SHARED_STATUS_DEFAULTS = Object.freeze({
+  waiting: "#ffff99",
+  running: "#f2aa84",
+  complete: "#4e95d9",
+  failed: "#ff7979",
+});
+
 export const DEFAULT_STATUS_COLORS = Object.freeze({
-  light: Object.freeze({
-    waiting: "#cfe2ff",
-    running: "#6ea8fe",
-    complete: "#0d6efd",
-    failed: "#dc3545",
-  }),
-  dark: Object.freeze({
-    waiting: "#1e3a5f",
-    running: "#3d7dd6",
-    complete: "#6ea8fe",
-    failed: "#e35d6a",
-  }),
+  light: Object.freeze({ ...SHARED_STATUS_DEFAULTS }),
+  dark: Object.freeze({ ...SHARED_STATUS_DEFAULTS }),
 });
 
 function cloneDefaults() {

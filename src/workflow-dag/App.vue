@@ -45,13 +45,22 @@
             <label
               v-for="key in statusColorKeys"
               :key="key"
-              class="settings-row"
+              class="settings-row settings-color-row"
             >
               <span class="text-capitalize">{{ key }}</span>
               <input
                 type="color"
                 :value="statusColors[theme][key]"
                 @input="onStatusColorInput(key, $event.target.value)"
+              />
+              <input
+                type="text"
+                class="settings-hex-input"
+                :value="statusColors[theme][key]"
+                maxlength="7"
+                spellcheck="false"
+                aria-label="Hex color for {{ key }}"
+                @change="onStatusColorInput(key, $event.target.value)"
               />
             </label>
             <button
@@ -114,13 +123,22 @@
           <label
             v-for="key in statusColorKeys"
             :key="`embed-${key}`"
-            class="settings-row"
+            class="settings-row settings-color-row"
           >
             <span class="text-capitalize">{{ key }}</span>
             <input
               type="color"
               :value="statusColors[theme][key]"
               @input="onStatusColorInput(key, $event.target.value)"
+            />
+            <input
+              type="text"
+              class="settings-hex-input"
+              :value="statusColors[theme][key]"
+              maxlength="7"
+              spellcheck="false"
+              aria-label="Hex color for {{ key }}"
+              @change="onStatusColorInput(key, $event.target.value)"
             />
           </label>
           <button
@@ -631,14 +649,13 @@ export default {
 
     const onStatusColorInput = (key, value) => {
       const t = theme.value === "dark" ? "dark" : "light";
-      statusColors.value = {
+      statusColors.value = writeStoredStatusColors({
         ...statusColors.value,
         [t]: {
           ...statusColors.value[t],
           [key]: value,
         },
-      };
-      writeStoredStatusColors(statusColors.value);
+      });
       syncStatusColorsToHost();
     };
 
@@ -1591,6 +1608,19 @@ body,
   border: 1px solid var(--wd-border);
   background: transparent;
   cursor: pointer;
+}
+.settings-color-row {
+  gap: 6px;
+}
+.settings-hex-input {
+  width: 72px;
+  font-family: Consolas, Menlo, monospace;
+  font-size: 11px;
+  padding: 2px 4px;
+  border: 1px solid var(--wd-border);
+  border-radius: 3px;
+  background: var(--wd-surface);
+  color: var(--wd-text);
 }
 .split-layout {
   display: flex;
