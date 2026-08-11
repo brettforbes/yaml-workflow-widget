@@ -16,20 +16,27 @@
 
 <script>
 import { computed } from "vue";
-import { EDGE_TYPE, resolveEdgeColor } from "./edgeMeta";
+import { EDGE_TYPE } from "./edgeMeta";
+import { resolveStoredEdgeColor } from "../edgeColors";
 
 export default {
   name: "EdgeLegend",
   props: {
     theme: { type: String, default: "light" },
     colored: { type: Boolean, default: true },
+    edgeColors: { type: Object, default: null },
   },
   setup(props) {
     const rows = computed(() =>
       [EDGE_TYPE.FOLLOWED_BY, EDGE_TYPE.USED_BY, EDGE_TYPE.SEMANTIC_EXPORT].map(
         (type) => ({
           type,
-          color: resolveEdgeColor(type, props.theme, props.colored),
+          color: resolveStoredEdgeColor(
+            type,
+            props.theme,
+            props.colored,
+            props.edgeColors || undefined
+          ),
         })
       )
     );

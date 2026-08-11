@@ -10,17 +10,17 @@ export const LEGACY_FOLLOWS = "follows";
 /** @deprecated use EDGE_TYPE.SEMANTIC_EXPORT */
 export const LEGACY_SEMANTIC = "semantic-subgraph";
 
-/** Colorblind-safe Okabe–Ito inspired palettes */
+/** SPEC-017 R17-12 defaults (same light/dark); settings may override via edgeColors.js */
 export const EDGE_COLORS = {
   light: {
-    [EDGE_TYPE.FOLLOWED_BY]: "#0072B2",
-    [EDGE_TYPE.USED_BY]: "#E69F00",
-    [EDGE_TYPE.SEMANTIC_EXPORT]: "#009E73",
+    [EDGE_TYPE.FOLLOWED_BY]: "#156082",
+    [EDGE_TYPE.USED_BY]: "#E97132",
+    [EDGE_TYPE.SEMANTIC_EXPORT]: "#78206E",
   },
   dark: {
-    [EDGE_TYPE.FOLLOWED_BY]: "#56B4E9",
-    [EDGE_TYPE.USED_BY]: "#F0E442",
-    [EDGE_TYPE.SEMANTIC_EXPORT]: "#3DDBA8",
+    [EDGE_TYPE.FOLLOWED_BY]: "#156082",
+    [EDGE_TYPE.USED_BY]: "#E97132",
+    [EDGE_TYPE.SEMANTIC_EXPORT]: "#78206E",
   },
 };
 

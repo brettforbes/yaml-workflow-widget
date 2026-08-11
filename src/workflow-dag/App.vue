@@ -71,6 +71,39 @@
               Reset status colors
             </button>
           </div>
+          <div class="settings-status-colors">
+            <div class="settings-section-label">
+              Edge colors ({{ theme }})
+            </div>
+            <label
+              v-for="key in edgeColorKeys"
+              :key="`edge-${key}`"
+              class="settings-row settings-color-row"
+            >
+              <span>{{ key }}</span>
+              <input
+                type="color"
+                :value="edgeColors[theme][key]"
+                @input="onEdgeColorInput(key, $event.target.value)"
+              />
+              <input
+                type="text"
+                class="settings-hex-input"
+                :value="edgeColors[theme][key]"
+                maxlength="7"
+                spellcheck="false"
+                :aria-label="`Hex color for ${key}`"
+                @change="onEdgeColorInput(key, $event.target.value)"
+              />
+            </label>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary w-100"
+              @click="resetEdgeColorDefaults"
+            >
+              Reset edge colors
+            </button>
+          </div>
         </div>
       </div>
       <button
@@ -147,6 +180,39 @@
             @click="resetStatusColorDefaults"
           >
             Reset status colors
+          </button>
+        </div>
+        <div class="settings-status-colors">
+          <div class="settings-section-label">
+            Edge colors ({{ theme }})
+          </div>
+          <label
+            v-for="key in edgeColorKeys"
+            :key="`embed-edge-${key}`"
+            class="settings-row settings-color-row"
+          >
+            <span>{{ key }}</span>
+            <input
+              type="color"
+              :value="edgeColors[theme][key]"
+              @input="onEdgeColorInput(key, $event.target.value)"
+            />
+            <input
+              type="text"
+              class="settings-hex-input"
+              :value="edgeColors[theme][key]"
+              maxlength="7"
+              spellcheck="false"
+              :aria-label="`Hex color for ${key}`"
+              @change="onEdgeColorInput(key, $event.target.value)"
+            />
+          </label>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary w-100"
+            @click="resetEdgeColorDefaults"
+          >
+            Reset edge colors
           </button>
         </div>
       </div>
@@ -315,7 +381,12 @@
             :show-labels="true"
           />
         </NiceDagEdges>
-        <EdgeLegend v-if="showLegend" :theme="theme" :colored="edgeColored" />
+        <EdgeLegend
+          v-if="showLegend"
+          :theme="theme"
+          :colored="edgeColored"
+          :edge-colors="edgeColors"
+        />
         <div v-if="editMode" class="edit-palette" @click.stop>
           <button type="button" title="Add step" @click="addNodeKind('step')">
             + step
@@ -379,7 +450,7 @@ import "prismjs/components/prism-yaml";
 import "bootstrap/dist/css/bootstrap.min.css";
 import sampleYaml from "./assets/12A_Workflow_YAML_Example.yaml";
 import { workflowDocToNiceDagModel, NODE_KIND } from "./components/mapper";
-import { EDGE_TYPE, edgeKey, resolveEdgeColor } from "./components/edgeMeta";
+import { EDGE_TYPE, edgeKey } from "./components/edgeMeta";
 import { diagramToWorkflowYaml } from "./components/diagramYaml";
 import CategoryNode from "./components/CategoryNode.vue";
 import CliAppNode from "./components/CliAppNode.vue";
@@ -412,6 +483,13 @@ import {
   resetStatusColors,
   writeStoredStatusColors,
 } from "./statusColors";
+import {
+  EDGE_COLOR_KEYS,
+  readStoredEdgeColors,
+  resetEdgeColors,
+  resolveStoredEdgeColor,
+  writeStoredEdgeColors,
+} from "./edgeColors";
 import { validateWorkflowYaml } from "./components/yamlValidate";
 import { applyValidatedYamlToNiceDag } from "./components/yamlToDag";
 import {
@@ -538,6 +616,9 @@ export default {
     /** SPEC-015 R15-10 — per-theme status color overrides. */
     const statusColors = ref(readStoredStatusColors());
     const statusColorKeys = STATUS_KEYS;
+    /** SPEC-017 R17-12 — per-theme edge-type color overrides. */
+    const edgeColors = ref(readStoredEdgeColors());
+    const edgeColorKeys = EDGE_COLOR_KEYS;
     const edgeMenu = ref({ open: false, x: 0, y: 0 });
     const yamlText = ref(sampleYaml);
     /** Last YAML that successfully validated — diagram must not use invalid edits (R12-E5-02). */
@@ -613,7 +694,12 @@ export default {
         edgeMeta.value.get(edgeKey(edge.source.id, edge.target.id)) ||
         EDGE_TYPE.FOLLOWED_BY;
       return {
-        color: resolveEdgeColor(type, theme.value, edgeColored.value),
+        color: resolveStoredEdgeColor(
+          type,
+          theme.value,
+          edgeColored.value,
+          edgeColors.value
+        ),
       };
     };
 
@@ -662,6 +748,26 @@ export default {
     const resetStatusColorDefaults = () => {
       statusColors.value = resetStatusColors();
       syncStatusColorsToHost();
+    };
+
+    const onEdgeColorInput = (key, value) => {
+      const t = theme.value === "dark" ? "dark" : "light";
+      edgeColors.value = writeStoredEdgeColors({
+        ...edgeColors.value,
+        [t]: {
+          ...edgeColors.value[t],
+          [key]: value,
+        },
+      });
+      // Force Nice-DAG edge repaint when colors change.
+      const niceDag = niceDagReactive.use();
+      niceDag?.render?.();
+    };
+
+    const resetEdgeColorDefaults = () => {
+      edgeColors.value = resetEdgeColors();
+      const niceDag = niceDagReactive.use();
+      niceDag?.render?.();
     };
 
     const prettyPrintYaml = () => {
@@ -746,7 +852,12 @@ export default {
           EDGE_TYPE.FOLLOWED_BY;
         path.setAttribute(
           "stroke",
-          resolveEdgeColor(type, theme.value, edgeColored.value)
+          resolveStoredEdgeColor(
+            type,
+            theme.value,
+            edgeColored.value,
+            edgeColors.value
+          )
         );
         path.setAttribute("fill", "none");
         path.setAttribute("fill-opacity", "0");
@@ -1462,6 +1573,10 @@ export default {
       statusColorKeys,
       onStatusColorInput,
       resetStatusColorDefaults,
+      edgeColors,
+      edgeColorKeys,
+      onEdgeColorInput,
+      resetEdgeColorDefaults,
       prettyPrintYaml,
       prettyPrintLayout,
       edgeMeta,
