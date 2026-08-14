@@ -9,6 +9,7 @@ import yaml from "js-yaml";
 import {
   NODE_KIND,
   WORKFLOW_END_ID,
+  WORKFLOW_TARGET_COLLECTOR_ID,
   WORKFLOW_TARGET_ID,
   workflowDocToNiceDagModel,
 } from "./mapper.js";
@@ -117,6 +118,23 @@ if (
 const nucleiCol = edgeKey("sfp_cli_nuclei", "__ctxcol_sfp_cli_nuclei__");
 if (edgeMeta.get(nucleiCol) !== EDGE_TYPE.SEMANTIC_EXPORT) {
   console.error("FAIL: nuclei must semantic-export to collector");
+  process.exit(1);
+}
+
+const targetCol = sampleModel.find((n) => n.id === WORKFLOW_TARGET_COLLECTOR_ID);
+const subfinderCol = sampleModel.find(
+  (n) => n.id === "__ctxcol_sfp_cli_subfinder__"
+);
+if (
+  targetCol?.data?.layoutCx == null ||
+  subfinderCol?.data?.layoutCx == null ||
+  targetCol.data.layoutCx !== subfinderCol.data.layoutCx
+) {
+  console.error(
+    "FAIL: target collector X must align with first scan-step collector",
+    targetCol?.data?.layoutCx,
+    subfinderCol?.data?.layoutCx
+  );
   process.exit(1);
 }
 
