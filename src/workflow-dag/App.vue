@@ -320,7 +320,7 @@
             :node="slotProps.node"
             :editable="editMode"
             :selected="selectedNodeIds.includes(slotProps.node.id)"
-            :status="stepStatuses[slotProps.node.id] || ''"
+            :status="nodeStatusLabel(slotProps.node.id)"
             @edit="openEdit"
             @select="onNodeSelect"
           />
@@ -329,7 +329,7 @@
             :node="slotProps.node"
             :editable="editMode"
             :selected="selectedNodeIds.includes(slotProps.node.id)"
-            :status="stepStatuses[slotProps.node.id] || ''"
+            :status="nodeStatusLabel(slotProps.node.id)"
             @edit="openEdit"
             @select="onNodeSelect"
           />
@@ -365,7 +365,8 @@
             :dag-observor="niceDagReactive.observor"
             :editable="editMode"
             :selected="selectedNodeIds.includes(slotProps.node.id)"
-            :status="stepStatuses[slotProps.node.id] || ''"
+            :status="nodeStatusLabel(slotProps.node.id)"
+            :step-status="stepStatuses[slotProps.node.id] || null"
             @edit="openEdit"
             @cli-ui="openCliUiFromNode"
             @select="onNodeSelect"
@@ -453,6 +454,10 @@ import { workflowDocToNiceDagModel, NODE_KIND } from "./components/mapper";
 import { EDGE_TYPE, edgeKey } from "./components/edgeMeta";
 import { diagramToWorkflowYaml } from "./components/diagramYaml";
 import CategoryNode from "./components/CategoryNode.vue";
+import {
+  normalizeStepStatusEntry,
+  stepStatusLabel,
+} from "./components/stepStatus.js";
 import CliAppNode from "./components/CliAppNode.vue";
 import StartNode from "./components/StartNode.vue";
 import TargetNode from "./components/TargetNode.vue";
@@ -833,16 +838,9 @@ export default {
       showLegend.value = !!visible;
     };
 
-    const ALLOWED_STEP_STATUSES = new Set([
-      "waiting",
-      "running",
-      "complete",
-      "failed",
-    ]);
-
     /**
-     * SPEC-015 R15-07 — replace-semantics. Payload `{ statuses: { stepId: state } }`
-     * or a bare map. Empty / missing clears. Unknown states are dropped.
+     * SPEC-015 R15-07 / SPEC-018 R18-13 — replace-semantics status map.
+     * Values may be string statuses or `{ status, input_done, input_total }`.
      */
     const setStepStatuses = (payload) => {
       const raw =
@@ -856,12 +854,14 @@ export default {
       const next = {};
       for (const [stepId, state] of Object.entries(raw)) {
         if (typeof stepId !== "string" || !stepId) continue;
-        if (typeof state !== "string") continue;
-        if (!ALLOWED_STEP_STATUSES.has(state)) continue;
-        next[stepId] = state;
+        const entry = normalizeStepStatusEntry(state);
+        if (entry) next[stepId] = entry;
       }
       stepStatuses.value = next;
     };
+
+    const nodeStatusLabel = (nodeId) =>
+      stepStatusLabel(stepStatuses.value[nodeId]);
 
     const refreshEdgeStrokes = () => {
       const niceDag = niceDagReactive.use();
@@ -1598,6 +1598,7 @@ export default {
       setLegendVisible,
       stepStatuses,
       setStepStatuses,
+      nodeStatusLabel,
       statusColors,
       statusColorKeys,
       onStatusColorInput,
