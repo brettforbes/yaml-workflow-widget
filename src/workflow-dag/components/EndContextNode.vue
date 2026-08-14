@@ -94,7 +94,7 @@ export default {
   box-sizing: border-box;
 }
 .wf-end-label {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   color: #111;
   text-transform: lowercase;

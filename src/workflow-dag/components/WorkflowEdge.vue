@@ -52,7 +52,7 @@ export default {
  */
 .wf-edge-label {
   text-align: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;

@@ -125,7 +125,7 @@ export default {
   box-sizing: border-box;
 }
 .wf-target-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #222;
   text-transform: lowercase;

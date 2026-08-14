@@ -380,7 +380,7 @@ export default {
   z-index: 2;
 }
 .wf-cli-app-label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: #222;
   overflow: hidden;

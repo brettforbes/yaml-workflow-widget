@@ -87,9 +87,9 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
+  padding: 9px 15px;
   background: #3a3a3a;
-  font-size: 12px;
+  font-size: 18px;
   color: #eee;
 }
 .wf-yaml-tooltip-actions {
@@ -100,17 +100,17 @@ export default {
   border: 1px solid #888;
   background: #555;
   color: #fff;
-  border-radius: 3px;
-  padding: 2px 8px;
-  font-size: 11px;
+  border-radius: 4px;
+  padding: 3px 12px;
+  font-size: 17px;
   cursor: pointer;
 }
 .wf-yaml-tooltip-body {
   margin: 0;
-  padding: 8px 10px;
+  padding: 12px 15px;
   overflow: auto;
   font-family: Consolas, Menlo, monospace;
-  font-size: 11px;
+  font-size: 17px;
   line-height: 1.4;
   white-space: pre-wrap;
   word-break: break-word;
