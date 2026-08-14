@@ -158,7 +158,7 @@ export default {
   border-color: #009e73;
 }
 .wf-category-label {
-  font-size: 13px;
+  font-size: 12px;
   color: #333;
   text-transform: lowercase;
 }

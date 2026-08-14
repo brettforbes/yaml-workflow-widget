@@ -55,7 +55,7 @@ export default {
   border: 1px solid var(--wd-border);
   border-radius: 6px;
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--wd-text);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
