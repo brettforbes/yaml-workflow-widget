@@ -107,10 +107,18 @@ if (!httpx || httpx.data?.layoutChain !== "left") {
   console.error("FAIL: httpx should be left chain", httpx?.data);
   process.exit(1);
 }
+if (httpx.data?.label !== "httpx") {
+  console.error("FAIL: httpx label must be short token", httpx.data?.label);
+  process.exit(1);
+}
 
 const subfinder = sampleModel.find((n) => n.id === "sfp_cli_subfinder");
 if (!subfinder?.children?.length || subfinder.collapse !== true) {
   console.error("FAIL: steps must be collapsed HIERARCHY groups with children");
+  process.exit(1);
+}
+if (subfinder.data?.label !== "subfinder") {
+  console.error("FAIL: subfinder label must be short token", subfinder.data?.label);
   process.exit(1);
 }
 for (const cat of ["input", "config", "context", "output"]) {
