@@ -57,7 +57,7 @@ The widget validates YAML with Langium, updates the diagram only when validation
 |---------|---------|--------|
 | `setYaml` | `{ yaml: string }` or raw string | Replace editor text; validate immediately; remount diagram if valid |
 | `getYaml` | `{ requestId?: string }` | Reply with `yamlResult` |
-| `setStepStatuses` | `{ statuses: { [stepId]: "waiting"\|"running"\|"complete"\|"failed" } }` | Live DAG step shading (SPEC-015); empty map clears |
+| `setStepStatuses` | `{ statuses: { [stepId]: "waiting"\|"running"\|"complete"\|"failed" \| { status, input_done?, input_total? } } }` | Live DAG step shading + optional `i/n` badge (SPEC-015, SPEC-018); empty map clears |
 
 ```js
 postToWidget("setYaml", {
@@ -127,13 +127,14 @@ While a workflow or single step runs, the host should poll backend status and pu
 postToWidget("setStepStatuses", {
   statuses: {
     sfp_cli_nmap: "running",
-    sfp_cli_httpx: "waiting",
+    sfp_cli_httpx: { status: "waiting", input_done: 0, input_total: 12 },
   },
 });
 ```
 
 - Keys are DSL **step ids** (same as `selectStep` / CLI node ids).
 - States: `waiting` | `running` | `complete` | `failed`.
+- Values may be a **string** (backward compatible) or `{ status, input_done?, input_total? }` for an **`i/n` badge** on the step node (SPEC-018 R18-13).
 - Clear on reset: `postToWidget("setStepStatuses", { statuses: {} })`.
 - Operators can customize status colors (light/dark) via the iframe Settings panel; defaults live in theme tokens.
 - **SPEC-017:** Settings also accept **hex text** (`#RRGGBB`) alongside the color picker for status colors and the three edge types (`followed-by`, `used-by`, `semantic-export`). Defaults (both themes): waiting `#FFFF99`, running `#F2AA84`, complete `#4E95D9`, failed `#FF7979`, followed-by `#156082`, used-by `#E97132`, semantic-export `#78206E`. Persisted in `localStorage` (`workflow-dag-status-colors`, `workflow-dag-edge-colors`).
