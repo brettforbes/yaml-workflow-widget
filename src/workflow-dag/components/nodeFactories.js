@@ -1,6 +1,7 @@
 import * as yaml from "js-yaml";
 import { NODE_KIND, CATEGORIES } from "./mapper";
 import { collectorId } from "./contextRail";
+import { shortStepLabel } from "./stepDisplayLabel.js";
 
 let seq = 0;
 function nextId(prefix) {
@@ -50,7 +51,7 @@ export function createStepNode(label) {
       uses: step.uses,
       raw: step,
       yaml: yaml.dump(step, { lineWidth: 120, noRefs: true }).trimEnd(),
-      label: label || id,
+      label: label || shortStepLabel(id, step.uses),
       lane: 0,
       contextSide: "right",
     },

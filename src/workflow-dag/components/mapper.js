@@ -15,6 +15,7 @@ import {
   assignLayoutChains,
   assignLayoutRanks,
 } from "./workflowSeedRoles.js";
+import { stepDisplayLabel } from "./stepDisplayLabel.js";
 
 const CATEGORIES = ["input", "config", "context", "output"];
 
@@ -362,7 +363,7 @@ export function workflowStepsToNiceDagModel(
         uses: step.uses,
         raw: step,
         yaml: yaml.dump(step, { lineWidth: 120, noRefs: true }).trimEnd(),
-        label: step.id,
+        label: stepDisplayLabel(step),
         inboundEdgeType: inbound.edgeType,
       },
     };
