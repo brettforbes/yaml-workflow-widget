@@ -187,6 +187,26 @@ node src/workflow-dag/components/workflowSeedGolden.smoke.mjs
 ## SPEC-016 addendum — Target context port + collector
 
 - Target box has a **right-edge context port** (`wf-connector-context-right`).
-- A diagram-chrome collector `__ctxcol_target__` sits on the Target row at `CX + TARGET_W/2 + COLLECTOR_GAP`, seeded from `inputs.targets`.
+- A diagram-chrome collector `__ctxcol_target__` sits on the Target row, seeded from `inputs.targets`.
 - Edge: Target.ctx → `__ctxcol_target__` (semantic-export). Collector ids remain stripped from YAML round-trip.
 - Do **not** change frozen 12A/12A2 step coordinates; only this Target-row chrome is added.
+
+## SPEC-018 addendum — Export-only edges, Target align, labels, progress
+
+Parent spec: `@spiderfeet/.governance/specs/SPEC-018-composer-refine.md` (R18-09..14).
+
+| Rule | Behaviour |
+|------|-----------|
+| **Short step labels** | Collapsed CLI steps show last token of `sfp_cli_*` / `tool.*` (`subfinder`, `nmap`). Full id in tooltip/YAML. |
+| **Typography** | Shape labels ~14–16px; edge labels ~11–12px; YamlTooltip chrome ~150% (native + embed). |
+| **Export-only semantic-export** | Step→collector edge only when `context.export: scan_graph`. Rank collector exists if **any** step on that rank exports. HTTPX/Katana (`export: none`) have no step→collector edge; shared-rank collectors remain for Nmap/Nerva rows. |
+| **Target collector align** | Once per workflow, `__ctxcol_target__` `layoutCx` matches the **first scan-step** collector (Subfinder on 12A) so the context rail is vertically aligned at the first step. Other collectors unchanged. |
+| **`setStepStatuses` progress** | Host may send `{ status, input_done, input_total }` per step; DAG renders `i/n` on the CLI step node. String statuses remain valid. |
+
+**Smoke (Epic C):**
+
+```bash
+node src/workflow-dag/spec018.smoke.mjs
+```
+
+Covers mapper (labels, export edges, target align), step status normalization, and host protocol envelope.
