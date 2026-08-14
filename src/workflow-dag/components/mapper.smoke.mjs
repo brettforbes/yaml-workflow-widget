@@ -93,12 +93,30 @@ if (!sharedCol?.data?.shared) {
   process.exit(1);
 }
 if (
-  edgeMeta.get(edgeKey("sfp_cli_httpx", "__ctxcol_rank_3__")) !==
-    EDGE_TYPE.SEMANTIC_EXPORT ||
   edgeMeta.get(edgeKey("sfp_cli_nmap", "__ctxcol_rank_3__")) !==
     EDGE_TYPE.SEMANTIC_EXPORT
 ) {
-  console.error("FAIL: both split steps must semantic-export to shared collector");
+  console.error("FAIL: nmap must semantic-export to shared collector");
+  process.exit(1);
+}
+if (
+  edgeMeta.has(edgeKey("sfp_cli_httpx", "__ctxcol_rank_3__"))
+) {
+  console.error("FAIL: httpx must not semantic-export (export: none)");
+  process.exit(1);
+}
+if (
+  edgeMeta.has(edgeKey("sfp_cli_katana", "__ctxcol_katana__")) ||
+  [...edgeMeta.keys()].some(
+    (k) => k.startsWith("sfp_cli_katana|") && k.includes("__ctxcol")
+  )
+) {
+  console.error("FAIL: katana must not semantic-export (export: none)");
+  process.exit(1);
+}
+const nucleiCol = edgeKey("sfp_cli_nuclei", "__ctxcol_sfp_cli_nuclei__");
+if (edgeMeta.get(nucleiCol) !== EDGE_TYPE.SEMANTIC_EXPORT) {
+  console.error("FAIL: nuclei must semantic-export to collector");
   process.exit(1);
 }
 

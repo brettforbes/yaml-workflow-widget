@@ -15,7 +15,7 @@ import {
   assignLayoutChains,
   assignLayoutRanks,
 } from "./workflowSeedRoles.js";
-import { stepDisplayLabel } from "./stepDisplayLabel.js";
+import { stepDisplayLabel, stepExportsScanGraph } from "./stepDisplayLabel.js";
 
 const CATEGORIES = ["input", "config", "context", "output"];
 
@@ -35,6 +35,12 @@ export const WORKFLOW_TARGET_COLLECTOR_ID = "__ctxcol_target__";
 export const WORKFLOW_END_ID = "__workflow_end__";
 
 const STEPS_FROM_RE = /\$steps\.([A-Za-z0-9_-]+)\./;
+
+/** @param {object} stepNode - Nice-DAG step node from workflowStepsToNiceDagModel */
+function stepNodeExportsScanGraph(stepNode) {
+  const raw = stepNode?.data?.raw;
+  return stepExportsScanGraph(raw?.context?.export);
+}
 
 /**
  * Header YAML shown on the start-circle tooltip (apiVersion/kind/id/info).
@@ -229,11 +235,13 @@ export function workflowDocToNiceDagModel(doc) {
   }
   for (const rank of [...byRank.keys()].sort((a, b) => a - b)) {
     const atRank = byRank.get(rank);
+    const exporters = atRank.filter(stepNodeExportsScanGraph);
+    if (exporters.length === 0) continue;
     const shared = atRank.length >= 2;
     const primary =
       (shared &&
         atRank.find((s) => (chains.get(s.id)?.chain || "") === "left")) ||
-      atRank[0];
+      exporters[0];
     const cid = shared
       ? `__ctxcol_rank_${rank}__`
       : collectorId(primary.id);
@@ -250,10 +258,11 @@ export function workflowDocToNiceDagModel(doc) {
         shared,
         layoutRank: rank,
         lane: lanes.get(primary.id) || 0,
+        exportsScanGraph: exporters.map((s) => s.id),
       },
     };
     collectors.push(col);
-    for (const s of atRank) {
+    for (const s of exporters) {
       edgeMeta.set(edgeKey(s.id, cid), EDGE_TYPE.SEMANTIC_EXPORT);
     }
     if (prevCollectorId) {
