@@ -15,6 +15,11 @@
     @click="onSelectClick"
   >
     <span
+      v-if="progressLabel"
+      class="wf-step-progress-badge"
+      :title="`Progress ${progressLabel}`"
+    >{{ progressLabel }}</span>
+    <span
       v-if="normalizedStatus"
       class="wf-step-status-icon"
       :title="normalizedStatus"
@@ -85,6 +90,7 @@
 import { computed, ref, watch } from "vue";
 import * as yaml from "js-yaml";
 import YamlTooltip from "./YamlTooltip.vue";
+import { stepProgressLabel } from "./stepStatus.js";
 
 function bodyYamlWithoutIO(node) {
   const raw = node?.data?.raw;
@@ -106,6 +112,8 @@ export default {
     selected: { type: Boolean, default: false },
     /** SPEC-015 R15-08 — waiting | running | complete | failed (empty = no status chrome). */
     status: { type: String, default: "" },
+    /** SPEC-018 R18-13 — optional `{ status, input_done, input_total }` for i/n badge. */
+    stepStatus: { type: Object, default: null },
     /** Bumps when Nice-DAG fires model changes — required because node.collapse is not Vue-reactive. */
     dagObservor: { type: Number, default: 0 },
   },
@@ -132,6 +140,9 @@ export default {
       normalizedStatus.value ? `wf-step-status-${normalizedStatus.value}` : ""
     );
     const statusGlyph = computed(() => GLYPHS[normalizedStatus.value] || "");
+    const progressLabel = computed(() =>
+      stepProgressLabel(props.stepStatus || null)
+    );
 
     const isExpanded = computed(() => {
       void props.dagObservor;
@@ -246,6 +257,7 @@ export default {
       normalizedStatus,
       statusClass,
       statusGlyph,
+      progressLabel,
       showTooltip,
       keepOpen,
       tooltipYaml,
@@ -294,6 +306,27 @@ export default {
   color: #fff;
 }
 .wf-cli-app-node.wf-step-status-failed .wf-cli-app-label {
+  color: #fff;
+}
+.wf-step-progress-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  z-index: 3;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #222;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.wf-cli-app-node.wf-step-status-complete .wf-step-progress-badge,
+.wf-cli-app-node.wf-step-status-failed .wf-step-progress-badge {
+  background: rgba(0, 0, 0, 0.28);
   color: #fff;
 }
 .wf-step-status-icon {

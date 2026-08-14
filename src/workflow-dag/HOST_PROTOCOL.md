@@ -31,7 +31,7 @@ Outbound widget → host messages use `target: "parent"`.
 | `setEditMode` | `{ editing: boolean }` | Enter/exit diagram edit mode; emit `editModeChanged` (R13-21) |
 | `openSettings` | `{}` | Open the settings panel (R13-21) |
 | `setLegendVisible` | `{ visible: boolean }` | Show/hide edge legend (R13-21 / R13-26) |
-| `setStepStatuses` | `{ statuses: { [stepId]: "waiting"\|"running"\|"complete"\|"failed" } }` | Replace live step status map for DAG shading (SPEC-015 R15-07); empty `{}` clears |
+| `setStepStatuses` | `{ statuses: { [stepId]: "waiting"\|"running"\|"complete"\|"failed" \| { status, input_done?, input_total? } } }` | Replace live step status map for DAG shading (SPEC-015 R15-07, SPEC-018 R18-13); empty `{}` clears |
 | `mcpExplain` | `{ code?: string }` | Reply `mcpResult` with explain text (E6-S5) |
 | `mcpProduce` | `{ intent: string }` | Reply `mcpResult` with produced YAML (E6-S5) |
 
@@ -75,7 +75,8 @@ iframe.contentWindow.postMessage({
 
 - **Host → iframe `setStepStatuses`**: replace-semantics map keyed by **DSL step id** (CLI node id, e.g. `sfp_cli_nmap` — not `${id}__category` children).
 - Allowed states: `waiting` | `running` | `complete` | `failed`.
-- Empty `statuses: {}` (or a non-object payload) clears all status chrome.
+- Each value may be a **string** status (backward compatible) or an **object** `{ status, input_done?, input_total? }` for an `i/n` progress badge on the step node (SPEC-018 R18-13). When `input_total > 0`, the DAG renders `input_done/input_total` (e.g. `0/12` while running, `12/12` when complete).
+- Empty `statuses: {}` (or a non-object payload) clears all status chrome and progress badges.
 - Nodes shade via `--wd-status-*` theme tokens; icons provide a colorblind fallback. Status colors are editable in Settings (per light/dark theme).
 
 ```js
@@ -84,8 +85,8 @@ iframe.contentWindow.postMessage({
   payload: {
     statuses: {
       sfp_cli_nmap: 'running',
-      sfp_cli_httpx: 'waiting',
-      sfp_cli_nuclei: 'complete',
+      sfp_cli_httpx: { status: 'waiting', input_done: 0, input_total: 12 },
+      sfp_cli_nuclei: { status: 'complete', input_done: 12, input_total: 12 },
     },
   },
   target: 'iframe',

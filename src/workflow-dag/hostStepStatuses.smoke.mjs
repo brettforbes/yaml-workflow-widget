@@ -37,4 +37,17 @@ if (!clear || clear.type !== "setStepStatuses") {
   process.exit(1);
 }
 
+const progress = normalizeHostMessage({
+  type: "setStepStatuses",
+  payload: {
+    statuses: {
+      sfp_cli_nmap: { status: "running", input_done: 0, input_total: 5 },
+    },
+  },
+});
+if (progress?.payload?.statuses?.sfp_cli_nmap?.input_total !== 5) {
+  console.error("HOST_STEP_STATUSES_SMOKE_FAIL progress envelope", progress);
+  process.exit(1);
+}
+
 console.log("HOST_STEP_STATUSES_SMOKE_OK");
