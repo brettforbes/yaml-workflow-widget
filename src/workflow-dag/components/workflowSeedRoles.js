@@ -285,6 +285,27 @@ export function annotateWorkflowSeedLayout(nodes, entryParentId) {
     colNode.data.layoutCy = cy;
   }
 
+  // SPEC-018 R18-12 — once per workflow, align Target collector X with the first
+  // scan-step collector so the context rail is a clean vertical line at Subfinder.
+  if (target && targetCollector && stepNodes.length) {
+    const firstRank = Math.min(...stepNodes.map((s) => ranks.get(s.id) || 0));
+    const firstStep = stepNodes.find((s) => (ranks.get(s.id) || 0) === firstRank);
+    if (firstStep) {
+      const firstStepCollector = nodes.find(
+        (n) =>
+          n.data?.kind === NODE_KIND.CONTEXT_COLLECTOR &&
+          n.id !== WORKFLOW_TARGET_COLLECTOR_ID &&
+          (n.id === collectorId(firstStep.id) ||
+            (Array.isArray(n.data?.forSteps) &&
+              n.data.forSteps.includes(firstStep.id)))
+      );
+      if (firstStepCollector?.data?.layoutCx != null) {
+        targetCollector.data.layoutCx = firstStepCollector.data.layoutCx;
+        targetCollector.data.targetAlignFirstStep = true;
+      }
+    }
+  }
+
   if (end) {
     end.data.layoutRole = "transition";
     end.data.layoutRank = endRank;
