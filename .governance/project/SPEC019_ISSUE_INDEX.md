@@ -19,7 +19,7 @@ Status legend: `open` → `in progress` → `in review` → `done`.
 | Code | Issue | Requirement | Depends on | Status |
 |------|-------|-------------|------------|--------|
 | Epic D | [#296](https://github.com/brettforbes/yaml-workflow-widget/issues/296) | R19-10..12 | — | open |
-| D1 — Collector deps = exporters only | [#297](https://github.com/brettforbes/yaml-workflow-widget/issues/297) | R19-10 | — | open |
+| D1 — Collector deps = exporters only | [#297](https://github.com/brettforbes/yaml-workflow-widget/issues/297) | R19-10 | — | done |
 | D2 — Vertical vs horizontal ports | [#298](https://github.com/brettforbes/yaml-workflow-widget/issues/298) | R19-11 | D1 | open |
 | D3 — Smoke mixed-rank + no httpx/katana deps | [#299](https://github.com/brettforbes/yaml-workflow-widget/issues/299) | R19-12 | D1, D2 | open |
 
