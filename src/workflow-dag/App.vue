@@ -504,7 +504,7 @@ import {
   postReady,
   postToHost,
 } from "./hostProtocol";
-import { mapWorkflowSeedEdgeToPointsNiceDag } from "./components/workflowSeedEdgePoints";
+import { mapWorkflowSeedEdgeToPoints } from "./components/workflowSeedEdgePoints";
 import {
   explainWorkflowYaml,
   produceWorkflowForHost,
@@ -709,13 +709,24 @@ export default {
       };
     };
 
+    const mapSeedEdgeWithMeta = (edge) => {
+      const edgeType =
+        edgeMeta.value.get(edgeKey(edge.source.id, edge.target.id)) ||
+        EDGE_TYPE.FOLLOWED_BY;
+      return mapWorkflowSeedEdgeToPoints({
+        source: edge.source,
+        target: edge.target,
+        edgeType,
+      });
+    };
+
     const { niceDagEl, niceDagReactive } = useNiceDag({
       editable: true,
       mode: "DEFAULT",
       layout: "WORKFLOW_SEED",
       initNodes,
       getNodeSize,
-      mapEdgeToPoints: mapWorkflowSeedEdgeToPointsNiceDag,
+      mapEdgeToPoints: mapSeedEdgeWithMeta,
       graphLabel: { rankdir: "TB", ranksep: 56, edgesep: 28, nodesep: 36 },
       /* Seed §2.4: content origin + padding ⇒ visual sub-step offsets + 214×528 host */
       subViewPadding: { top: 56, bottom: 80, left: 36, right: 18 },

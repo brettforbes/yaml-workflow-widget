@@ -8,6 +8,8 @@
  * at seed layoutCy.
  */
 
+import { EDGE_TYPE } from "./edgeMeta.js";
+
 const PORT_R = 6;
 
 function isExpandedStepHost(node) {
@@ -161,7 +163,7 @@ function isTarget(node) {
  * @param {{ source: object, target: object }} edge
  * @returns {{ source: {x:number,y:number}, target: {x:number,y:number}, path: string }}
  */
-export function mapWorkflowSeedEdgeToPoints({ source, target }) {
+export function mapWorkflowSeedEdgeToPoints({ source, target, edgeType = EDGE_TYPE.FOLLOWED_BY }) {
   let from;
   let to;
 
@@ -169,8 +171,13 @@ export function mapWorkflowSeedEdgeToPoints({ source, target }) {
     from = portPerimeter(source, "out", target);
     to = portPerimeter(target, "in", source);
   } else if (isStep(source) && isCollector(target)) {
-    from = portPerimeter(source, "ctx", target);
-    to = circlePerimeter(target, source);
+    if (edgeType === EDGE_TYPE.SEMANTIC_EXPORT) {
+      from = portPerimeter(source, "ctx", target);
+      to = circlePerimeter(target, source);
+    } else {
+      from = portPerimeter(source, "out", target);
+      to = circlePerimeter(target, source);
+    }
   } else if (isTarget(source) && isCollector(target)) {
     // SPEC-016 C2 — Target.ctx (right) → target context collector.
     from = portPerimeter(source, "ctx", target);
@@ -179,8 +186,13 @@ export function mapWorkflowSeedEdgeToPoints({ source, target }) {
     from = circlePerimeter(source, target);
     to = circlePerimeter(target, source);
   } else if (isCollector(source) && isTransition(target)) {
-    from = circlePerimeter(source, target);
-    to = circlePerimeter(target, source);
+    if (edgeType === EDGE_TYPE.SEMANTIC_EXPORT) {
+      from = circlePerimeter(source, target);
+      to = circlePerimeter(target, source);
+    } else {
+      from = circlePerimeter(source, target);
+      to = portPerimeter(target, "in", source);
+    }
   } else if (isTransition(source) && isTarget(target)) {
     from = circlePerimeter(source, target);
     to = portPerimeter(target, "in", source);
@@ -217,5 +229,10 @@ export function mapWorkflowSeedEdgeToPoints({ source, target }) {
 }
 
 export function mapWorkflowSeedEdgeToPointsNiceDag(edge) {
-  return mapWorkflowSeedEdgeToPoints(edge);
+  const edgeType = edge.edgeType ?? edge.data?.edgeType;
+  return mapWorkflowSeedEdgeToPoints({
+    source: edge.source,
+    target: edge.target,
+    edgeType,
+  });
 }

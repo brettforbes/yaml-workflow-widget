@@ -3,6 +3,7 @@
  * Run: node src/workflow-dag/components/workflowSeedEdgePoints.smoke.mjs
  */
 import { mapWorkflowSeedEdgeToPoints } from "./workflowSeedEdgePoints.js";
+import { EDGE_TYPE } from "./edgeMeta.js";
 
 const EXPAND_DELTA = 464;
 const CX = 391;
@@ -62,7 +63,7 @@ function endTransition(cy, { y = cy - 36 } = {}) {
 {
   const s = step("a", 200);
   const c = collector("__ctx_a__", 200);
-  const { source, target } = mapWorkflowSeedEdgeToPoints({ source: s, target: c });
+  const { source, target } = mapWorkflowSeedEdgeToPoints({ source: s, target: c, edgeType: EDGE_TYPE.SEMANTIC_EXPORT });
   if (Math.abs(source.y - 200) > 0.5 || Math.abs(target.y - 200) > 0.5) {
     console.error("FAIL: collapsed semantic row must sit on cy=200", source, target);
     process.exit(1);
@@ -75,10 +76,7 @@ function endTransition(cy, { y = cy - 36 } = {}) {
   const pushedY = seedCy - 16 + EXPAND_DELTA;
   const c = collector("__ctx_b__", seedCy, { y: pushedY });
   const e = endTransition(500, { y: 500 - 36 + EXPAND_DELTA });
-  const { source, target, path } = mapWorkflowSeedEdgeToPoints({
-    source: c,
-    target: e,
-  });
+  const { source, target, path } = mapWorkflowSeedEdgeToPoints({ source: c, target: e, edgeType: EDGE_TYPE.SEMANTIC_EXPORT });
   const colVisualCy = seedCy + EXPAND_DELTA;
   const endVisualCy = e.y + e.height / 2;
   // Must not remain stuck on seed layoutCy (pre-push row)
@@ -110,7 +108,7 @@ function endTransition(cy, { y = cy - 36 } = {}) {
   const c = collector("__ctx_pushed__", seedCy, {
     y: seedCy - 16 + EXPAND_DELTA,
   });
-  const { source, target } = mapWorkflowSeedEdgeToPoints({ source: s, target: c });
+  const { source, target } = mapWorkflowSeedEdgeToPoints({ source: s, target: c, edgeType: EDGE_TYPE.SEMANTIC_EXPORT });
   const expectCy = seedCy + EXPAND_DELTA;
   if (Math.abs(source.y - expectCy) > 0.5 || Math.abs(target.y - expectCy) > 0.5) {
     console.error("FAIL: pushed horizontal semantic must sit on visual cy", source, target);
@@ -122,9 +120,28 @@ function endTransition(cy, { y = cy - 36 } = {}) {
 {
   const s = step("exp", 200, { expanded: true, y: 200 - 32 });
   const c = collector("__ctx_exp__", 200);
-  const { source, target } = mapWorkflowSeedEdgeToPoints({ source: s, target: c });
+  const { source, target } = mapWorkflowSeedEdgeToPoints({ source: s, target: c, edgeType: EDGE_TYPE.SEMANTIC_EXPORT });
   if (Math.abs(source.y - 200) > 0.5 || Math.abs(target.y - 200) > 0.5) {
     console.error("FAIL: expanded step context edge must stay on seed cy", source, target);
+    process.exit(1);
+  }
+}
+
+// followed-by step→step uses vertical in/out (shared cx)
+{
+  const a = step("seq_a", 120);
+  const b = step("seq_b", 280);
+  const { source, target } = mapWorkflowSeedEdgeToPoints({
+    source: a,
+    target: b,
+    edgeType: EDGE_TYPE.FOLLOWED_BY,
+  });
+  if (Math.abs(source.x - target.x) > 0.5) {
+    console.error("FAIL: followed-by must attach on vertical cx", source, target);
+    process.exit(1);
+  }
+  if (source.y >= target.y) {
+    console.error("FAIL: followed-by source must be above target out/in", source, target);
     process.exit(1);
   }
 }
