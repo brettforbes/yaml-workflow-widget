@@ -210,3 +210,15 @@ node src/workflow-dag/spec018.smoke.mjs
 ```
 
 Covers mapper (labels, export edges, target align), step status normalization, and host protocol envelope.
+
+## SPEC-019 addendum - Collector `dependencies` smoke (R19-12)
+
+Validate Nice-DAG **`collector.dependencies`** (upstream step ids + prior collector), not `edgeMeta` alone. Use `edgeKey` separator `source->target`.
+
+**Smoke:**
+
+```bash
+node src/workflow-dag/spec019.smoke.mjs
+```
+
+12A expectations: Nmap rank shared collector depends on `sfp_cli_nmap` (not `sfp_cli_httpx`); Nerva collector depends on `sfp_cli_nerva` (not `sfp_cli_katana`). HTTPX/Katana (`export: none`) never appear as exporter dependencies on rank collectors.
