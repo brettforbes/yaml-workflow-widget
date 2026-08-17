@@ -245,7 +245,7 @@ export function workflowDocToNiceDagModel(doc) {
     const cid = shared
       ? `__ctxcol_rank_${rank}__`
       : collectorId(primary.id);
-    const deps = atRank.map((s) => s.id);
+    const deps = exporters.map((s) => s.id);
     if (prevCollectorId) deps.push(prevCollectorId);
     const col = {
       id: cid,
