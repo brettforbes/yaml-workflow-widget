@@ -76,6 +76,22 @@ Agent plan / issue map: [`.governance/specs/SPEC-012-AGENT-PLAN.md`](.governance
 
 Nice-DAG skill: [`.cursor/skills/nice-dag/SKILL.md`](.cursor/skills/nice-dag/SKILL.md).
 
+### SPEC-018 — Composer refine (DAG readability + export edges + i/n)
+
+Canonical spec lives in spiderfeet: `@spiderfeet/.governance/specs/SPEC-018-composer-refine.md`  
+Agent plan: `@spiderfeet/.governance/project/SPEC018_AGENT_PLAN.md`  
+This repo's issue index: [`.governance/project/SPEC018_ISSUE_INDEX.md`](.governance/project/SPEC018_ISSUE_INDEX.md)
+
+Epic C: short labels, larger type, export-only semantic-export edges, Target collector extra-right align, `setStepStatuses` `i/n` badge.
+
+### SPEC-019 — Composer refine 2 (collector deps + port geometry)
+
+Canonical spec lives in spiderfeet: `@spiderfeet/.governance/specs/SPEC-019-composer-refine-2.md`  
+Agent plan: `@spiderfeet/.governance/project/SPEC019_AGENT_PLAN.md`  
+This repo's issue index: [`.governance/project/SPEC019_ISSUE_INDEX.md`](.governance/project/SPEC019_ISSUE_INDEX.md)
+
+Epic D: collector `dependencies` = exporters only; `followed-by`/`used-by` on vertical ports; `semantic-export` on CX; mixed-rank smoke. First issue: **D1**.
+
 ### Governance
 
 VibeGov rules: `.cursor/rules/gov-*.mdc`. Branch from `develop`, PR into `develop`. Canonical specs live under `.governance/specs/`; do not delete `.seed` DSL seed docs (12A/12B/12C) or `.cursor/skills` docs.
